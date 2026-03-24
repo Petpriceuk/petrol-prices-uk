@@ -1178,6 +1178,31 @@
       color: #13427f;
     }
 
+    .popup-fuels {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .popup-fuel-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #f8fbff;
+      border: 1px solid #dbe7f5;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #334155;
+    }
+
+    .popup-fuel-line strong {
+      color: #0f3f83;
+      font-size: 0.92rem;
+    }
+
     footer {
       padding: 24px 0 40px;
       text-align: center;
@@ -1194,41 +1219,129 @@
         grid-template-columns: 1fr;
       }
 
-      .map-panel { position: static; }
-
-      .search-grid {
-        grid-template-columns: repeat(2, 1fr);
+      .map-panel {
+        position: static;
+        order: 2;
       }
 
-      .search-grid .field { grid-column: 1 / -1; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    }
+      .results-panel {
+        order: 1;
+      }
 
-    @media (max-width: 820px) {
+      .search-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .search-grid .field {
+        grid-column: 1 / -1;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .station-grid {
         grid-template-columns: 1fr;
       }
 
       .pricing-panel {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .pricing-panel > .price-card,
+      .pricing-panel > .distance-stack {
+        grid-column: 1 / -1;
+      }
+
+      .pricing-panel > .distance-stack {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .map-wrap {
+        height: 360px;
       }
 
       .selected-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media (max-width: 760px) {
-      .wrap { padding: 0 14px; }
-      .topbar-inner { flex-direction: column; align-items: flex-start; }
-      .hero-panel, .results-panel, .map-panel, .guide-card { padding: 18px; }
+    @media (max-width: 900px) {
+      .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .hero-head {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-title-row,
+      .planner-head,
+      .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .search-grid,
+      .planner-grid,
+      .pricing-panel,
+      .selected-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-panel > .price-card,
+      .pricing-panel > .distance-stack,
+      .pricing-panel > .updated-card,
+      .pricing-panel > .directions-link {
+        grid-column: auto;
+      }
+
+      .pricing-panel > .distance-stack {
+        grid-template-columns: 1fr;
+      }
+
+      .fuel-glance {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .fuel-mini {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .map-wrap {
+        height: 320px;
+      }
+
+      .map-note {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        padding: 0 14px;
+      }
+
+      .hero-panel,
+      .results-panel,
+      .map-panel,
+      .guide-card {
+        padding: 18px;
+      }
+
+      .header-pill {
+        display: none;
+      }
 
       .search-grid,
       .stats-grid,
       .selected-grid,
-      .pricing-panel,
       .planner-grid,
-      .estimate-row {
+      .fuel-glance {
         grid-template-columns: 1fr;
       }
 
@@ -1239,10 +1352,43 @@
         margin-right: 0;
       }
 
-      .section-head { flex-direction: column; }
-      .map-wrap { height: 320px; }
-      .header-pill { display: none; }
-      .summary-title-row { flex-direction: column; }
+      .station-card {
+        padding: 16px;
+      }
+
+      .station-heading {
+        align-items: flex-start;
+      }
+
+      .station-rank {
+        min-width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        font-size: 0.96rem;
+      }
+
+      .brand-logo-img {
+        width: 42px;
+        height: 42px;
+        padding: 6px;
+      }
+
+      .section-head h2,
+      .section-head h3 {
+        font-size: 1.35rem;
+      }
+
+      .metric-value {
+        font-size: 1.6rem;
+      }
+
+      .map-wrap {
+        height: 260px;
+      }
+
+      .selected-card {
+        padding: 16px;
+      }
     }
   </style>
 </head>
@@ -1838,6 +1984,30 @@
       return `<span class="fuel-mini"><span class="fuel-code ${codeClassMap[code] || "code-e10"}">${code}</span><span class="fuel-name">${escapeHtml(label)}</span><strong>${formatPrice(price)}</strong></span>`;
     }
 
+    function buildMapPopupFuelMarkup(station) {
+      const fuelLines = [
+        { label: "E10 Unleaded", price: station.displayUnleaded },
+        { label: "E5 Super Unleaded", price: station.displaySuperUnleaded },
+        { label: "B7 Diesel", price: station.displayDiesel },
+        { label: "SD Premium Diesel", price: station.displayPremiumDiesel }
+      ]
+        .filter(item => Number.isFinite(item.price) && item.price > 0)
+        .map(item => `<div class="popup-fuel-line"><span>${escapeHtml(item.label)}</span><strong>${formatPrice(item.price)}</strong></div>`)
+        .join("");
+
+      return fuelLines ? `<div class="popup-fuels">${fuelLines}</div>` : "";
+    }
+
+    function buildSelectedFuelStat(label, price, toneClass = "") {
+      if (!Number.isFinite(price) || price <= 0) return "";
+      return `
+        <div class="selected-stat ${toneClass}">
+          <div class="small">${escapeHtml(label)}</div>
+          <div class="strong">${formatPrice(price)}</div>
+        </div>
+      `;
+    }
+
     function getDirectionsUrl(station) {
       const destination = `${station.latitude},${station.longitude}`;
       const origin = state.searchCenter ? `${state.searchCenter.lat},${state.searchCenter.lng}` : "";
@@ -2315,22 +2485,10 @@
             <div class="small">Selected fuel</div>
             <div class="strong">${formatPrice(selected.price)}</div>
           </div>
-          <div class="selected-stat fuel-unleaded">
-            <div class="small">E10 Unleaded</div>
-            <div class="strong">${formatPrice(selected.displayUnleaded)}</div>
-          </div>
-          <div class="selected-stat fuel-super">
-            <div class="small">E5 Super Unleaded</div>
-            <div class="strong">${formatPrice(selected.displaySuperUnleaded)}</div>
-          </div>
-          <div class="selected-stat fuel-diesel">
-            <div class="small">B7 Diesel</div>
-            <div class="strong">${formatPrice(selected.displayDiesel)}</div>
-          </div>
-          <div class="selected-stat fuel-premium">
-            <div class="small">SD Premium Diesel</div>
-            <div class="strong">${formatPrice(selected.displayPremiumDiesel)}</div>
-          </div>
+          ${elements.fuelType.value !== "E10" ? buildSelectedFuelStat("E10 Unleaded", selected.displayUnleaded, "fuel-unleaded") : ""}
+          ${elements.fuelType.value !== "E5" ? buildSelectedFuelStat("E5 Super Unleaded", selected.displaySuperUnleaded, "fuel-super") : ""}
+          ${elements.fuelType.value !== "B7S" ? buildSelectedFuelStat("B7 Diesel", selected.displayDiesel, "fuel-diesel") : ""}
+          ${elements.fuelType.value !== "B7P" ? buildSelectedFuelStat("SD Premium Diesel", selected.displayPremiumDiesel, "fuel-premium") : ""}
           <div class="selected-stat">
             <div class="small">Distance</div>
             <div class="strong">${formatMiles(selected.distanceMiles)}</div>
@@ -2395,7 +2553,7 @@
           .bindPopup(`
             <p class="popup-title">${escapeHtml(station.brandDisplay)} • ${escapeHtml(station.tradingName)}</p>
             <div class="popup-copy">${escapeHtml(station.address)}</div>
-            <div class="popup-price">${escapeHtml(station.fuelLabel)}: ${formatPrice(station.price)}</div>
+            ${buildMapPopupFuelMarkup(station)}
           `);
 
         marker.on("click", () => selectStation(station.id));
