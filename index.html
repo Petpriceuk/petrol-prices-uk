@@ -394,6 +394,74 @@
       color: #43566f;
     }
 
+    .planner-card {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #fffdfa 0%, #fff7ec 100%);
+      border: 1px solid #eddcc0;
+    }
+
+    .planner-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .planner-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .planner-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.92rem;
+    }
+
+    .planner-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .planner-input label {
+      display: block;
+      margin-bottom: 8px;
+      color: #56697f;
+      font-size: 0.8rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .planner-input input {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 16px;
+      border: 1px solid #dcc7a8;
+      background: #fff;
+      padding: 0 14px;
+      color: var(--text);
+    }
+
+    .planner-input input:focus {
+      outline: none;
+      border-color: #d7ab51;
+      box-shadow: 0 0 0 4px rgba(246,183,60,0.12);
+    }
+
+    .planner-note {
+      margin-top: 12px;
+      color: #53667e;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
     .layout {
       margin-top: 22px;
       display: grid;
@@ -408,12 +476,14 @@
     }
 
     .results-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
       background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(249, 251, 255, 0.92));
     }
 
     .map-panel {
-      position: sticky;
-      top: 88px;
+      position: static;
       background: linear-gradient(180deg, rgba(255,250,244,0.96), rgba(255,255,255,0.92));
     }
 
@@ -464,6 +534,26 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
+    }
+
+    @media (min-width: 1161px) {
+      .stations {
+        max-height: calc(100vh - 280px);
+        overflow: auto;
+        padding-right: 8px;
+        margin-right: -4px;
+      }
+
+      .stations::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .stations::-webkit-scrollbar-thumb {
+        background: #d5deea;
+        border-radius: 999px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+      }
     }
 
     .station-card {
@@ -658,6 +748,53 @@
       letter-spacing: -0.01em;
     }
 
+    .estimate-row {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .estimate-card {
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .estimate-card.fill {
+      background: #eef8f4;
+      border-color: #cdeede;
+    }
+
+    .estimate-card.trip {
+      background: #fff8ee;
+      border-color: #f0debf;
+    }
+
+    .estimate-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 900;
+      color: #5a6e86;
+    }
+
+    .estimate-value {
+      margin-top: 6px;
+      font-size: 1.08rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .estimate-copy {
+      margin-top: 5px;
+      color: #5c7088;
+      line-height: 1.5;
+      font-size: 0.8rem;
+    }
+
     .pricing-panel {
       min-width: 0;
       display: grid;
@@ -757,7 +894,7 @@
     .selected-grid {
       margin-top: 16px;
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 10px;
     }
 
@@ -923,8 +1060,17 @@
       .search-grid,
       .stats-grid,
       .selected-grid,
-      .pricing-panel {
+      .pricing-panel,
+      .planner-grid,
+      .estimate-row {
         grid-template-columns: 1fr;
+      }
+
+      .stations {
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+        margin-right: 0;
       }
 
       .section-head { flex-direction: column; }
@@ -1027,6 +1173,30 @@
           <div class="summary-strip" id="summaryStrip">
             Choose a fuel type, search a location, and the summary will update instantly.
           </div>
+
+          <div class="planner-card">
+            <div class="planner-head">
+              <div>
+                <h3>Cost planner</h3>
+                <p>Adjust these to estimate a full tank and the one-way fuel cost to reach each station.</p>
+              </div>
+            </div>
+
+            <div class="planner-grid">
+              <div class="planner-input">
+                <label for="tankSize">Tank size (litres)</label>
+                <input id="tankSize" type="number" min="20" max="120" step="1" value="50" inputmode="numeric" />
+              </div>
+              <div class="planner-input">
+                <label for="fuelEconomy">Fuel economy (mpg)</label>
+                <input id="fuelEconomy" type="number" min="10" max="120" step="1" value="42" inputmode="numeric" />
+              </div>
+            </div>
+
+            <div class="planner-note" id="plannerNote">
+              Estimates are based on a 50L tank and 42 mpg. Drive cost is one-way from your search point to the station.
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1067,7 +1237,7 @@
         </div>
 
         <div class="map-note">
-          The map keeps page scrolling smooth. Use the on-map controls or touch gestures to zoom when you want a closer look.
+          Use the map for a quick visual check, then compare the list for price, distance, fill cost and journey estimate.
         </div>
       </aside>
     </section>
@@ -1168,7 +1338,10 @@
       statAverage: document.getElementById("statAverage"),
       statHighest: document.getElementById("statHighest"),
       stations: document.getElementById("stations"),
-      selectedCard: document.getElementById("selectedCard")
+      selectedCard: document.getElementById("selectedCard"),
+      tankSize: document.getElementById("tankSize"),
+      fuelEconomy: document.getElementById("fuelEconomy"),
+      plannerNote: document.getElementById("plannerNote")
     };
 
     const state = {
@@ -1356,6 +1529,34 @@
 
     function formatMiles(value) {
       return Number.isFinite(value) ? `${value.toFixed(1)} mi` : "—";
+    }
+
+    function formatCurrency(value) {
+      return Number.isFinite(value)
+        ? new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)
+        : "—";
+    }
+
+    function getEstimatorSettings() {
+      const tankLitres = Math.min(120, Math.max(20, Number(elements.tankSize.value) || 50));
+      const fuelEconomyMpg = Math.min(120, Math.max(10, Number(elements.fuelEconomy.value) || 42));
+      return { tankLitres, fuelEconomyMpg };
+    }
+
+    function calculateFillCost(pricePence, tankLitres) {
+      if (!Number.isFinite(pricePence) || !Number.isFinite(tankLitres)) return null;
+      return (pricePence * tankLitres) / 100;
+    }
+
+    function calculateJourneyFuelLitres(distanceMiles, fuelEconomyMpg) {
+      if (!Number.isFinite(distanceMiles) || !Number.isFinite(fuelEconomyMpg) || fuelEconomyMpg <= 0) return null;
+      return (distanceMiles / fuelEconomyMpg) * 4.54609;
+    }
+
+    function calculateJourneyCost(pricePence, distanceMiles, fuelEconomyMpg) {
+      const litresUsed = calculateJourneyFuelLitres(distanceMiles, fuelEconomyMpg);
+      if (!Number.isFinite(pricePence) || !Number.isFinite(litresUsed)) return null;
+      return (litresUsed * pricePence) / 100;
     }
 
     function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1607,6 +1808,7 @@
     }
 
     function calculateResults(center, fuelCode, sortBy) {
+      const { tankLitres, fuelEconomyMpg } = getEstimatorSettings();
       return state.stations
         .map(station => {
           const price = getStationPrice(station, fuelCode);
@@ -1622,7 +1824,10 @@
             openingSummary: getOpeningSummary(station),
             distanceMiles,
             displayUnleaded: station.priceE10,
-            displayDiesel: station.priceB7S
+            displayDiesel: station.priceB7S,
+            fillCost: calculateFillCost(price, tankLitres),
+            journeyCost: calculateJourneyCost(price, distanceMiles, fuelEconomyMpg),
+            journeyFuelLitres: calculateJourneyFuelLitres(distanceMiles, fuelEconomyMpg)
           };
         })
         .filter(station => Number.isFinite(station.price) && station.price > 0 && station.distanceMiles <= SEARCH_RADIUS_MILES)
@@ -1653,10 +1858,12 @@
 
     function updateHeroStats() {
       const stats = getSummaryStats(state.results);
+      const { tankLitres, fuelEconomyMpg } = getEstimatorSettings();
       elements.statCount.textContent = stats ? String(stats.count) : "0";
       elements.statCheapest.textContent = stats ? formatPrice(stats.cheapest) : "—";
       elements.statAverage.textContent = stats ? formatPrice(stats.average) : "—";
       elements.statHighest.textContent = stats ? formatPrice(stats.highest) : "—";
+      elements.plannerNote.textContent = `Estimates are based on a ${Math.round(tankLitres)}L tank and ${Math.round(fuelEconomyMpg)} mpg. Drive cost is one-way from your search point to the station.`;
 
       const fuelLabel = FUEL_CONFIG[elements.fuelType.value].label;
       if (!state.searchCenter) {
@@ -1780,6 +1987,19 @@
                   <span class="supporting-pill">⏱ ${escapeHtml(lastUpdated)}</span>
                   ${phoneHtml}
                 </div>
+
+                <div class="estimate-row">
+                  <div class="estimate-card fill">
+                    <div class="estimate-label">Approx full tank</div>
+                    <div class="estimate-value">${formatCurrency(station.fillCost)}</div>
+                    <div class="estimate-copy">Based on your ${Math.round(getEstimatorSettings().tankLitres)}L tank at this station’s ${escapeHtml(station.fuelLabel.toLowerCase())} price.</div>
+                  </div>
+                  <div class="estimate-card trip">
+                    <div class="estimate-label">Estimated drive cost</div>
+                    <div class="estimate-value">${formatCurrency(station.journeyCost)}</div>
+                    <div class="estimate-copy">About ${station.journeyFuelLitres ? station.journeyFuelLitres.toFixed(2) : "0.00"}L one-way from your search point.</div>
+                  </div>
+                </div>
               </div>
 
               <div class="pricing-panel">
@@ -1843,6 +2063,14 @@
           <div class="selected-stat">
             <div class="small">Updated</div>
             <div class="strong">${escapeHtml(relativeUpdatedText(selected.updatedAt).replace('Updated ', ''))}</div>
+          </div>
+          <div class="selected-stat">
+            <div class="small">Approx full tank</div>
+            <div class="strong">${formatCurrency(selected.fillCost)}</div>
+          </div>
+          <div class="selected-stat">
+            <div class="small">Drive cost</div>
+            <div class="strong">${formatCurrency(selected.journeyCost)}</div>
           </div>
         </div>
         <div class="supporting-row" style="margin-top: 14px;">
@@ -2018,6 +2246,8 @@
     elements.locateBtn.addEventListener("click", useCurrentLocation);
     elements.fuelType.addEventListener("change", rerunCurrentSearch);
     elements.sortBy.addEventListener("change", rerunCurrentSearch);
+    elements.tankSize.addEventListener("input", rerunCurrentSearch);
+    elements.fuelEconomy.addEventListener("input", rerunCurrentSearch);
     elements.searchInput.addEventListener("keydown", event => {
       if (event.key === "Enter") performSearch();
     });
