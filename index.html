@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Petrol Prices UK</title>
-  <meta name="description" content="Find petrol stations within 5 miles, compare live fuel prices, and view forecourt details from the official UK fuel data CSV." />
+  <meta name="description" content="Compare nearby petrol and diesel prices. Search by postcode, town or city, see stations within 5 miles, and check opening times and forecourt details." />
 
   <link
     rel="stylesheet"
@@ -15,37 +15,42 @@
 
   <style>
     :root {
-      --bg: #f3f7fb;
-      --bg-soft: #edf4ff;
-      --card: rgba(255, 255, 255, 0.92);
-      --card-strong: #ffffff;
-      --text: #10233f;
-      --muted: #5f718d;
-      --line: #dbe6f2;
-      --line-strong: #c8d7e7;
-      --brand: #0f6fff;
-      --brand-2: #12b5cb;
-      --accent: #19a974;
-      --accent-2: #f59e0b;
-      --danger: #ef4444;
-      --purple: #7c3aed;
-      --shadow: 0 14px 40px rgba(18, 38, 63, 0.08);
-      --shadow-soft: 0 8px 24px rgba(18, 38, 63, 0.06);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
+      --bg: #f5f3ee;
+      --bg-2: #eef4fb;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-strong: #ffffff;
+      --panel-blue: #eef4ff;
+      --panel-mint: #eef8f4;
+      --panel-warm: #fff8ee;
+      --text: #1b2740;
+      --muted: #64748b;
+      --line: #dbe4ef;
+      --line-strong: #c9d6e5;
+      --navy: #24446d;
+      --blue: #3b82f6;
+      --blue-strong: #1d4ed8;
+      --teal: #0f766e;
+      --mint: #10b981;
+      --gold: #f6b73c;
+      --rose: #ef7d6d;
+      --shadow: 0 18px 48px rgba(28, 43, 71, 0.08);
+      --shadow-soft: 0 10px 28px rgba(28, 43, 71, 0.06);
+      --radius-xl: 30px;
+      --radius-lg: 24px;
       --radius-md: 18px;
       --radius-sm: 14px;
     }
 
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
+
     body {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(18, 181, 203, 0.10), transparent 28%),
-        radial-gradient(circle at top right, rgba(15, 111, 255, 0.10), transparent 22%),
-        linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
+        radial-gradient(circle at top left, rgba(59,130,246,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(16,185,129,0.08), transparent 22%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
       min-height: 100vh;
     }
 
@@ -62,9 +67,9 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      border-bottom: 1px solid rgba(255,255,255,0.8);
-      background: rgba(245, 250, 255, 0.82);
-      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.72);
+      background: rgba(247, 244, 239, 0.88);
+      backdrop-filter: blur(18px);
     }
 
     .topbar-inner {
@@ -82,21 +87,21 @@
     }
 
     .brand-icon {
-      width: 52px;
-      height: 52px;
+      width: 54px;
+      height: 54px;
       border-radius: 18px;
       display: grid;
       place-items: center;
       color: #fff;
       font-size: 24px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      box-shadow: 0 14px 28px rgba(15, 111, 255, 0.26);
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      box-shadow: 0 14px 28px rgba(36,68,109,0.22);
     }
 
     .brand-title {
       margin: 0;
-      font-size: 1.15rem;
-      font-weight: 800;
+      font-size: 1.16rem;
+      font-weight: 900;
       letter-spacing: -0.02em;
     }
 
@@ -112,89 +117,129 @@
       gap: 8px;
       padding: 10px 14px;
       border-radius: 999px;
-      background: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.88);
       border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 0.92rem;
-      font-weight: 700;
+      color: #49617f;
+      font-size: 0.9rem;
+      font-weight: 800;
       box-shadow: var(--shadow-soft);
     }
 
-    .hero {
-      margin-top: 22px;
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 22px;
-      align-items: stretch;
-    }
-
-    .hero-main,
-    .hero-side,
+    .hero-panel,
     .results-panel,
     .map-panel,
-    .insight-card {
-      background: var(--card);
+    .guide-card {
+      background: var(--panel);
       border: 1px solid rgba(255,255,255,0.9);
-      box-shadow: var(--shadow);
       border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
     }
 
-    .hero-main {
+    .hero-panel {
+      margin-top: 22px;
       padding: 30px;
-      overflow: hidden;
       position: relative;
+      overflow: hidden;
     }
 
-    .hero-main::before {
+    .hero-panel::before,
+    .hero-panel::after {
       content: "";
       position: absolute;
-      inset: auto -80px -120px auto;
-      width: 240px;
-      height: 240px;
       border-radius: 999px;
-      background: radial-gradient(circle, rgba(18, 181, 203, 0.16), transparent 65%);
       pointer-events: none;
+    }
+
+    .hero-panel::before {
+      width: 260px;
+      height: 260px;
+      right: -70px;
+      top: -90px;
+      background: radial-gradient(circle, rgba(59,130,246,0.10), transparent 66%);
+    }
+
+    .hero-panel::after {
+      width: 210px;
+      height: 210px;
+      left: -60px;
+      bottom: -100px;
+      background: radial-gradient(circle, rgba(16,185,129,0.10), transparent 66%);
     }
 
     .eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 9px 14px;
+      padding: 10px 14px;
       border-radius: 999px;
-      background: #eaf4ff;
-      color: #1357b8;
+      background: #edf4ff;
+      color: #1e4f9c;
       font-size: 0.84rem;
-      font-weight: 800;
+      font-weight: 900;
+    }
+
+    .hero-head {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 22px;
+      align-items: start;
     }
 
     h1 {
-      margin: 18px 0 10px;
-      font-size: clamp(2rem, 5vw, 3.9rem);
+      margin: 0;
+      font-size: clamp(2.1rem, 5vw, 4rem);
       line-height: 0.98;
       letter-spacing: -0.04em;
-      max-width: 780px;
+      max-width: 760px;
     }
 
     .hero-copy {
-      margin: 0;
-      max-width: 760px;
+      margin: 14px 0 0;
+      max-width: 780px;
       color: #42526a;
       font-size: 1.04rem;
       line-height: 1.72;
     }
 
+    .hero-callout {
+      padding: 18px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(36,68,109,0.98), rgba(59,130,246,0.96));
+      color: #fff;
+      box-shadow: 0 16px 34px rgba(36,68,109,0.18);
+    }
+
+    .hero-callout h2 {
+      margin: 0;
+      font-size: 1.16rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-callout p {
+      margin: 10px 0 0;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.65;
+      font-size: 0.95rem;
+    }
+
     .search-shell {
       margin-top: 24px;
-      background: rgba(247, 251, 255, 0.95);
+      display: grid;
+      gap: 16px;
+    }
+
+    .search-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246, 249, 255, 0.94));
       border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 16px;
+      border-radius: 26px;
+      padding: 18px;
+      box-shadow: var(--shadow-soft);
     }
 
     .search-grid {
       display: grid;
-      grid-template-columns: 1.3fr 0.75fr 0.75fr auto auto;
+      grid-template-columns: 1.35fr 0.78fr 0.78fr auto auto;
       gap: 12px;
       align-items: center;
     }
@@ -203,7 +248,7 @@
     .select,
     .btn {
       width: 100%;
-      min-height: 54px;
+      min-height: 56px;
       border-radius: 18px;
       border: 1px solid var(--line-strong);
       background: #fff;
@@ -215,8 +260,8 @@
     .field:focus,
     .select:focus {
       outline: none;
-      border-color: #7bb0ff;
-      box-shadow: 0 0 0 4px rgba(15, 111, 255, 0.10);
+      border-color: #8bb6ff;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.10);
     }
 
     .btn {
@@ -225,130 +270,134 @@
       justify-content: center;
       gap: 8px;
       cursor: pointer;
-      font-weight: 800;
+      font-weight: 900;
       padding: 0 18px;
-      background: #fff;
     }
 
     .btn-primary {
       border: none;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
       color: #fff;
-      box-shadow: 0 12px 28px rgba(15, 111, 255, 0.22);
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      box-shadow: 0 12px 28px rgba(36,68,109,0.18);
     }
 
-    .btn-secondary:hover,
-    .btn-primary:hover,
-    .station-card:hover {
-      transform: translateY(-1px);
+    .btn-secondary {
+      background: #fff9ef;
+      border-color: #eed9b5;
+      color: #7b5a12;
     }
 
-    .search-meta {
-      margin-top: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+    .btn:hover,
+    .station-card:hover { transform: translateY(-1px); }
 
-    .meta-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: #fff;
-      border: 1px solid var(--line);
+    .notice {
+      font-size: 0.94rem;
       color: var(--muted);
-      font-size: 0.84rem;
-      font-weight: 700;
-    }
-
-    .hero-side {
-      padding: 24px;
-      background:
-        linear-gradient(145deg, rgba(15, 111, 255, 0.98), rgba(18, 181, 203, 0.96));
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-side::before,
-    .hero-side::after {
-      content: "";
-      position: absolute;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.10);
-      pointer-events: none;
-    }
-
-    .hero-side::before {
-      width: 240px;
-      height: 240px;
-      right: -80px;
-      top: -40px;
-    }
-
-    .hero-side::after {
-      width: 180px;
-      height: 180px;
-      left: -40px;
-      bottom: -70px;
-    }
-
-    .hero-side h2 {
-      margin: 14px 0 8px;
-      font-size: 1.65rem;
-      letter-spacing: -0.02em;
-    }
-
-    .hero-side p {
-      margin: 0;
-      color: rgba(255,255,255,0.86);
       line-height: 1.65;
     }
 
+    .summary-card {
+      background: linear-gradient(160deg, rgba(255,255,255,0.96), rgba(246,249,255,0.96));
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      padding: 18px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .summary-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .summary-title-row h2 {
+      margin: 0;
+      font-size: 1.22rem;
+      letter-spacing: -0.02em;
+    }
+
+    .summary-title-row p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .summary-chip {
+      white-space: nowrap;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #fff8ee;
+      border: 1px solid #f0ddbd;
+      color: #94620a;
+      font-size: 0.85rem;
+      font-weight: 900;
+    }
+
     .stats-grid {
-      margin-top: 20px;
+      margin-top: 16px;
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
     }
 
     .stat-card {
       padding: 16px;
       border-radius: 22px;
-      background: rgba(255,255,255,0.14);
-      border: 1px solid rgba(255,255,255,0.12);
-      backdrop-filter: blur(8px);
+      border: 1px solid transparent;
+      min-height: 118px;
+    }
+
+    .stat-card:nth-child(1) {
+      background: #eef4ff;
+      border-color: #d6e4ff;
+    }
+
+    .stat-card:nth-child(2) {
+      background: #eef8f4;
+      border-color: #ccefe2;
+    }
+
+    .stat-card:nth-child(3) {
+      background: #fff8ee;
+      border-color: #f2dec0;
+    }
+
+    .stat-card:nth-child(4) {
+      background: #fff2f0;
+      border-color: #f7d6d0;
     }
 
     .stat-label {
-      font-size: 0.85rem;
-      color: rgba(255,255,255,0.78);
-      font-weight: 700;
+      font-size: 0.8rem;
+      color: #5f718a;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
 
     .stat-value {
       margin-top: 8px;
-      font-size: clamp(1.4rem, 2.3vw, 2.2rem);
-      font-weight: 800;
+      font-size: clamp(1.55rem, 2.4vw, 2.2rem);
+      font-weight: 900;
       letter-spacing: -0.03em;
     }
 
     .summary-strip {
-      margin-top: 18px;
-      padding: 16px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.14);
-      border: 1px solid rgba(255,255,255,0.14);
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #f7fafc;
+      border: 1px solid var(--line);
       font-size: 0.96rem;
-      line-height: 1.7;
+      line-height: 1.65;
+      color: #43566f;
     }
 
     .layout {
       margin-top: 22px;
       display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: 1.04fr 0.96fr;
       gap: 22px;
       align-items: start;
     }
@@ -356,6 +405,16 @@
     .results-panel,
     .map-panel {
       padding: 22px;
+    }
+
+    .results-panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(249, 251, 255, 0.92));
+    }
+
+    .map-panel {
+      position: sticky;
+      top: 88px;
+      background: linear-gradient(180deg, rgba(255,250,244,0.96), rgba(255,255,255,0.92));
     }
 
     .section-head {
@@ -383,20 +442,20 @@
       white-space: nowrap;
       padding: 10px 14px;
       border-radius: 999px;
-      background: #eef6ff;
-      color: #1557b0;
+      background: #edf4ff;
+      color: #1e4f9c;
       font-size: 0.88rem;
-      font-weight: 800;
-      border: 1px solid #cfe0ff;
+      font-weight: 900;
+      border: 1px solid #d4e3ff;
     }
 
     .status-banner {
       margin-bottom: 16px;
       padding: 14px 16px;
       border-radius: 18px;
-      background: #f8fbff;
-      border: 1px solid var(--line);
-      color: #42617e;
+      background: #fffdf9;
+      border: 1px solid #ecdcc4;
+      color: #60526b;
       font-size: 0.94rem;
       line-height: 1.65;
     }
@@ -409,9 +468,9 @@
 
     .station-card {
       border: 1px solid var(--line);
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 18px;
-      background: #fff;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
       box-shadow: var(--shadow-soft);
       cursor: pointer;
       transition: 0.18s ease;
@@ -419,14 +478,14 @@
     }
 
     .station-card.active {
-      border-color: #7fb0ff;
-      box-shadow: 0 14px 28px rgba(15, 111, 255, 0.12);
-      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+      border-color: #9dbcfb;
+      box-shadow: 0 14px 30px rgba(59,130,246,0.12);
+      background: linear-gradient(180deg, #f9fbff 0%, #ffffff 100%);
     }
 
     .station-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) 290px;
       gap: 18px;
       align-items: start;
     }
@@ -439,25 +498,25 @@
       margin-bottom: 12px;
     }
 
-    .station-rank {
-      min-width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, #0f6fff, #4db4ff);
-      color: #fff;
-      font-weight: 900;
-      font-size: 1.05rem;
-      box-shadow: 0 12px 24px rgba(15, 111, 255, 0.18);
-      flex-shrink: 0;
-    }
-
     .station-heading {
       display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
+    }
+
+    .station-rank {
+      min-width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--navy), var(--blue));
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.05rem;
+      box-shadow: 0 12px 24px rgba(36,68,109,0.18);
+      flex-shrink: 0;
     }
 
     .brand-visual {
@@ -488,7 +547,7 @@
       border-radius: 14px;
       border: 1px solid transparent;
       font-weight: 900;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       letter-spacing: 0.01em;
       box-shadow: var(--shadow-soft);
       text-transform: uppercase;
@@ -510,11 +569,11 @@
     .brand-murco { background: rgba(0,61,165,0.12); color: #063889; border-color: rgba(0,61,165,0.22); }
     .brand-valero { background: rgba(0,92,185,0.12); color: #005cb9; border-color: rgba(226,33,38,0.22); }
     .brand-eg-on-the-move { background: rgba(111,76,255,0.12); color: #5d39d4; border-color: rgba(111,76,255,0.20); }
-    .brand-welcome-break { background: rgba(3, 164, 115, 0.14); color: #0a7e5b; border-color: rgba(3, 164, 115, 0.24); }
+    .brand-welcome-break { background: rgba(3,164,115,0.14); color: #0a7e5b; border-color: rgba(3,164,115,0.24); }
 
     .station-brand {
       margin: 0;
-      font-size: 1.08rem;
+      font-size: 1.12rem;
       font-weight: 900;
       letter-spacing: -0.02em;
     }
@@ -535,7 +594,8 @@
 
     .tag-row,
     .amenity-row,
-    .supporting-row {
+    .supporting-row,
+    .fuel-glance {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
@@ -550,9 +610,14 @@
       font-weight: 700;
     }
 
+    .fuel-glance {
+      margin-top: 14px;
+    }
+
     .tag,
     .amenity,
-    .supporting-pill {
+    .supporting-pill,
+    .fuel-mini {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -580,8 +645,21 @@
       border: 1px solid var(--line);
     }
 
+    .fuel-mini {
+      background: #fff8ee;
+      border: 1px solid #f1ddbc;
+      color: #5b4a2e;
+      gap: 10px;
+    }
+
+    .fuel-mini strong {
+      font-size: 0.9rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
     .pricing-panel {
-      min-width: 200px;
+      min-width: 0;
       display: grid;
       gap: 10px;
     }
@@ -597,23 +675,33 @@
     }
 
     .price-card {
-      background: linear-gradient(160deg, #10315c, #173f79);
+      background: linear-gradient(160deg, #24446d, #3763a0);
       color: #fff;
       border: none;
-      box-shadow: 0 14px 28px rgba(16, 49, 92, 0.20);
+      box-shadow: 0 14px 28px rgba(36,68,109,0.20);
+    }
+
+    .distance-card {
+      background: var(--panel-mint);
+      border-color: #cdeede;
+    }
+
+    .updated-card {
+      background: var(--panel-warm);
+      border-color: #f0debf;
     }
 
     .metric-label {
       font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      font-weight: 800;
+      font-weight: 900;
       opacity: 0.82;
     }
 
     .metric-value {
       margin-top: 6px;
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 900;
       letter-spacing: -0.04em;
     }
@@ -621,19 +709,14 @@
     .metric-subvalue {
       margin-top: 6px;
       color: inherit;
-      opacity: 0.82;
+      opacity: 0.84;
       font-size: 0.84rem;
       line-height: 1.5;
     }
 
-    .map-panel {
-      position: sticky;
-      top: 88px;
-    }
-
     .map-wrap {
       margin-top: 14px;
-      height: 420px;
+      height: 430px;
       border-radius: 24px;
       overflow: hidden;
       border: 1px solid var(--line);
@@ -646,21 +729,21 @@
       margin-top: 16px;
       padding: 18px;
       border-radius: 22px;
-      background: #f8fbff;
-      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff 0%, #fffaf2 100%);
+      border: 1px solid #eadcc6;
     }
 
     .selected-label {
       color: var(--muted);
       font-size: 0.84rem;
-      font-weight: 800;
+      font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
 
     .selected-name {
       margin-top: 8px;
-      font-size: 1.3rem;
+      font-size: 1.26rem;
       font-weight: 900;
       letter-spacing: -0.02em;
     }
@@ -674,7 +757,7 @@
     .selected-grid {
       margin-top: 16px;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 10px;
     }
 
@@ -687,8 +770,8 @@
 
     .selected-stat .small {
       color: var(--muted);
-      font-size: 0.76rem;
-      font-weight: 800;
+      font-size: 0.74rem;
+      font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
@@ -696,7 +779,7 @@
     .selected-stat .strong {
       margin-top: 6px;
       font-weight: 900;
-      font-size: 1rem;
+      font-size: 0.98rem;
       letter-spacing: -0.02em;
     }
 
@@ -707,30 +790,34 @@
       font-size: 0.92rem;
     }
 
-    .insight-grid {
+    .guide-grid {
       margin-top: 22px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 18px;
     }
 
-    .insight-card {
+    .guide-card {
       padding: 22px;
     }
 
-    .insight-card h3 {
+    .guide-card:nth-child(1) { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,244,255,0.9)); }
+    .guide-card:nth-child(2) { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,248,244,0.9)); }
+    .guide-card:nth-child(3) { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,248,238,0.9)); }
+
+    .guide-card h3 {
       margin: 0;
-      font-size: 1.15rem;
+      font-size: 1.12rem;
       letter-spacing: -0.02em;
     }
 
-    .insight-card p {
-      margin: 8px 0 0;
+    .guide-card p {
+      margin: 10px 0 0;
       color: var(--muted);
       line-height: 1.65;
     }
 
-    .insight-pills {
+    .guide-pills {
       margin-top: 14px;
       display: flex;
       flex-wrap: wrap;
@@ -741,7 +828,7 @@
       border: 1px dashed var(--line-strong);
       border-radius: 24px;
       padding: 24px;
-      background: linear-gradient(180deg, #fbfdff 0%, #f5faff 100%);
+      background: linear-gradient(180deg, #fbfdff 0%, #f8fbff 100%);
     }
 
     .empty-state h3 {
@@ -754,13 +841,6 @@
       margin: 0;
       color: var(--muted);
       line-height: 1.7;
-    }
-
-    .notice {
-      margin-top: 10px;
-      font-size: 0.86rem;
-      color: var(--muted);
-      line-height: 1.65;
     }
 
     .leaflet-popup-content-wrapper {
@@ -790,13 +870,13 @@
 
     .popup-price {
       margin-top: 10px;
-      font-size: 1.15rem;
+      font-size: 1.08rem;
       font-weight: 900;
       color: #13427f;
     }
 
     footer {
-      padding: 22px 0 38px;
+      padding: 24px 0 40px;
       text-align: center;
       color: var(--muted);
       font-size: 0.92rem;
@@ -805,45 +885,52 @@
     .hidden { display: none !important; }
 
     @media (max-width: 1160px) {
-      .hero,
+      .hero-head,
       .layout,
-      .insight-grid {
+      .guide-grid {
         grid-template-columns: 1fr;
       }
 
-      .map-panel {
-        position: static;
-      }
+      .map-panel { position: static; }
 
       .search-grid {
         grid-template-columns: 1fr 1fr 1fr;
       }
 
       .search-grid .field { grid-column: 1 / -1; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    @media (max-width: 760px) {
-      .wrap { padding: 0 14px; }
-      .topbar-inner { flex-direction: column; align-items: flex-start; }
-      .hero-main, .hero-side, .results-panel, .map-panel, .insight-card { padding: 18px; }
-      .search-grid,
-      .stats-grid,
-      .selected-grid {
-        grid-template-columns: 1fr;
-      }
-
+    @media (max-width: 820px) {
       .station-grid {
         grid-template-columns: 1fr;
       }
 
       .pricing-panel {
-        min-width: 0;
         grid-template-columns: repeat(3, 1fr);
       }
 
-      .metric-value { font-size: 1.5rem; }
-      .map-wrap { height: 320px; }
+      .selected-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .wrap { padding: 0 14px; }
+      .topbar-inner { flex-direction: column; align-items: flex-start; }
+      .hero-panel, .results-panel, .map-panel, .guide-card { padding: 18px; }
+
+      .search-grid,
+      .stats-grid,
+      .selected-grid,
+      .pricing-panel {
+        grid-template-columns: 1fr;
+      }
+
       .section-head { flex-direction: column; }
+      .map-wrap { height: 320px; }
+      .header-pill { display: none; }
+      .summary-title-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -854,24 +941,36 @@
         <div class="brand-icon">⛽</div>
         <div>
           <p class="brand-title">Petrol Prices UK</p>
-          <p class="brand-subtitle">Compare nearby fuel prices, opening details and forecourt amenities in one place</p>
+          <p class="brand-subtitle">Search nearby fuel prices, compare forecourts, and choose the stop that suits you best</p>
         </div>
       </div>
-      <div class="header-pill">Official CSV data • 5-mile radius search • mobile friendly</div>
+      <div class="header-pill">Cheapest • nearest • latest updates</div>
     </div>
   </header>
 
   <main class="wrap">
-    <section class="hero">
-      <section class="hero-main">
-        <div class="eyebrow">Search by postcode, town or city</div>
-        <h1>Find the best nearby fuel prices without the clutter</h1>
-        <p class="hero-copy">
-          Enter a UK postcode, town or city to see petrol stations within 5 miles, ranked by price, distance or freshness.
-          You can also use your current location to instantly compare nearby forecourts.
-        </p>
+    <section class="hero-panel">
+      <div class="eyebrow">Search by postcode, town or city</div>
 
-        <div class="search-shell">
+      <div class="hero-head">
+        <div>
+          <h1>Find nearby fuel prices fast and compare them clearly</h1>
+          <p class="hero-copy">
+            Search a postcode, town or city to see petrol stations within 5 miles, compare unleaded and diesel at a glance,
+            and check opening times and useful forecourt details before you set off.
+          </p>
+        </div>
+
+        <aside class="hero-callout">
+          <h2>Quickest way to search</h2>
+          <p>
+            Enter a location or tap <strong>Locate me</strong> for nearby stations ranked by the price, distance or update time that matters most to you.
+          </p>
+        </aside>
+      </div>
+
+      <div class="search-shell">
+        <div class="search-card">
           <div class="search-grid">
             <input id="searchInput" class="field" type="text" placeholder="Enter a UK postcode, town or city" aria-label="Search by postcode, town or city" />
 
@@ -894,44 +993,42 @@
             <button id="locateBtn" class="btn btn-secondary" type="button">Locate me</button>
           </div>
 
-          <div class="search-meta">
-            <span class="meta-chip">Search radius: 5 miles</span>
-            <span class="meta-chip">Live distance from your search point</span>
-            <span class="meta-chip">Forecourt details pulled from the CSV</span>
-          </div>
-
-          <div id="searchStatus" class="notice">Enter a location to begin. For towns and cities, the search uses a map lookup with a local CSV fallback.</div>
-        </div>
-      </section>
-
-      <aside class="hero-side">
-        <div class="eyebrow" style="background: rgba(255,255,255,0.16); color: #fff;">Live search summary</div>
-        <h2>Everything drivers care about at a glance</h2>
-        <p id="summaryHeadline">Search for a location to see how many stations are nearby and where the best price is.</p>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">Stations found</div>
-            <div class="stat-value" id="statCount">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Cheapest price</div>
-            <div class="stat-value" id="statCheapest">—</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Average price</div>
-            <div class="stat-value" id="statAverage">—</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Highest price</div>
-            <div class="stat-value" id="statHighest">—</div>
-          </div>
+          <div id="searchStatus" class="notice" style="margin-top: 12px;">Enter a location to start comparing nearby fuel prices.</div>
         </div>
 
-        <div class="summary-strip" id="summaryStrip">
-          Search results will show the cheapest, average and highest price for the fuel type you choose.
+        <div class="summary-card">
+          <div class="summary-title-row">
+            <div>
+              <h2>Live search summary</h2>
+              <p id="summaryHeadline">Search for a location to see how many stations are nearby and what price range you can expect.</p>
+            </div>
+            <div class="summary-chip">5-mile search radius</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Stations found</div>
+              <div class="stat-value" id="statCount">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Cheapest price</div>
+              <div class="stat-value" id="statCheapest">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Average price</div>
+              <div class="stat-value" id="statAverage">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Highest price</div>
+              <div class="stat-value" id="statHighest">—</div>
+            </div>
+          </div>
+
+          <div class="summary-strip" id="summaryStrip">
+            Choose a fuel type, search a location, and the summary will update instantly.
+          </div>
         </div>
-      </aside>
+      </div>
     </section>
 
     <section class="layout">
@@ -939,7 +1036,7 @@
         <div class="section-head">
           <div>
             <h2>Nearby petrol stations</h2>
-            <p class="section-copy">Each card shows the brand first, then the trading name, full address, rank, distance, opening details, amenities and fuel update time.</p>
+            <p class="section-copy">Cards show the brand first, then the trading name, full address, rank, opening details and both unleaded and diesel prices for quick comparison.</p>
           </div>
           <div id="resultsBadge" class="results-badge">0 results</div>
         </div>
@@ -970,38 +1067,45 @@
         </div>
 
         <div class="map-note">
-          Tip: customers can click a station card or map marker to focus that forecourt instantly.
+          The map keeps page scrolling smooth. Use the on-map controls or touch gestures to zoom when you want a closer look.
         </div>
       </aside>
     </section>
 
-    <section class="insight-grid">
-      <article class="insight-card">
-        <h3>Useful forecourt details from the CSV</h3>
-        <p>This version also uses opening hours, amenities, motorway or supermarket flags, phone number, county and country, plus fuel-specific update timestamps where they are available.</p>
-        <div class="insight-pills">
-          <span class="meta-chip">Opening hours</span>
-          <span class="meta-chip">Car wash</span>
-          <span class="meta-chip">Toilets</span>
-          <span class="meta-chip">AdBlue</span>
-          <span class="meta-chip">Motorway</span>
-          <span class="meta-chip">Supermarket</span>
+    <section class="guide-grid">
+      <article class="guide-card">
+        <h3>Compare what matters quickly</h3>
+        <p>See the cheapest, average and highest price for your chosen fuel type, then switch between lowest price, nearest or most recently updated.</p>
+        <div class="guide-pills">
+          <span class="tag">Lowest price</span>
+          <span class="tag">Nearest</span>
+          <span class="tag">Latest update</span>
         </div>
       </article>
 
-      <article class="insight-card">
-        <h3>Colourful, simpler, more customer-facing</h3>
-        <p>The placeholder/demo tone is replaced with real customer wording, stronger hierarchy, clearer cards, richer summary stats and a proper map instead of a decorative mock area.</p>
+      <article class="guide-card">
+        <h3>Useful forecourt details</h3>
+        <p>Many stations also include details like car wash, toilets, motorway or supermarket status, phone number and whether fuel is available 24 hours.</p>
+        <div class="guide-pills">
+          <span class="amenity">Car wash</span>
+          <span class="amenity">Customer toilets</span>
+          <span class="amenity">24-hour fuel</span>
+        </div>
       </article>
 
-      <article class="insight-card">
-        <h3>Brand visuals included</h3>
-        <p>Common brands have styled brand badges now. The code also supports real logo files automatically if you add SVGs into <strong>/brand-logos</strong> later.</p>
+      <article class="guide-card">
+        <h3>Search your way</h3>
+        <p>Use a postcode for pinpoint results, search a town or city for a wider local view, or tap Locate me when you want the nearest options straight away.</p>
+        <div class="guide-pills">
+          <span class="supporting-pill">Postcode</span>
+          <span class="supporting-pill">Town or city</span>
+          <span class="supporting-pill">Locate me</span>
+        </div>
       </article>
     </section>
 
     <footer>
-      <strong>Petrol Prices UK</strong> • Helping drivers compare nearby UK fuel prices with clearer search and better forecourt detail.
+      <strong>Petrol Prices UK</strong> • Helping drivers compare nearby fuel prices with clearer search, clearer cards and clearer forecourt detail.
     </footer>
   </main>
 
@@ -1077,7 +1181,11 @@
       lastResolvedQuery: ""
     };
 
-    const map = L.map("map", { zoomControl: true }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM);
+    const map = L.map("map", {
+      zoomControl: true,
+      scrollWheelZoom: false
+    }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM);
+
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
@@ -1308,7 +1416,7 @@
 
       const lat = matches.reduce((sum, station) => sum + station.latitude, 0) / matches.length;
       const lng = matches.reduce((sum, station) => sum + station.longitude, 0) / matches.length;
-      return { lat, lng, label: query, source: "local csv" };
+      return { lat, lng, label: query, source: "local lookup" };
     }
 
     async function resolveSearchLocation(query) {
@@ -1337,7 +1445,7 @@
           };
         }
       } catch (error) {
-        // Fall through to local CSV centroid.
+        // Fall through to local lookup.
       }
 
       const localCentroid = getLocalCentroid(cleanQuery);
@@ -1499,7 +1607,7 @@
     }
 
     function calculateResults(center, fuelCode, sortBy) {
-      const results = state.stations
+      return state.stations
         .map(station => {
           const price = getStationPrice(station, fuelCode);
           const timestamp = getStationTimestamp(station, fuelCode);
@@ -1512,7 +1620,9 @@
             updatedAt: timestamp,
             updatedText: relativeUpdatedText(timestamp),
             openingSummary: getOpeningSummary(station),
-            distanceMiles
+            distanceMiles,
+            displayUnleaded: station.priceE10,
+            displayDiesel: station.priceB7S
           };
         })
         .filter(station => Number.isFinite(station.price) && station.price > 0 && station.distanceMiles <= SEARCH_RADIUS_MILES)
@@ -1522,8 +1632,6 @@
           return a.price - b.price || a.distanceMiles - b.distanceMiles;
         })
         .map((station, index) => ({ ...station, rank: index + 1 }));
-
-      return results;
     }
 
     function getSummaryStats(results) {
@@ -1552,7 +1660,7 @@
 
       const fuelLabel = FUEL_CONFIG[elements.fuelType.value].label;
       if (!state.searchCenter) {
-        elements.summaryHeadline.textContent = "Search for a location to see how many stations are nearby and where the best price is.";
+        elements.summaryHeadline.textContent = "Search for a location to see how many stations are nearby and what price range you can expect.";
         elements.summaryStrip.textContent = `Results will show the cheapest, average and highest ${fuelLabel} price within 5 miles.`;
         return;
       }
@@ -1652,6 +1760,11 @@
 
                 <p class="station-address">${escapeHtml(station.address)}</p>
 
+                <div class="fuel-glance">
+                  <span class="fuel-mini">Unleaded <strong>${formatPrice(station.displayUnleaded)}</strong></span>
+                  <span class="fuel-mini">Diesel <strong>${formatPrice(station.displayDiesel)}</strong></span>
+                </div>
+
                 <div class="tag-row">
                   ${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
                 </div>
@@ -1673,7 +1786,7 @@
                 <div class="price-card">
                   <div class="metric-label">${escapeHtml(station.fuelLabel)}</div>
                   <div class="metric-value">${formatPrice(station.price)}</div>
-                  <div class="metric-subvalue">Best rank: #${station.rank} in this search</div>
+                  <div class="metric-subvalue">Ranked #${station.rank} for this search</div>
                 </div>
                 <div class="distance-card">
                   <div class="metric-label">Distance</div>
@@ -1712,8 +1825,16 @@
         <div class="selected-address">${escapeHtml(selected.address)}</div>
         <div class="selected-grid">
           <div class="selected-stat">
-            <div class="small">Price</div>
+            <div class="small">Selected fuel</div>
             <div class="strong">${formatPrice(selected.price)}</div>
+          </div>
+          <div class="selected-stat">
+            <div class="small">Unleaded</div>
+            <div class="strong">${formatPrice(selected.displayUnleaded)}</div>
+          </div>
+          <div class="selected-stat">
+            <div class="small">Diesel</div>
+            <div class="strong">${formatPrice(selected.displayDiesel)}</div>
           </div>
           <div class="selected-stat">
             <div class="small">Distance</div>
@@ -1745,18 +1866,18 @@
       searchCenterMarker = L.circleMarker([state.searchCenter.lat, state.searchCenter.lng], {
         radius: 9,
         weight: 3,
-        color: "#0f6fff",
+        color: "#1d4ed8",
         fillColor: "#ffffff",
         fillOpacity: 1
       }).addTo(map).bindPopup(`<p class="popup-title">Search centre</p><div class="popup-copy">${escapeHtml(state.searchLabel)}</div>`);
 
       radiusCircle = L.circle([state.searchCenter.lat, state.searchCenter.lng], {
         radius: SEARCH_RADIUS_METRES,
-        color: "#0f6fff",
+        color: "#1d4ed8",
         weight: 2,
         opacity: 0.65,
-        fillColor: "#8bc2ff",
-        fillOpacity: 0.10
+        fillColor: "#93c5fd",
+        fillOpacity: 0.12
       }).addTo(map);
 
       const bounds = L.latLngBounds([[state.searchCenter.lat, state.searchCenter.lng]]);
@@ -1766,8 +1887,8 @@
         const marker = L.circleMarker([station.latitude, station.longitude], {
           radius: isSelected ? 10 : 7,
           weight: isSelected ? 3 : 2,
-          color: isSelected ? "#10315c" : "#0f6fff",
-          fillColor: isSelected ? "#0fb0c9" : "#ffffff",
+          color: isSelected ? "#24446d" : "#1d4ed8",
+          fillColor: isSelected ? "#f6b73c" : "#ffffff",
           fillOpacity: 1
         })
           .addTo(markerLayer)
@@ -1805,7 +1926,7 @@
             lat: coords.latitude,
             lng: coords.longitude,
             label: "your location",
-            source: "browser geolocation"
+            source: "browser location"
           };
           elements.searchInput.value = "Using your current location";
         } else {
@@ -1817,7 +1938,7 @@
         state.searchCenter = { lat: resolved.lat, lng: resolved.lng };
         state.searchLabel = resolved.label;
         state.lastSearchMode = resolved.source;
-        setStatus(`Search centred on ${resolved.label} using ${resolved.source}.`, false);
+        setStatus(`Showing stations within 5 miles of ${resolved.label}.`, false);
 
         state.results = calculateResults(state.searchCenter, fuelCode, sortBy);
         state.selectedId = state.results.length ? state.results[0].id : null;
@@ -1876,38 +1997,26 @@
       );
     }
 
-    function buildNationalInsightText() {
-      const fuelCode = elements.fuelType.value;
-      const available = state.stations.filter(station => Number.isFinite(getStationPrice(station, fuelCode)) && getStationPrice(station, fuelCode) > 0);
-      if (!available.length) return;
-      const cheapest = available.reduce((best, current) => getStationPrice(current, fuelCode) < getStationPrice(best, fuelCode) ? current : best, available[0]);
-      elements.summaryStrip.textContent = `CSV loaded: ${available.length.toLocaleString()} stations currently list ${FUEL_CONFIG[fuelCode].label}. Cheapest nationwide right now in this file: ${cheapest.brandDisplay} • ${cheapest.tradingName} at ${formatPrice(getStationPrice(cheapest, fuelCode))}.`;
-    }
-
     async function init() {
       try {
         await loadCsvData();
-        buildNationalInsightText();
         renderAll();
       } catch (error) {
         console.error(error);
-        elements.statusBanner.textContent = "The CSV could not be loaded. Check that fuel-data.csv is in the same folder as this page or in your public root.";
+        elements.statusBanner.textContent = "Fuel price data is unavailable right now. Please try again in a moment.";
         elements.stations.innerHTML = `
           <div class="empty-state">
-            <h3>CSV file not found</h3>
-            <p>Please make sure <strong>fuel-data.csv</strong> is available at <strong>${CSV_URL}</strong>. On Vercel or GitHub Pages, placing it in your public root usually works well.</p>
+            <h3>Fuel data is unavailable</h3>
+            <p>We could not load the latest station information just now. Please try again shortly.</p>
           </div>
         `;
-        setStatus("The CSV file could not be loaded.", true);
+        setStatus("Fuel price data could not be loaded.", true);
       }
     }
 
     elements.searchBtn.addEventListener("click", () => performSearch());
     elements.locateBtn.addEventListener("click", useCurrentLocation);
-    elements.fuelType.addEventListener("change", () => {
-      buildNationalInsightText();
-      rerunCurrentSearch();
-    });
+    elements.fuelType.addEventListener("change", rerunCurrentSearch);
     elements.sortBy.addEventListener("change", rerunCurrentSearch);
     elements.searchInput.addEventListener("keydown", event => {
       if (event.key === "Enter") performSearch();
