@@ -4,321 +4,1088 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Petrol Prices UK</title>
+  <meta name="description" content="Find petrol stations within 5 miles, compare live fuel prices, and view forecourt details from the official UK fuel data CSV." />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
   <style>
-    :root{
-      --bg1:#eaf6ff;
-      --bg2:#fff9ec;
-      --text:#0f172a;
-      --muted:#64748b;
-      --line:#e2e8f0;
-      --dark:#0f172a;
-      --sky:#0ea5e9;
-      --emerald:#10b981;
-      --soft-shadow:0 10px 30px rgba(15,23,42,.08);
-      --big-shadow:0 20px 60px rgba(15,23,42,.08);
+    :root {
+      --bg: #f3f7fb;
+      --bg-soft: #edf4ff;
+      --card: rgba(255, 255, 255, 0.92);
+      --card-strong: #ffffff;
+      --text: #10233f;
+      --muted: #5f718d;
+      --line: #dbe6f2;
+      --line-strong: #c8d7e7;
+      --brand: #0f6fff;
+      --brand-2: #12b5cb;
+      --accent: #19a974;
+      --accent-2: #f59e0b;
+      --danger: #ef4444;
+      --purple: #7c3aed;
+      --shadow: 0 14px 40px rgba(18, 38, 63, 0.08);
+      --shadow-soft: 0 8px 24px rgba(18, 38, 63, 0.06);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
     }
-    * { box-sizing:border-box; }
-    html, body { margin:0; padding:0; font-family:Arial, sans-serif; color:var(--text); }
-    body { background: linear-gradient(135deg, var(--bg1), #ffffff 55%, var(--bg2)); }
-    .wrap { max-width:1200px; margin:0 auto; padding:0 16px; }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(18, 181, 203, 0.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(15, 111, 255, 0.10), transparent 22%),
+        linear-gradient(180deg, #f7fbff 0%, #eef5fb 100%);
+      min-height: 100vh;
+    }
+
+    a { color: inherit; }
+    button, input, select { font: inherit; }
+
+    .wrap {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 0 18px;
+    }
+
     .topbar {
-      position:sticky; top:0; z-index:50; background:rgba(255,255,255,.85);
-      backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.9);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.8);
+      background: rgba(245, 250, 255, 0.82);
+      backdrop-filter: blur(16px);
     }
+
     .topbar-inner {
-      display:flex; align-items:center; justify-content:space-between; padding:16px 0; gap:16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
     }
-    .brand { display:flex; align-items:center; gap:12px; }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
     .brand-icon {
-      width:44px; height:44px; border-radius:16px; display:grid; place-items:center;
-      color:white; font-size:22px; background:linear-gradient(135deg, var(--sky), var(--emerald));
-      box-shadow:0 12px 24px rgba(14,165,233,.25);
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 14px 28px rgba(15, 111, 255, 0.26);
     }
-    .brand-title { font-size:20px; font-weight:700; margin:0; }
-    .brand-sub { margin:2px 0 0; color:var(--muted); font-size:14px; }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .header-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-soft);
+    }
 
     .hero {
-      margin-top:24px; background:rgba(255,255,255,.88); border:1px solid rgba(255,255,255,.9);
-      border-radius:28px; overflow:hidden; box-shadow:var(--big-shadow);
-    }
-    .hero-grid { display:grid; grid-template-columns:1.2fr .8fr; }
-    .hero-left { padding:32px; }
-    .pill {
-      display:inline-flex; align-items:center; gap:8px; border-radius:999px;
-      padding:8px 12px; font-size:12px; font-weight:700;
-    }
-    .pill.blue { background:#e0f2fe; color:#0369a1; }
-    .pill.white { background:rgba(255,255,255,.16); color:#fff; }
-    h1 { margin:16px 0 0; font-size:52px; line-height:1.02; letter-spacing:-0.03em; }
-    .hero-copy { margin-top:16px; max-width:700px; color:#475569; line-height:1.7; font-size:17px; }
-
-    .search-box {
-      margin-top:24px; background:rgba(248,250,252,.92); border:1px solid var(--line);
-      border-radius:24px; padding:14px;
-    }
-    .chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-    .chip {
-      background:#fff; border:1px solid var(--line); color:#475569; border-radius:999px;
-      padding:8px 12px; font-size:12px; font-weight:600;
-    }
-    .chip.green { background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
-
-    .controls {
-      display:grid; grid-template-columns:1.4fr .8fr .8fr auto; gap:12px;
-    }
-    .field, .select, .search-btn {
-      height:50px; border-radius:18px; border:1px solid var(--line); font-size:15px;
-    }
-    .field, .select { background:#fff; padding:0 14px; width:100%; }
-    .search-btn {
-      border:none; background:var(--dark); color:#fff; font-weight:700; padding:0 18px; cursor:pointer;
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+      align-items: stretch;
     }
 
-    .hero-right {
-      color:#fff; padding:32px; background:linear-gradient(135deg, #0284c7, #06b6d4 45%, #10b981);
-    }
-    .stats { margin-top:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-    .stat { border-radius:24px; background:rgba(255,255,255,.14); padding:16px; }
-    .stat-label { font-size:14px; color:rgba(255,255,255,.84); }
-    .stat-value { margin-top:8px; font-size:32px; font-weight:800; }
-
-    .content {
-      margin-top:24px; display:grid; grid-template-columns:1.15fr .85fr; gap:24px; align-items:start;
-    }
-    .section-title {
-      display:flex; justify-content:space-between; align-items:end; gap:12px; margin-bottom:16px;
-    }
-    .section-title h2 { margin:0; font-size:30px; letter-spacing:-0.02em; }
-    .section-title p { margin:6px 0 0; color:var(--muted); font-size:14px; }
-    .badge {
-      background:#fff; border:1px solid var(--line); border-radius:999px; padding:9px 12px;
-      font-size:12px; font-weight:700; color:#475569;
+    .hero-main,
+    .hero-side,
+    .results-panel,
+    .map-panel,
+    .insight-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
     }
 
-    .stations { display:flex; flex-direction:column; gap:14px; }
-    .station {
-      width:100%; text-align:left; border:1px solid rgba(255,255,255,.9); background:#fff;
-      border-radius:26px; padding:18px; box-shadow:var(--soft-shadow); cursor:pointer;
+    .hero-main {
+      padding: 30px;
+      overflow: hidden;
+      position: relative;
     }
-    .station.active { background:#f0f9ff; border-color:#7dd3fc; }
-    .station-top { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
-    .station-name-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-    .station-name { margin:0; font-size:20px; font-weight:700; }
+
+    .hero-main::before {
+      content: "";
+      position: absolute;
+      inset: auto -80px -120px auto;
+      width: 240px;
+      height: 240px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(18, 181, 203, 0.16), transparent 65%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: #eaf4ff;
+      color: #1357b8;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2rem, 5vw, 3.9rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      max-width: 780px;
+    }
+
+    .hero-copy {
+      margin: 0;
+      max-width: 760px;
+      color: #42526a;
+      font-size: 1.04rem;
+      line-height: 1.72;
+    }
+
+    .search-shell {
+      margin-top: 24px;
+      background: rgba(247, 251, 255, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 16px;
+    }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 0.75fr 0.75fr auto auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .field,
+    .select,
+    .btn {
+      width: 100%;
+      min-height: 54px;
+      border-radius: 18px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      padding: 0 16px;
+      color: var(--text);
+      transition: 0.2s ease;
+    }
+
+    .field:focus,
+    .select:focus {
+      outline: none;
+      border-color: #7bb0ff;
+      box-shadow: 0 0 0 4px rgba(15, 111, 255, 0.10);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 800;
+      padding: 0 18px;
+      background: #fff;
+    }
+
+    .btn-primary {
+      border: none;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(15, 111, 255, 0.22);
+    }
+
+    .btn-secondary:hover,
+    .btn-primary:hover,
+    .station-card:hover {
+      transform: translateY(-1px);
+    }
+
+    .search-meta {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .hero-side {
+      padding: 24px;
+      background:
+        linear-gradient(145deg, rgba(15, 111, 255, 0.98), rgba(18, 181, 203, 0.96));
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-side::before,
+    .hero-side::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      pointer-events: none;
+    }
+
+    .hero-side::before {
+      width: 240px;
+      height: 240px;
+      right: -80px;
+      top: -40px;
+    }
+
+    .hero-side::after {
+      width: 180px;
+      height: 180px;
+      left: -40px;
+      bottom: -70px;
+    }
+
+    .hero-side h2 {
+      margin: 14px 0 8px;
+      font-size: 1.65rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-side p {
+      margin: 0;
+      color: rgba(255,255,255,0.86);
+      line-height: 1.65;
+    }
+
+    .stats-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.78);
+      font-weight: 700;
+    }
+
+    .stat-value {
+      margin-top: 8px;
+      font-size: clamp(1.4rem, 2.3vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .summary-strip {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-size: 0.96rem;
+      line-height: 1.7;
+    }
+
+    .layout {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .results-panel,
+    .map-panel {
+      padding: 22px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-head h2,
+    .section-head h3 {
+      margin: 0;
+      font-size: 1.7rem;
+      letter-spacing: -0.02em;
+    }
+
+    .section-copy {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .results-badge {
+      white-space: nowrap;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #eef6ff;
+      color: #1557b0;
+      font-size: 0.88rem;
+      font-weight: 800;
+      border: 1px solid #cfe0ff;
+    }
+
+    .status-banner {
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+      color: #42617e;
+      font-size: 0.94rem;
+      line-height: 1.65;
+    }
+
+    .stations {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .station-card {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+      background: #fff;
+      box-shadow: var(--shadow-soft);
+      cursor: pointer;
+      transition: 0.18s ease;
+      text-align: left;
+    }
+
+    .station-card.active {
+      border-color: #7fb0ff;
+      box-shadow: 0 14px 28px rgba(15, 111, 255, 0.12);
+      background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    }
+
+    .station-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .station-meta-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .station-rank {
+      min-width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #0f6fff, #4db4ff);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.05rem;
+      box-shadow: 0 12px 24px rgba(15, 111, 255, 0.18);
+      flex-shrink: 0;
+    }
+
+    .station-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-visual {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand-logo-img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 8px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0 14px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      font-weight: 900;
+      font-size: 0.85rem;
+      letter-spacing: 0.01em;
+      box-shadow: var(--shadow-soft);
+      text-transform: uppercase;
+    }
+
+    .brand-default { background: #eff3f8; color: #30445e; border-color: #d6e0eb; }
+    .brand-esso { background: rgba(214,0,28,0.12); color: #c7001e; border-color: rgba(214,0,28,0.22); }
+    .brand-tesco { background: rgba(0,75,160,0.10); color: #004ba0; border-color: rgba(230,0,43,0.24); }
+    .brand-shell { background: rgba(255,220,0,0.18); color: #d11a1f; border-color: rgba(255,220,0,0.36); }
+    .brand-bp { background: rgba(46,176,71,0.14); color: #1d7f32; border-color: rgba(46,176,71,0.24); }
+    .brand-asda { background: rgba(102,184,42,0.16); color: #3d7a11; border-color: rgba(102,184,42,0.24); }
+    .brand-morrisons { background: rgba(255,197,34,0.18); color: #486029; border-color: rgba(85,129,57,0.24); }
+    .brand-sainsburys { background: rgba(241,109,33,0.16); color: #be4a06; border-color: rgba(241,109,33,0.24); }
+    .brand-texaco { background: rgba(0,86,166,0.12); color: #0056a6; border-color: rgba(226,40,49,0.22); }
+    .brand-gulf { background: rgba(242,104,34,0.15); color: #c2510d; border-color: rgba(0,106,179,0.18); }
+    .brand-jet { background: rgba(0,69,174,0.13); color: #0045ae; border-color: rgba(228,0,43,0.22); }
+    .brand-total { background: rgba(234, 76, 137, 0.12); color: #a52d61; border-color: rgba(0, 103, 177, 0.18); }
+    .brand-maxol { background: rgba(231,78,39,0.12); color: #ba3610; border-color: rgba(231,78,39,0.22); }
+    .brand-murco { background: rgba(0,61,165,0.12); color: #063889; border-color: rgba(0,61,165,0.22); }
+    .brand-valero { background: rgba(0,92,185,0.12); color: #005cb9; border-color: rgba(226,33,38,0.22); }
+    .brand-eg-on-the-move { background: rgba(111,76,255,0.12); color: #5d39d4; border-color: rgba(111,76,255,0.20); }
+    .brand-welcome-break { background: rgba(3, 164, 115, 0.14); color: #0a7e5b; border-color: rgba(3, 164, 115, 0.24); }
+
+    .station-brand {
+      margin: 0;
+      font-size: 1.08rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .station-trading {
+      margin: 4px 0 0;
+      font-size: 0.96rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .station-address {
+      margin: 12px 0 0;
+      color: #45617c;
+      line-height: 1.65;
+      font-size: 0.95rem;
+    }
+
+    .tag-row,
+    .amenity-row,
+    .supporting-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag-row { margin-top: 14px; }
+    .amenity-row { margin-top: 12px; }
+    .supporting-row {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .tag,
+    .amenity,
+    .supporting-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
     .tag {
-      background:#f1f5f9; color:#475569; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700;
-    }
-    .tag.selected { background:#e0f2fe; color:#0369a1; }
-    .address { margin-top:10px; color:#475569; font-size:14px; line-height:1.5; }
-    .meta {
-      margin-top:14px; display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:13px; font-weight:600;
+      background: #eef5ff;
+      color: #1f5eb2;
+      border: 1px solid #d5e6ff;
     }
 
-    .price-panel { min-width:170px; display:grid; gap:10px; }
-    .price-box, .distance-box { border-radius:18px; padding:14px; }
-    .price-box { background:var(--dark); color:#fff; }
-    .distance-box { background:#f1f5f9; color:#334155; }
-    .mini-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; opacity:.75; }
-    .big-price { margin-top:6px; font-size:34px; font-weight:800; }
-    .big-distance { margin-top:6px; font-size:24px; font-weight:800; }
+    .amenity {
+      background: #f6f9fc;
+      color: #475c75;
+      border: 1px solid #e3ebf5;
+    }
 
-    .map-card {
-      position:sticky; top:88px; background:#fff; border:1px solid rgba(255,255,255,.9);
-      border-radius:28px; overflow:hidden; box-shadow:var(--soft-shadow);
+    .supporting-pill {
+      background: #fff;
+      color: #54687f;
+      border: 1px solid var(--line);
     }
-    .map-head { padding:18px; border-bottom:1px solid #f1f5f9; }
-    .map-head h3 { margin:0; font-size:24px; }
-    .map-head p { margin:6px 0 0; color:var(--muted); font-size:14px; }
-    .map-area {
-      position:relative; height:360px; background:linear-gradient(135deg, #e0f2fe, #ecfeff 55%, #ecfdf5);
-      overflow:hidden;
-    }
-    .map-grid {
-      position:absolute; inset:0; opacity:.55;
-      background-image:
-        linear-gradient(rgba(148,163,184,.25) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148,163,184,.25) 1px, transparent 1px);
-      background-size:28px 28px;
-    }
-    .pin { position:absolute; transform:translate(-50%,-50%); border:none; background:none; cursor:pointer; }
-    .pin-bubble {
-      background:#fff; color:#334155; border-radius:999px; padding:10px 12px; font-size:12px;
-      font-weight:800; box-shadow:0 10px 20px rgba(15,23,42,.12);
-    }
-    .pin.active .pin-bubble { background:var(--dark); color:#fff; }
 
-    .selected-card { padding:18px; }
-    .selected-inner {
-      background:#f8fafc; border:1px solid var(--line); border-radius:24px; padding:16px;
+    .pricing-panel {
+      min-width: 200px;
+      display: grid;
+      gap: 10px;
     }
-    .selected-label { color:var(--muted); font-size:13px; font-weight:700; }
-    .selected-name { margin-top:6px; font-size:20px; font-weight:800; }
-    .selected-address { margin-top:6px; color:#475569; font-size:14px; line-height:1.5; }
-    .selected-stats {
-      margin-top:16px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+
+    .price-card,
+    .distance-card,
+    .updated-card {
+      border-radius: 20px;
+      padding: 14px;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #f8fbff;
     }
+
+    .price-card {
+      background: linear-gradient(160deg, #10315c, #173f79);
+      color: #fff;
+      border: none;
+      box-shadow: 0 14px 28px rgba(16, 49, 92, 0.20);
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+      opacity: 0.82;
+    }
+
+    .metric-value {
+      margin-top: 6px;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .metric-subvalue {
+      margin-top: 6px;
+      color: inherit;
+      opacity: 0.82;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .map-panel {
+      position: sticky;
+      top: 88px;
+    }
+
+    .map-wrap {
+      margin-top: 14px;
+      height: 420px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #dfeeff;
+    }
+
+    #map { width: 100%; height: 100%; }
+
+    .selected-card {
+      margin-top: 16px;
+      padding: 18px;
+      border-radius: 22px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+    }
+
+    .selected-label {
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .selected-name {
+      margin-top: 8px;
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .selected-address {
+      margin-top: 8px;
+      color: #4c637f;
+      line-height: 1.65;
+    }
+
+    .selected-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
     .selected-stat {
-      background:#fff; border:1px solid var(--line); border-radius:18px; padding:12px; text-align:center;
+      padding: 12px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
     }
-    .selected-stat .label { font-size:12px; color:var(--muted); }
-    .selected-stat .value { margin-top:6px; font-size:16px; font-weight:800; }
 
-    footer { padding:24px 0 40px; text-align:center; color:var(--muted); font-size:14px; }
-
-    @media (max-width: 1024px) {
-      .hero-grid, .content { grid-template-columns:1fr; }
-      .map-card { position:static; }
-      h1 { font-size:42px; }
+    .selected-stat .small {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
+
+    .selected-stat .strong {
+      margin-top: 6px;
+      font-weight: 900;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .map-note {
+      margin-top: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.92rem;
+    }
+
+    .insight-grid {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .insight-card {
+      padding: 22px;
+    }
+
+    .insight-card h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .insight-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .insight-pills {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--line-strong);
+      border-radius: 24px;
+      padding: 24px;
+      background: linear-gradient(180deg, #fbfdff 0%, #f5faff 100%);
+    }
+
+    .empty-state h3 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .notice {
+      margin-top: 10px;
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .leaflet-popup-content {
+      margin: 14px 16px;
+      font-family: inherit;
+      color: var(--text);
+    }
+
+    .popup-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .popup-copy {
+      margin-top: 6px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    .popup-price {
+      margin-top: 10px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #13427f;
+    }
+
+    footer {
+      padding: 22px 0 38px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1160px) {
+      .hero,
+      .layout,
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .map-panel {
+        position: static;
+      }
+
+      .search-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .search-grid .field { grid-column: 1 / -1; }
+    }
+
     @media (max-width: 760px) {
-      .topbar-inner { align-items:flex-start; flex-direction:column; }
-      .hero-left, .hero-right { padding:22px; }
-      h1 { font-size:34px; }
-      .controls, .stats, .selected-stats { grid-template-columns:1fr; }
-      .section-title, .station-top { align-items:flex-start; flex-direction:column; }
-      .price-panel { width:100%; min-width:0; grid-template-columns:1fr 1fr; }
-      .map-area { height:300px; }
+      .wrap { padding: 0 14px; }
+      .topbar-inner { flex-direction: column; align-items: flex-start; }
+      .hero-main, .hero-side, .results-panel, .map-panel, .insight-card { padding: 18px; }
+      .search-grid,
+      .stats-grid,
+      .selected-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .station-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pricing-panel {
+        min-width: 0;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .metric-value { font-size: 1.5rem; }
+      .map-wrap { height: 320px; }
+      .section-head { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-inner">
-      <div class="brand">
+      <div class="brand-lockup">
         <div class="brand-icon">⛽</div>
         <div>
           <p class="brand-title">Petrol Prices UK</p>
-          <p class="brand-sub">Simple petrol price search for UK drivers</p>
+          <p class="brand-subtitle">Compare nearby fuel prices, opening details and forecourt amenities in one place</p>
         </div>
       </div>
+      <div class="header-pill">Official CSV data • 5-mile radius search • mobile friendly</div>
     </div>
   </header>
 
   <main class="wrap">
     <section class="hero">
-      <div class="hero-grid">
-        <div class="hero-left">
-          <div class="pill blue">One page • mobile friendly • CSV upload version</div>
-          <h1>Find the cheapest nearby fuel in seconds</h1>
-          <p class="hero-copy">
-            Search by town, postcode, station name, or any text found in your CSV upload.
-          </p>
+      <section class="hero-main">
+        <div class="eyebrow">Search by postcode, town or city</div>
+        <h1>Find the best nearby fuel prices without the clutter</h1>
+        <p class="hero-copy">
+          Enter a UK postcode, town or city to see petrol stations within 5 miles, ranked by price, distance or freshness.
+          You can also use your current location to instantly compare nearby forecourts.
+        </p>
 
-          <div class="search-box">
-            <div class="chip-row">
-              <span class="chip">Local CSV file</span>
-              <span class="chip green">No expiring links</span>
-            </div>
+        <div class="search-shell">
+          <div class="search-grid">
+            <input id="searchInput" class="field" type="text" placeholder="Enter a UK postcode, town or city" aria-label="Search by postcode, town or city" />
 
-            <div class="controls">
-              <input id="searchInput" class="field" type="text" value="" placeholder="Enter town, postcode, or station" />
-              <select id="fuelType" class="select">
-                <option>Petrol</option>
-                <option>Diesel</option>
-                <option>Premium Petrol</option>
-              </select>
-              <select id="sortBy" class="select">
-                <option>Lowest price</option>
-                <option>Nearest</option>
-                <option>Recently updated</option>
-              </select>
-              <button id="searchBtn" class="search-btn">Search</button>
-            </div>
+            <select id="fuelType" class="select" aria-label="Select fuel type">
+              <option value="E10">Unleaded (E10)</option>
+              <option value="E5">Super Unleaded (E5)</option>
+              <option value="B7S">Diesel (B7)</option>
+              <option value="B7P">Premium Diesel (B7P)</option>
+              <option value="B10">B10</option>
+              <option value="HVO">HVO</option>
+            </select>
+
+            <select id="sortBy" class="select" aria-label="Sort results by">
+              <option value="price">Lowest price</option>
+              <option value="distance">Nearest</option>
+              <option value="updated">Recently updated</option>
+            </select>
+
+            <button id="searchBtn" class="btn btn-primary" type="button">Find stations</button>
+            <button id="locateBtn" class="btn btn-secondary" type="button">Locate me</button>
+          </div>
+
+          <div class="search-meta">
+            <span class="meta-chip">Search radius: 5 miles</span>
+            <span class="meta-chip">Live distance from your search point</span>
+            <span class="meta-chip">Forecourt details pulled from the CSV</span>
+          </div>
+
+          <div id="searchStatus" class="notice">Enter a location to begin. For towns and cities, the search uses a map lookup with a local CSV fallback.</div>
+        </div>
+      </section>
+
+      <aside class="hero-side">
+        <div class="eyebrow" style="background: rgba(255,255,255,0.16); color: #fff;">Live search summary</div>
+        <h2>Everything drivers care about at a glance</h2>
+        <p id="summaryHeadline">Search for a location to see how many stations are nearby and where the best price is.</p>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Stations found</div>
+            <div class="stat-value" id="statCount">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Cheapest price</div>
+            <div class="stat-value" id="statCheapest">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Average price</div>
+            <div class="stat-value" id="statAverage">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Highest price</div>
+            <div class="stat-value" id="statHighest">—</div>
           </div>
         </div>
 
-        <div class="hero-right">
-          <div class="pill white">Designed for phone, tablet and desktop</div>
-
-          <div class="stats">
-            <div class="stat">
-              <div class="stat-label">Cheapest shown</div>
-              <div class="stat-value" id="statCheapest">--</div>
-              <div class="stat-label">Current selected fuel type</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Results found</div>
-              <div class="stat-value" id="statCount">0</div>
-              <div class="stat-label">Rows loaded from CSV</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">CSV status</div>
-              <div class="stat-value" id="statFreshest">--</div>
-              <div class="stat-label">Live from repo upload</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="content">
-      <div>
-        <div class="section-title">
-          <div>
-            <h2>Nearby stations</h2>
-            <p>Search works across all text found in the CSV rows</p>
-          </div>
-          <div class="badge" id="resultsBadge">0 matching results</div>
-        </div>
-
-        <div id="stations" class="stations"></div>
-      </div>
-
-      <aside class="map-card">
-        <div class="map-head">
-          <h3>Map view</h3>
-          <p>Simple visual support for the list</p>
-        </div>
-        <div class="map-area">
-          <div class="map-grid"></div>
-          <div id="pins"></div>
-        </div>
-        <div class="selected-card">
-          <div id="selectedCard" class="selected-inner"></div>
+        <div class="summary-strip" id="summaryStrip">
+          Search results will show the cheapest, average and highest price for the fuel type you choose.
         </div>
       </aside>
     </section>
 
+    <section class="layout">
+      <section class="results-panel">
+        <div class="section-head">
+          <div>
+            <h2>Nearby petrol stations</h2>
+            <p class="section-copy">Each card shows the brand first, then the trading name, full address, rank, distance, opening details, amenities and fuel update time.</p>
+          </div>
+          <div id="resultsBadge" class="results-badge">0 results</div>
+        </div>
+
+        <div id="statusBanner" class="status-banner">
+          Ready when you are. Search by postcode, town or city or use the “Locate me” button.
+        </div>
+
+        <div id="stations" class="stations"></div>
+      </section>
+
+      <aside class="map-panel">
+        <div class="section-head">
+          <div>
+            <h3>Map view</h3>
+            <p class="section-copy">Your search centre is shown with a 5-mile radius so nearby stations are easy to understand visually.</p>
+          </div>
+        </div>
+
+        <div class="map-wrap">
+          <div id="map"></div>
+        </div>
+
+        <div id="selectedCard" class="selected-card">
+          <div class="selected-label">Selected station</div>
+          <div class="selected-name">No station selected yet</div>
+          <div class="selected-address">Search for a location to see nearby stations and select one for more detail.</div>
+        </div>
+
+        <div class="map-note">
+          Tip: customers can click a station card or map marker to focus that forecourt instantly.
+        </div>
+      </aside>
+    </section>
+
+    <section class="insight-grid">
+      <article class="insight-card">
+        <h3>Useful forecourt details from the CSV</h3>
+        <p>This version also uses opening hours, amenities, motorway or supermarket flags, phone number, county and country, plus fuel-specific update timestamps where they are available.</p>
+        <div class="insight-pills">
+          <span class="meta-chip">Opening hours</span>
+          <span class="meta-chip">Car wash</span>
+          <span class="meta-chip">Toilets</span>
+          <span class="meta-chip">AdBlue</span>
+          <span class="meta-chip">Motorway</span>
+          <span class="meta-chip">Supermarket</span>
+        </div>
+      </article>
+
+      <article class="insight-card">
+        <h3>Colourful, simpler, more customer-facing</h3>
+        <p>The placeholder/demo tone is replaced with real customer wording, stronger hierarchy, clearer cards, richer summary stats and a proper map instead of a decorative mock area.</p>
+      </article>
+
+      <article class="insight-card">
+        <h3>Brand visuals included</h3>
+        <p>Common brands have styled brand badges now. The code also supports real logo files automatically if you add SVGs into <strong>/brand-logos</strong> later.</p>
+      </article>
+    </section>
+
     <footer>
-      <strong>Petrol Prices UK</strong><br>
-      Helping drivers find better fuel prices across the UK.
+      <strong>Petrol Prices UK</strong> • Helping drivers compare nearby UK fuel prices with clearer search and better forecourt detail.
     </footer>
   </main>
 
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
   <script>
     const CSV_URL = "./fuel-data.csv";
+    const SEARCH_RADIUS_MILES = 5;
+    const SEARCH_RADIUS_METRES = SEARCH_RADIUS_MILES * 1609.344;
+    const DEFAULT_MAP_CENTER = [54.5, -3.2];
+    const DEFAULT_MAP_ZOOM = 6;
 
-    const fallbackStations = [
-      {
-        id: 1,
-        name: "Shell London Road",
-        brand: "Shell",
-        town: "Manchester",
-        postcode: "M1 1AE",
-        address: "214 London Road, Manchester",
-        open: "Open 24 hours",
-        updatedMins: 12,
-        distance: 0.6,
-        pin: { x: "18%", y: "24%" },
-        prices: { "Petrol": 136.9, "Diesel": 141.5, "Premium Petrol": 149.9 },
-        searchText: "shell london road manchester m1 1ae 214 london road manchester"
-      }
-    ];
+    const FUEL_CONFIG = {
+      E10: { label: "Unleaded (E10)", priceKey: "priceE10", timestampKey: "timestampE10" },
+      E5: { label: "Super Unleaded (E5)", priceKey: "priceE5", timestampKey: "timestampE5" },
+      B7S: { label: "Diesel (B7)", priceKey: "priceB7S", timestampKey: "timestampB7S" },
+      B7P: { label: "Premium Diesel (B7P)", priceKey: "priceB7P", timestampKey: "timestampB7P" },
+      B10: { label: "B10", priceKey: "priceB10", timestampKey: "timestampB10" },
+      HVO: { label: "HVO", priceKey: "priceHVO", timestampKey: "timestampHVO" }
+    };
 
-    const searchInput = document.getElementById("searchInput");
-    const fuelType = document.getElementById("fuelType");
-    const sortBy = document.getElementById("sortBy");
-    const searchBtn = document.getElementById("searchBtn");
-    const stationsEl = document.getElementById("stations");
-    const pinsEl = document.getElementById("pins");
-    const selectedCardEl = document.getElementById("selectedCard");
-    const resultsBadgeEl = document.getElementById("resultsBadge");
-    const statCheapestEl = document.getElementById("statCheapest");
-    const statCountEl = document.getElementById("statCount");
-    const statFreshestEl = document.getElementById("statFreshest");
+    const BRAND_FILE_SLUGS = {
+      "ESSO": "esso",
+      "TESCO": "tesco",
+      "SHELL": "shell",
+      "BP": "bp",
+      "ASDA": "asda",
+      "ASDA EXPRESS": "asda",
+      "MORRISONS": "morrisons",
+      "SAINSBURY'S": "sainsburys",
+      "SAINSBURYS": "sainsburys",
+      "TEXACO": "texaco",
+      "GULF": "gulf",
+      "JET": "jet",
+      "TOTAL": "total",
+      "VALERO": "valero",
+      "MAXOL": "maxol",
+      "MURCO": "murco",
+      "EG ON THE MOVE": "eg-on-the-move",
+      "WELCOME BREAK": "welcome-break"
+    };
 
-    let stationsData = [...fallbackStations];
-    let selectedId = 1;
-    let csvLoaded = false;
+    const elements = {
+      searchInput: document.getElementById("searchInput"),
+      fuelType: document.getElementById("fuelType"),
+      sortBy: document.getElementById("sortBy"),
+      searchBtn: document.getElementById("searchBtn"),
+      locateBtn: document.getElementById("locateBtn"),
+      searchStatus: document.getElementById("searchStatus"),
+      resultsBadge: document.getElementById("resultsBadge"),
+      statusBanner: document.getElementById("statusBanner"),
+      summaryHeadline: document.getElementById("summaryHeadline"),
+      summaryStrip: document.getElementById("summaryStrip"),
+      statCount: document.getElementById("statCount"),
+      statCheapest: document.getElementById("statCheapest"),
+      statAverage: document.getElementById("statAverage"),
+      statHighest: document.getElementById("statHighest"),
+      stations: document.getElementById("stations"),
+      selectedCard: document.getElementById("selectedCard")
+    };
+
+    const state = {
+      stations: [],
+      results: [],
+      selectedId: null,
+      searchCenter: null,
+      searchLabel: "",
+      lastSearchMode: "none",
+      lastResolvedQuery: ""
+    };
+
+    const map = L.map("map", { zoomControl: true }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let markerLayer = L.layerGroup().addTo(map);
+    let radiusCircle = null;
+    let searchCenterMarker = null;
 
     function parseCsvLine(line) {
       const result = [];
@@ -334,220 +1101,817 @@
           i++;
         } else if (char === '"') {
           inQuotes = !inQuotes;
-        } else if (char === "," && !inQuotes) {
-          result.push(current.trim());
+        } else if (char === ',' && !inQuotes) {
+          result.push(current);
           current = "";
         } else {
           current += char;
         }
       }
 
-      result.push(current.trim());
-      return result;
+      result.push(current);
+      return result.map(value => value.trim());
     }
 
-    function findHeaderIndex(headers, names) {
-      for (const name of names) {
-        const idx = headers.findIndex(h => h.includes(name));
-        if (idx !== -1) return idx;
+    function toBool(value) {
+      return String(value).toLowerCase() === "true";
+    }
+
+    function asNumber(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function safeDate(value) {
+      if (!value) return null;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function formatBrandName(value) {
+      const raw = String(value || "Independent").trim();
+      const upper = raw.toUpperCase();
+      const displayMap = {
+        "ESSO": "Esso",
+        "TESCO": "Tesco",
+        "SHELL": "Shell",
+        "BP": "bp",
+        "ASDA": "Asda",
+        "ASDA EXPRESS": "Asda Express",
+        "MORRISONS": "Morrisons",
+        "SAINSBURY'S": "Sainsbury's",
+        "SAINSBURYS": "Sainsbury's",
+        "TEXACO": "Texaco",
+        "GULF": "Gulf",
+        "JET": "Jet",
+        "TOTAL": "Total",
+        "VALERO": "Valero",
+        "MAXOL": "Maxol",
+        "MURCO": "Murco",
+        "EG ON THE MOVE": "EG On The Move",
+        "WELCOME BREAK": "Welcome Break"
+      };
+      return displayMap[upper] || raw.replace(/\b\w/g, c => c.toUpperCase()).replace(/\s+/g, " ");
+    }
+
+    function titleCase(value) {
+      if (!value) return "";
+      return String(value)
+        .toLowerCase()
+        .replace(/\b\w/g, char => char.toUpperCase())
+        .replace(/\bUk\b/g, "UK")
+        .replace(/\bBp\b/g, "bp");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function slugifyBrand(value) {
+      const upper = String(value || "").trim().toUpperCase();
+      if (BRAND_FILE_SLUGS[upper]) return BRAND_FILE_SLUGS[upper];
+      return upper.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "default";
+    }
+
+    function buildAmenities(station) {
+      const items = [];
+      if (station.hasCarWash) items.push("Car wash");
+      if (station.hasToilets) items.push("Customer toilets");
+      if (station.hasWater) items.push("Water filling");
+      if (station.hasAdbluePumps) items.push("AdBlue pumps");
+      if (station.hasAdbluePackaged) items.push("Packaged AdBlue");
+      if (station.hasLpg) items.push("LPG");
+      if (station.is24HoursAmenity) items.push("24-hour fuel");
+      return items;
+    }
+
+    function getDayName(date = new Date()) {
+      return ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][date.getDay()];
+    }
+
+    function formatTimeValue(value) {
+      if (!value || value === "NaN") return null;
+      const [hourString = "00", minuteString = "00"] = String(value).split(":");
+      const hour = Number(hourString);
+      const minute = Number(minuteString);
+      if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+      const suffix = hour >= 12 ? "pm" : "am";
+      const displayHour = ((hour + 11) % 12) + 1;
+      return `${displayHour}:${String(minute).padStart(2, "0")}${suffix}`;
+    }
+
+    function getOpeningSummary(station) {
+      const day = getDayName();
+      const dayData = station.openingTimes[day] || {};
+      if (dayData.is24Hours) return "Open 24 hours today";
+
+      const open = formatTimeValue(dayData.open);
+      const close = formatTimeValue(dayData.close);
+      if (open && close) return `Open today ${open} – ${close}`;
+      return "Opening hours available";
+    }
+
+    function minutesAgo(date) {
+      if (!date) return null;
+      return Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
+    }
+
+    function relativeUpdatedText(date) {
+      const mins = minutesAgo(date);
+      if (mins === null) return "Update time not available";
+      if (mins < 60) return `Updated ${mins} min ago`;
+      const hours = Math.round(mins / 60);
+      if (hours < 24) return `Updated ${hours} hr ago`;
+      const days = Math.round(hours / 24);
+      return `Updated ${days} day${days === 1 ? "" : "s"} ago`;
+    }
+
+    function formatAbsoluteDate(date) {
+      if (!date) return "Not available";
+      return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(date);
+    }
+
+    function formatPrice(value) {
+      return Number.isFinite(value) ? `${value.toFixed(1)}p` : "—";
+    }
+
+    function formatMiles(value) {
+      return Number.isFinite(value) ? `${value.toFixed(1)} mi` : "—";
+    }
+
+    function haversineMiles(lat1, lon1, lat2, lon2) {
+      const toRad = deg => (deg * Math.PI) / 180;
+      const R = 3958.7613;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function getStationPrice(station, fuelCode) {
+      const priceKey = FUEL_CONFIG[fuelCode].priceKey;
+      return station[priceKey];
+    }
+
+    function getStationTimestamp(station, fuelCode) {
+      const fuelTimestamp = station[FUEL_CONFIG[fuelCode].timestampKey];
+      return fuelTimestamp || station.forecourtUpdatedAt || null;
+    }
+
+    function composeAddress(parts) {
+      return parts.filter(Boolean).join(", ");
+    }
+
+    function normalizeQuery(value) {
+      return String(value || "").trim();
+    }
+
+    function isLikelyUkPostcode(query) {
+      return /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(query.replace(/\s+/g, "")) || /^[A-Z]{1,2}\d{1,2}\s*\d[A-Z]{2}$/i.test(query.trim());
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+      return response.json();
+    }
+
+    function getLocalCentroid(query) {
+      const q = query.toLowerCase();
+      const matches = state.stations.filter(station => {
+        return [
+          station.postcode,
+          station.city,
+          station.county,
+          station.country,
+          station.address,
+          station.tradingName,
+          station.brandDisplay
+        ].filter(Boolean).some(value => String(value).toLowerCase().includes(q));
+      });
+
+      if (!matches.length) return null;
+
+      const lat = matches.reduce((sum, station) => sum + station.latitude, 0) / matches.length;
+      const lng = matches.reduce((sum, station) => sum + station.longitude, 0) / matches.length;
+      return { lat, lng, label: query, source: "local csv" };
+    }
+
+    async function resolveSearchLocation(query) {
+      const cleanQuery = normalizeQuery(query);
+      if (!cleanQuery) throw new Error("Please enter a postcode, town or city.");
+
+      if (isLikelyUkPostcode(cleanQuery)) {
+        const postcodeLookup = await fetchJson(`https://api.postcodes.io/postcodes/${encodeURIComponent(cleanQuery)}`);
+        if (!postcodeLookup.result) throw new Error("We could not find that postcode.");
+        return {
+          lat: Number(postcodeLookup.result.latitude),
+          lng: Number(postcodeLookup.result.longitude),
+          label: postcodeLookup.result.postcode,
+          source: "postcode lookup"
+        };
       }
-      return -1;
+
+      try {
+        const results = await fetchJson(`https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=gb&limit=1&q=${encodeURIComponent(cleanQuery)}`);
+        if (Array.isArray(results) && results.length) {
+          return {
+            lat: Number(results[0].lat),
+            lng: Number(results[0].lon),
+            label: results[0].display_name.split(",")[0] || cleanQuery,
+            source: "map lookup"
+          };
+        }
+      } catch (error) {
+        // Fall through to local CSV centroid.
+      }
+
+      const localCentroid = getLocalCentroid(cleanQuery);
+      if (localCentroid) return localCentroid;
+
+      throw new Error("We could not locate that town or city. Please try a nearby postcode or another place name.");
+    }
+
+    function parseStationsFromCsv(text) {
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      const headers = parseCsvLine(lines[0]);
+      const idx = key => headers.indexOf(key);
+
+      const headerIndex = {
+        nodeId: idx("forecourts.node_id"),
+        tradingName: idx("forecourts.trading_name"),
+        brandName: idx("forecourts.brand_name"),
+        isMotorway: idx("forecourts.is_motorway_service_station"),
+        isSupermarket: idx("forecourts.is_supermarket_service_station"),
+        phone: idx("forecourts.public_phone_number"),
+        temporaryClosure: idx("forecourts.temporary_closure"),
+        permanentClosure: idx("forecourts.permanent_closure"),
+        postcode: idx("forecourts.location.postcode"),
+        line1: idx("forecourts.location.address_line_1"),
+        line2: idx("forecourts.location.address_line_2"),
+        city: idx("forecourts.location.city"),
+        county: idx("forecourts.location.county"),
+        country: idx("forecourts.location.country"),
+        lat: idx("forecourts.location.latitude"),
+        lng: idx("forecourts.location.longitude"),
+        update: idx("forecourt_update_timestamp"),
+        priceE5: idx("forecourts.fuel_price.E5"),
+        priceE10: idx("forecourts.fuel_price.E10"),
+        priceB7S: idx("forecourts.fuel_price.B7S"),
+        priceB7P: idx("forecourts.fuel_price.B7P"),
+        priceB10: idx("forecourts.fuel_price.B10"),
+        priceHVO: idx("forecourts.fuel_price.HVO"),
+        timestampE5: idx("forecourts.price_submission_timestamp.E5"),
+        timestampE10: idx("forecourts.price_submission_timestamp.E10"),
+        timestampB7S: idx("forecourts.price_submission_timestamp.B7S"),
+        timestampB7P: idx("forecourts.price_submission_timestamp.B7P"),
+        timestampB10: idx("forecourts.price_submission_timestamp.B10"),
+        timestampHVO: idx("forecourts.price_submission_timestamp.HVO"),
+        mondayOpen: idx("forecourts.opening_times.usual_days.monday.open_time"),
+        mondayClose: idx("forecourts.opening_times.usual_days.monday.close_time"),
+        monday24: idx("forecourts.opening_times.usual_days.monday.is_24_hours"),
+        tuesdayOpen: idx("forecourts.opening_times.usual_days.tuesday.open_time"),
+        tuesdayClose: idx("forecourts.opening_times.usual_days.tuesday.close_time"),
+        tuesday24: idx("forecourts.opening_times.usual_days.tuesday.is_24_hours"),
+        wednesdayOpen: idx("forecourts.opening_times.usual_days.wednesday.open_time"),
+        wednesdayClose: idx("forecourts.opening_times.usual_days.wednesday.close_time"),
+        wednesday24: idx("forecourts.opening_times.usual_days.wednesday.is_24_hours"),
+        thursdayOpen: idx("forecourts.opening_times.usual_days.thursday.open_time"),
+        thursdayClose: idx("forecourts.opening_times.usual_days.thursday.close_time"),
+        thursday24: idx("forecourts.opening_times.usual_days.thursday.is_24_hours"),
+        fridayOpen: idx("forecourts.opening_times.usual_days.friday.open_time"),
+        fridayClose: idx("forecourts.opening_times.usual_days.friday.close_time"),
+        friday24: idx("forecourts.opening_times.usual_days.friday.is_24_hours"),
+        saturdayOpen: idx("forecourts.opening_times.usual_days.saturday.open_time"),
+        saturdayClose: idx("forecourts.opening_times.usual_days.saturday.close_time"),
+        saturday24: idx("forecourts.opening_times.usual_days.saturday.is_24_hours"),
+        sundayOpen: idx("forecourts.opening_times.usual_days.sunday.open_time"),
+        sundayClose: idx("forecourts.opening_times.usual_days.sunday.close_time"),
+        sunday24: idx("forecourts.opening_times.usual_days.sunday.is_24_hours"),
+        adbluePumps: idx("forecourts.amenities.fuel_and_energy_services.adblue_pumps"),
+        adbluePackaged: idx("forecourts.amenities.fuel_and_energy_services.adblue_packaged"),
+        lpg: idx("forecourts.amenities.fuel_and_energy_services.lpg_pumps"),
+        carWash: idx("forecourts.amenities.vehicle_services.car_wash"),
+        water: idx("forecourts.amenities.water_filling"),
+        fuel24: idx("forecourts.amenities.twenty_four_hour_fuel"),
+        toilets: idx("forecourts.amenities.customer_toilets")
+      };
+
+      const dayFields = {
+        monday: [headerIndex.mondayOpen, headerIndex.mondayClose, headerIndex.monday24],
+        tuesday: [headerIndex.tuesdayOpen, headerIndex.tuesdayClose, headerIndex.tuesday24],
+        wednesday: [headerIndex.wednesdayOpen, headerIndex.wednesdayClose, headerIndex.wednesday24],
+        thursday: [headerIndex.thursdayOpen, headerIndex.thursdayClose, headerIndex.thursday24],
+        friday: [headerIndex.fridayOpen, headerIndex.fridayClose, headerIndex.friday24],
+        saturday: [headerIndex.saturdayOpen, headerIndex.saturdayClose, headerIndex.saturday24],
+        sunday: [headerIndex.sundayOpen, headerIndex.sundayClose, headerIndex.sunday24]
+      };
+
+      return lines.slice(1).map((line, index) => {
+        const cols = parseCsvLine(line);
+        const latitude = asNumber(cols[headerIndex.lat]);
+        const longitude = asNumber(cols[headerIndex.lng]);
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+
+        const closed = toBool(cols[headerIndex.temporaryClosure]) || toBool(cols[headerIndex.permanentClosure]);
+        if (closed) return null;
+
+        const brandDisplay = formatBrandName(cols[headerIndex.brandName]);
+        const tradingName = titleCase(cols[headerIndex.tradingName] || "Fuel Station");
+        const city = titleCase(cols[headerIndex.city]);
+        const county = titleCase(cols[headerIndex.county]);
+        const country = titleCase(cols[headerIndex.country]);
+        const postcode = (cols[headerIndex.postcode] || "").toUpperCase();
+        const addressLine1 = titleCase(cols[headerIndex.line1]);
+        const addressLine2 = titleCase(cols[headerIndex.line2]);
+
+        const station = {
+          id: cols[headerIndex.nodeId] || `station-${index + 1}`,
+          brandRaw: cols[headerIndex.brandName] || "",
+          brandDisplay,
+          tradingName,
+          postcode,
+          city,
+          county,
+          country,
+          addressLine1,
+          addressLine2,
+          address: composeAddress([addressLine1, addressLine2, city, county, postcode]),
+          latitude,
+          longitude,
+          phone: cols[headerIndex.phone] || "",
+          isMotorway: toBool(cols[headerIndex.isMotorway]),
+          isSupermarket: toBool(cols[headerIndex.isSupermarket]),
+          forecourtUpdatedAt: safeDate(cols[headerIndex.update]),
+          priceE5: asNumber(cols[headerIndex.priceE5]),
+          priceE10: asNumber(cols[headerIndex.priceE10]),
+          priceB7S: asNumber(cols[headerIndex.priceB7S]),
+          priceB7P: asNumber(cols[headerIndex.priceB7P]),
+          priceB10: asNumber(cols[headerIndex.priceB10]),
+          priceHVO: asNumber(cols[headerIndex.priceHVO]),
+          timestampE5: safeDate(cols[headerIndex.timestampE5]),
+          timestampE10: safeDate(cols[headerIndex.timestampE10]),
+          timestampB7S: safeDate(cols[headerIndex.timestampB7S]),
+          timestampB7P: safeDate(cols[headerIndex.timestampB7P]),
+          timestampB10: safeDate(cols[headerIndex.timestampB10]),
+          timestampHVO: safeDate(cols[headerIndex.timestampHVO]),
+          hasAdbluePumps: toBool(cols[headerIndex.adbluePumps]),
+          hasAdbluePackaged: toBool(cols[headerIndex.adbluePackaged]),
+          hasLpg: toBool(cols[headerIndex.lpg]),
+          hasCarWash: toBool(cols[headerIndex.carWash]),
+          hasWater: toBool(cols[headerIndex.water]),
+          is24HoursAmenity: toBool(cols[headerIndex.fuel24]),
+          hasToilets: toBool(cols[headerIndex.toilets]),
+          openingTimes: Object.fromEntries(Object.entries(dayFields).map(([day, fieldIndexes]) => {
+            const [openIdx, closeIdx, is24Idx] = fieldIndexes;
+            return [day, {
+              open: cols[openIdx] || "",
+              close: cols[closeIdx] || "",
+              is24Hours: toBool(cols[is24Idx])
+            }];
+          }))
+        };
+
+        station.amenities = buildAmenities(station);
+        return station;
+      }).filter(Boolean);
     }
 
     async function loadCsvData() {
-      try {
-        const response = await fetch(CSV_URL);
-        if (!response.ok) throw new Error("CSV fetch failed");
-
-        const text = await response.text();
-        const lines = text.trim().split(/\r?\n/).filter(Boolean);
-        if (lines.length < 2) throw new Error("CSV empty");
-
-        const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
-
-        const nameIdx = findHeaderIndex(headers, ["site_name", "name", "station", "site"]);
-        const brandIdx = findHeaderIndex(headers, ["brand", "operator"]);
-        const townIdx = findHeaderIndex(headers, ["town", "city", "area"]);
-        const postcodeIdx = findHeaderIndex(headers, ["postcode", "post code"]);
-        const addressIdx = findHeaderIndex(headers, ["address", "street"]);
-        const petrolIdx = findHeaderIndex(headers, ["regular_petrol", "petrol", "unleaded", "e10"]);
-        const dieselIdx = findHeaderIndex(headers, ["regular_diesel", "diesel", "b7"]);
-        const premiumIdx = findHeaderIndex(headers, ["premium_petrol", "super unleaded", "premium", "e5"]);
-
-        const parsed = lines.slice(1).map((line, i) => {
-          const cols = parseCsvLine(line);
-          const rowText = cols.join(" ").toLowerCase();
-
-          const name =
-            (nameIdx !== -1 ? cols[nameIdx] : "") ||
-            (brandIdx !== -1 ? cols[brandIdx] : "") ||
-            `Station ${i + 1}`;
-
-          const brand = (brandIdx !== -1 ? cols[brandIdx] : "") || "Fuel Station";
-          const town = (townIdx !== -1 ? cols[townIdx] : "") || "";
-          const postcode = (postcodeIdx !== -1 ? cols[postcodeIdx] : "") || "";
-          const address =
-            (addressIdx !== -1 ? cols[addressIdx] : "") ||
-            [town, postcode].filter(Boolean).join(" ");
-
-          return {
-            id: i + 1,
-            name,
-            brand,
-            town,
-            postcode,
-            address,
-            open: "Check site",
-            updatedMins: (i % 25) + 1,
-            distance: Number((0.5 + (i % 7) * 0.6).toFixed(1)),
-            pin: {
-              x: `${18 + (i % 5) * 14}%`,
-              y: `${24 + (i % 4) * 16}%`
-            },
-            prices: {
-              "Petrol": petrolIdx !== -1 ? Number(cols[petrolIdx]) || 0 : 0,
-              "Diesel": dieselIdx !== -1 ? Number(cols[dieselIdx]) || 0 : 0,
-              "Premium Petrol": premiumIdx !== -1 ? Number(cols[premiumIdx]) || 0 : 0
-            },
-            searchText: rowText
-          };
-        }).filter(station =>
-          station.name ||
-          station.address ||
-          station.town ||
-          station.postcode
-        );
-
-        if (parsed.length) {
-          stationsData = parsed;
-          selectedId = parsed[0].id;
-          csvLoaded = true;
-        } else {
-          throw new Error("No rows parsed");
-        }
-      } catch (error) {
-        console.log("Using fallback data:", error.message);
-        csvLoaded = false;
-      }
+      const response = await fetch(CSV_URL);
+      if (!response.ok) throw new Error(`Could not load ${CSV_URL}`);
+      const csvText = await response.text();
+      state.stations = parseStationsFromCsv(csvText);
     }
 
-    function getFilteredStations() {
-      const q = searchInput.value.trim().toLowerCase();
-      const chosenFuel = fuelType.value;
-      const chosenSort = sortBy.value;
-
-      let results = stationsData
-        .map(station => ({
-          ...station,
-          price: station.prices[chosenFuel]
-        }))
-        .filter(station => {
-          const matchesQuery = q === "" || station.searchText.includes(q);
-          const hasPrice = station.price && station.price > 0;
-          return matchesQuery && hasPrice;
-        });
-
-      if (chosenSort === "Lowest price") results.sort((a, b) => a.price - b.price);
-      if (chosenSort === "Nearest") results.sort((a, b) => a.distance - b.distance);
-      if (chosenSort === "Recently updated") results.sort((a, b) => a.updatedMins - b.updatedMins);
+    function calculateResults(center, fuelCode, sortBy) {
+      const results = state.stations
+        .map(station => {
+          const price = getStationPrice(station, fuelCode);
+          const timestamp = getStationTimestamp(station, fuelCode);
+          const distanceMiles = haversineMiles(center.lat, center.lng, station.latitude, station.longitude);
+          return {
+            ...station,
+            price,
+            fuelCode,
+            fuelLabel: FUEL_CONFIG[fuelCode].label,
+            updatedAt: timestamp,
+            updatedText: relativeUpdatedText(timestamp),
+            openingSummary: getOpeningSummary(station),
+            distanceMiles
+          };
+        })
+        .filter(station => Number.isFinite(station.price) && station.price > 0 && station.distanceMiles <= SEARCH_RADIUS_MILES)
+        .sort((a, b) => {
+          if (sortBy === "distance") return a.distanceMiles - b.distanceMiles || a.price - b.price;
+          if (sortBy === "updated") return (minutesAgo(a.updatedAt) ?? 999999) - (minutesAgo(b.updatedAt) ?? 999999) || a.price - b.price;
+          return a.price - b.price || a.distanceMiles - b.distanceMiles;
+        })
+        .map((station, index) => ({ ...station, rank: index + 1 }));
 
       return results;
     }
 
-    function render() {
-      const results = getFilteredStations();
-      if (!results.find(s => s.id === selectedId) && results.length) selectedId = results[0].id;
-      const selected = results.find(s => s.id === selectedId) || null;
+    function getSummaryStats(results) {
+      if (!results.length) return null;
+      const prices = results.map(station => station.price);
+      const average = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+      return {
+        count: results.length,
+        cheapest: Math.min(...prices),
+        average,
+        highest: Math.max(...prices)
+      };
+    }
 
-      resultsBadgeEl.textContent = `${results.length} matching results`;
-      statCountEl.textContent = results.length;
-      statCheapestEl.textContent = results.length ? `${results[0].price.toFixed(1)}p` : "--";
-      statFreshestEl.textContent = csvLoaded ? "Loaded" : "Fallback";
+    function setStatus(message, isError = false) {
+      elements.searchStatus.textContent = message;
+      elements.searchStatus.style.color = isError ? "#b42318" : "var(--muted)";
+    }
 
-      stationsEl.innerHTML = results.length
-        ? results.map(station => `
-          <button class="station ${station.id === selectedId ? "active" : ""}" onclick="selectStation(${station.id})">
-            <div class="station-top">
+    function updateHeroStats() {
+      const stats = getSummaryStats(state.results);
+      elements.statCount.textContent = stats ? String(stats.count) : "0";
+      elements.statCheapest.textContent = stats ? formatPrice(stats.cheapest) : "—";
+      elements.statAverage.textContent = stats ? formatPrice(stats.average) : "—";
+      elements.statHighest.textContent = stats ? formatPrice(stats.highest) : "—";
+
+      const fuelLabel = FUEL_CONFIG[elements.fuelType.value].label;
+      if (!state.searchCenter) {
+        elements.summaryHeadline.textContent = "Search for a location to see how many stations are nearby and where the best price is.";
+        elements.summaryStrip.textContent = `Results will show the cheapest, average and highest ${fuelLabel} price within 5 miles.`;
+        return;
+      }
+
+      if (!stats) {
+        elements.summaryHeadline.textContent = `No ${fuelLabel} prices found within 5 miles of ${state.searchLabel}.`;
+        elements.summaryStrip.textContent = "Try another fuel type or search a nearby postcode, town or city.";
+        return;
+      }
+
+      elements.summaryHeadline.textContent = `${stats.count} stations found for ${fuelLabel} within 5 miles of ${state.searchLabel}.`;
+      elements.summaryStrip.textContent = `Cheapest ${formatPrice(stats.cheapest)} • Average ${formatPrice(stats.average)} • Highest ${formatPrice(stats.highest)}.`;
+    }
+
+    function updateResultsCopy() {
+      const fuelLabel = FUEL_CONFIG[elements.fuelType.value].label;
+      const count = state.results.length;
+      elements.resultsBadge.textContent = `${count} result${count === 1 ? "" : "s"}`;
+
+      if (!state.searchCenter) {
+        elements.statusBanner.textContent = "Ready when you are. Search by postcode, town or city or use the “Locate me” button.";
+        return;
+      }
+
+      if (!count) {
+        elements.statusBanner.textContent = `No stations selling ${fuelLabel} were found within 5 miles of ${state.searchLabel}.`;
+        return;
+      }
+
+      const cheapest = state.results[0];
+      elements.statusBanner.textContent = `${count} station${count === 1 ? "" : "s"} selling ${fuelLabel} found within 5 miles of ${state.searchLabel}. Cheapest: ${cheapest.brandDisplay} at ${formatPrice(cheapest.price)}.`;
+    }
+
+    function getBrandMarkup(brandDisplay, brandRaw) {
+      const brandSlug = slugifyBrand(brandRaw || brandDisplay);
+      const imgSrc = `./brand-logos/${brandSlug}.svg`;
+      return `
+        <div class="brand-visual">
+          <img class="brand-logo-img" src="${imgSrc}" alt="${escapeHtml(brandDisplay)} logo" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden');" />
+          <span class="brand-pill brand-default brand-${brandSlug} hidden">${escapeHtml(brandDisplay)}</span>
+        </div>
+      `;
+    }
+
+    function buildStationTags(station) {
+      const tags = [];
+      if (station.isMotorway) tags.push("Motorway service station");
+      if (station.isSupermarket) tags.push("Supermarket forecourt");
+      if (station.city) tags.push(station.city);
+      if (station.county) tags.push(station.county);
+      return tags.slice(0, 4);
+    }
+
+    function renderStations() {
+      if (!state.searchCenter) {
+        elements.stations.innerHTML = `
+          <div class="empty-state">
+            <h3>Start with a location</h3>
+            <p>Enter a postcode, town or city and you’ll see stations within 5 miles, ranked by price, distance or how recently the price was updated.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!state.results.length) {
+        elements.stations.innerHTML = `
+          <div class="empty-state">
+            <h3>No nearby stations found</h3>
+            <p>Try a different fuel type, search a nearby postcode, or use your current location to search another 5-mile radius.</p>
+          </div>
+        `;
+        return;
+      }
+
+      elements.stations.innerHTML = state.results.map(station => {
+        const selectedClass = station.id === state.selectedId ? "active" : "";
+        const tags = buildStationTags(station);
+        const amenities = station.amenities.slice(0, 6);
+        const todayOpening = station.openingSummary;
+        const lastUpdated = station.updatedText;
+        const phoneHtml = station.phone ? `<span class="supporting-pill">📞 ${escapeHtml(station.phone)}</span>` : "";
+
+        return `
+          <button class="station-card ${selectedClass}" type="button" onclick="selectStation('${escapeHtml(station.id)}')">
+            <div class="station-grid">
               <div>
-                <div class="station-name-row">
-                  <h3 class="station-name">${station.name}</h3>
-                  <span class="tag">${station.brand}</span>
-                  ${station.id === selectedId ? `<span class="tag selected">Selected</span>` : ""}
+                <div class="station-meta-top">
+                  <div class="station-heading">
+                    <div class="station-rank">#${station.rank}</div>
+                    ${getBrandMarkup(station.brandDisplay, station.brandRaw)}
+                    <div>
+                      <h3 class="station-brand">${escapeHtml(station.brandDisplay)}</h3>
+                      <p class="station-trading">${escapeHtml(station.tradingName)}</p>
+                    </div>
+                  </div>
                 </div>
-                <div class="address">${station.address || "Address not available"}</div>
-                <div class="meta">
-                  <span>${station.town || "Town not listed"}</span>
-                  <span>${station.postcode || "Postcode not listed"}</span>
-                  <span>Updated ${station.updatedMins} mins ago</span>
+
+                <p class="station-address">${escapeHtml(station.address)}</p>
+
+                <div class="tag-row">
+                  ${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+                </div>
+
+                ${amenities.length ? `
+                  <div class="amenity-row">
+                    ${amenities.map(item => `<span class="amenity">${escapeHtml(item)}</span>`).join("")}
+                  </div>
+                ` : ""}
+
+                <div class="supporting-row">
+                  <span class="supporting-pill">🕒 ${escapeHtml(todayOpening)}</span>
+                  <span class="supporting-pill">⏱ ${escapeHtml(lastUpdated)}</span>
+                  ${phoneHtml}
                 </div>
               </div>
-              <div class="price-panel">
-                <div class="price-box">
-                  <div class="mini-label">Price</div>
-                  <div class="big-price">${station.price.toFixed(1)}p</div>
+
+              <div class="pricing-panel">
+                <div class="price-card">
+                  <div class="metric-label">${escapeHtml(station.fuelLabel)}</div>
+                  <div class="metric-value">${formatPrice(station.price)}</div>
+                  <div class="metric-subvalue">Best rank: #${station.rank} in this search</div>
                 </div>
-                <div class="distance-box">
-                  <div class="mini-label">Distance</div>
-                  <div class="big-distance">${station.distance} miles</div>
+                <div class="distance-card">
+                  <div class="metric-label">Distance</div>
+                  <div class="metric-value">${formatMiles(station.distanceMiles)}</div>
+                </div>
+                <div class="updated-card">
+                  <div class="metric-label">Last update</div>
+                  <div class="metric-subvalue">${escapeHtml(formatAbsoluteDate(station.updatedAt))}</div>
                 </div>
               </div>
             </div>
           </button>
-        `).join("")
-        : `
-          <div class="station">
-            <div class="station-name">No stations found</div>
-            <div class="address">Try another search term from your CSV data.</div>
-          </div>
         `;
+      }).join("");
+    }
 
-      pinsEl.innerHTML = results.slice(0, 5).map(station => `
-        <button class="pin ${station.id === selectedId ? "active" : ""}"
-          onclick="selectStation(${station.id})"
-          style="left:${station.pin.x}; top:${station.pin.y};">
-          <span class="pin-bubble">${station.price.toFixed(1)}p</span>
-        </button>
-      `).join("");
+    function renderSelectedCard() {
+      const selected = state.results.find(station => station.id === state.selectedId);
+      if (!selected) {
+        elements.selectedCard.innerHTML = `
+          <div class="selected-label">Selected station</div>
+          <div class="selected-name">No station selected</div>
+          <div class="selected-address">Choose a station from the list or map to see more detail.</div>
+        `;
+        return;
+      }
 
-      selectedCardEl.innerHTML = selected ? `
+      const extraBits = [];
+      if (selected.city) extraBits.push(selected.city);
+      if (selected.county) extraBits.push(selected.county);
+      if (selected.country) extraBits.push(selected.country);
+
+      elements.selectedCard.innerHTML = `
         <div class="selected-label">Selected station</div>
-        <div class="selected-name">${selected.name}</div>
-        <div class="selected-address">${selected.address || "Address not available"}</div>
-        <div class="selected-stats">
+        <div class="selected-name">${escapeHtml(selected.brandDisplay)} • ${escapeHtml(selected.tradingName)}</div>
+        <div class="selected-address">${escapeHtml(selected.address)}</div>
+        <div class="selected-grid">
           <div class="selected-stat">
-            <div class="label">Price</div>
-            <div class="value">${selected.price.toFixed(1)}p</div>
+            <div class="small">Price</div>
+            <div class="strong">${formatPrice(selected.price)}</div>
           </div>
           <div class="selected-stat">
-            <div class="label">Town</div>
-            <div class="value">${selected.town || "-"}</div>
+            <div class="small">Distance</div>
+            <div class="strong">${formatMiles(selected.distanceMiles)}</div>
           </div>
           <div class="selected-stat">
-            <div class="label">Postcode</div>
-            <div class="value">${selected.postcode || "-"}</div>
+            <div class="small">Updated</div>
+            <div class="strong">${escapeHtml(relativeUpdatedText(selected.updatedAt).replace('Updated ', ''))}</div>
           </div>
         </div>
-      ` : `
-        <div class="selected-label">Selected station</div>
-        <div class="selected-name">No station selected</div>
+        <div class="supporting-row" style="margin-top: 14px;">
+          <span class="supporting-pill">📍 ${escapeHtml(extraBits.join(' • ') || selected.postcode || 'Location available')}</span>
+          <span class="supporting-pill">${selected.isMotorway ? '🛣 Motorway' : '🏪 Forecourt'}</span>
+          ${selected.phone ? `<a class="supporting-pill" href="tel:${escapeHtml(selected.phone.replace(/\s+/g, ''))}">📞 Call site</a>` : ''}
+        </div>
       `;
     }
 
-    function selectStation(id) {
-      selectedId = id;
-      render();
+    function updateMap() {
+      markerLayer.clearLayers();
+      if (radiusCircle) radiusCircle.remove();
+      if (searchCenterMarker) searchCenterMarker.remove();
+
+      if (!state.searchCenter) {
+        map.setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM);
+        return;
+      }
+
+      searchCenterMarker = L.circleMarker([state.searchCenter.lat, state.searchCenter.lng], {
+        radius: 9,
+        weight: 3,
+        color: "#0f6fff",
+        fillColor: "#ffffff",
+        fillOpacity: 1
+      }).addTo(map).bindPopup(`<p class="popup-title">Search centre</p><div class="popup-copy">${escapeHtml(state.searchLabel)}</div>`);
+
+      radiusCircle = L.circle([state.searchCenter.lat, state.searchCenter.lng], {
+        radius: SEARCH_RADIUS_METRES,
+        color: "#0f6fff",
+        weight: 2,
+        opacity: 0.65,
+        fillColor: "#8bc2ff",
+        fillOpacity: 0.10
+      }).addTo(map);
+
+      const bounds = L.latLngBounds([[state.searchCenter.lat, state.searchCenter.lng]]);
+
+      state.results.forEach(station => {
+        const isSelected = station.id === state.selectedId;
+        const marker = L.circleMarker([station.latitude, station.longitude], {
+          radius: isSelected ? 10 : 7,
+          weight: isSelected ? 3 : 2,
+          color: isSelected ? "#10315c" : "#0f6fff",
+          fillColor: isSelected ? "#0fb0c9" : "#ffffff",
+          fillOpacity: 1
+        })
+          .addTo(markerLayer)
+          .bindPopup(`
+            <p class="popup-title">${escapeHtml(station.brandDisplay)} • ${escapeHtml(station.tradingName)}</p>
+            <div class="popup-copy">${escapeHtml(station.address)}</div>
+            <div class="popup-price">${escapeHtml(station.fuelLabel)}: ${formatPrice(station.price)}</div>
+          `);
+
+        marker.on("click", () => selectStation(station.id));
+        bounds.extend([station.latitude, station.longitude]);
+      });
+
+      map.fitBounds(bounds.pad(0.18));
     }
 
-    searchBtn.addEventListener("click", render);
-    searchInput.addEventListener("input", render);
-    fuelType.addEventListener("change", render);
-    sortBy.addEventListener("change", render);
+    function renderAll() {
+      updateHeroStats();
+      updateResultsCopy();
+      renderStations();
+      renderSelectedCard();
+      updateMap();
+    }
+
+    async function performSearch({ useCurrentLocation = false, coords = null } = {}) {
+      const fuelCode = elements.fuelType.value;
+      const sortBy = elements.sortBy.value;
+      try {
+        elements.searchBtn.disabled = true;
+        elements.locateBtn.disabled = true;
+
+        let resolved;
+        if (useCurrentLocation && coords) {
+          resolved = {
+            lat: coords.latitude,
+            lng: coords.longitude,
+            label: "your location",
+            source: "browser geolocation"
+          };
+          elements.searchInput.value = "Using your current location";
+        } else {
+          const query = normalizeQuery(elements.searchInput.value);
+          resolved = await resolveSearchLocation(query);
+          state.lastResolvedQuery = query;
+        }
+
+        state.searchCenter = { lat: resolved.lat, lng: resolved.lng };
+        state.searchLabel = resolved.label;
+        state.lastSearchMode = resolved.source;
+        setStatus(`Search centred on ${resolved.label} using ${resolved.source}.`, false);
+
+        state.results = calculateResults(state.searchCenter, fuelCode, sortBy);
+        state.selectedId = state.results.length ? state.results[0].id : null;
+        renderAll();
+      } catch (error) {
+        state.results = [];
+        state.selectedId = null;
+        if (!state.searchCenter) updateMap();
+        renderAll();
+        setStatus(error.message || "We could not complete that search.", true);
+      } finally {
+        elements.searchBtn.disabled = false;
+        elements.locateBtn.disabled = false;
+      }
+    }
+
+    function selectStation(id) {
+      state.selectedId = id;
+      renderAll();
+      const selected = state.results.find(station => station.id === id);
+      if (selected) {
+        map.flyTo([selected.latitude, selected.longitude], Math.max(map.getZoom(), 13), { duration: 0.45 });
+      }
+    }
+
     window.selectStation = selectStation;
 
-    async function init() {
-      await loadCsvData();
-      render();
+    function rerunCurrentSearch() {
+      if (!state.searchCenter) {
+        renderAll();
+        return;
+      }
+      state.results = calculateResults(state.searchCenter, elements.fuelType.value, elements.sortBy.value);
+      state.selectedId = state.results.length ? (state.results.some(item => item.id === state.selectedId) ? state.selectedId : state.results[0].id) : null;
+      renderAll();
     }
+
+    function useCurrentLocation() {
+      if (!navigator.geolocation) {
+        setStatus("Location is not supported in this browser.", true);
+        return;
+      }
+
+      setStatus("Requesting your location…", false);
+
+      navigator.geolocation.getCurrentPosition(
+        position => performSearch({ useCurrentLocation: true, coords: position.coords }),
+        error => {
+          let message = "We could not access your location.";
+          if (error.code === 1) message = "Location access was blocked. Please allow location access and try again.";
+          if (error.code === 2) message = "Your location could not be determined. Please try again or enter a postcode.";
+          if (error.code === 3) message = "Location lookup timed out. Please try again or search by postcode.";
+          setStatus(message, true);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+      );
+    }
+
+    function buildNationalInsightText() {
+      const fuelCode = elements.fuelType.value;
+      const available = state.stations.filter(station => Number.isFinite(getStationPrice(station, fuelCode)) && getStationPrice(station, fuelCode) > 0);
+      if (!available.length) return;
+      const cheapest = available.reduce((best, current) => getStationPrice(current, fuelCode) < getStationPrice(best, fuelCode) ? current : best, available[0]);
+      elements.summaryStrip.textContent = `CSV loaded: ${available.length.toLocaleString()} stations currently list ${FUEL_CONFIG[fuelCode].label}. Cheapest nationwide right now in this file: ${cheapest.brandDisplay} • ${cheapest.tradingName} at ${formatPrice(getStationPrice(cheapest, fuelCode))}.`;
+    }
+
+    async function init() {
+      try {
+        await loadCsvData();
+        buildNationalInsightText();
+        renderAll();
+      } catch (error) {
+        console.error(error);
+        elements.statusBanner.textContent = "The CSV could not be loaded. Check that fuel-data.csv is in the same folder as this page or in your public root.";
+        elements.stations.innerHTML = `
+          <div class="empty-state">
+            <h3>CSV file not found</h3>
+            <p>Please make sure <strong>fuel-data.csv</strong> is available at <strong>${CSV_URL}</strong>. On Vercel or GitHub Pages, placing it in your public root usually works well.</p>
+          </div>
+        `;
+        setStatus("The CSV file could not be loaded.", true);
+      }
+    }
+
+    elements.searchBtn.addEventListener("click", () => performSearch());
+    elements.locateBtn.addEventListener("click", useCurrentLocation);
+    elements.fuelType.addEventListener("change", () => {
+      buildNationalInsightText();
+      rerunCurrentSearch();
+    });
+    elements.sortBy.addEventListener("change", rerunCurrentSearch);
+    elements.searchInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") performSearch();
+    });
 
     init();
   </script>
