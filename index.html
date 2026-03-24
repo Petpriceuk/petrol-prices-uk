@@ -17,49 +17,68 @@
       --soft-shadow:0 10px 30px rgba(15,23,42,.08);
       --big-shadow:0 20px 60px rgba(15,23,42,.08);
     }
+
     * { box-sizing:border-box; }
     html, body { margin:0; padding:0; font-family:Arial, sans-serif; color:var(--text); }
     body { background: linear-gradient(135deg, var(--bg1), #ffffff 55%, var(--bg2)); }
+
     .wrap { max-width:1200px; margin:0 auto; padding:0 16px; }
+
     .topbar {
-      position:sticky; top:0; z-index:50; background:rgba(255,255,255,.85);
-      backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.9);
+      position:sticky; top:0; z-index:50;
+      background:rgba(255,255,255,.85);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.9);
     }
+
     .topbar-inner {
-      display:flex; align-items:center; justify-content:space-between; padding:16px 0; gap:16px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 0; gap:16px;
     }
+
     .brand { display:flex; align-items:center; gap:12px; }
     .brand-icon {
-      width:44px; height:44px; border-radius:16px; display:grid; place-items:center;
-      color:white; font-size:22px; background:linear-gradient(135deg, var(--sky), var(--emerald));
+      width:44px; height:44px; border-radius:16px;
+      display:grid; place-items:center; color:white; font-size:22px;
+      background:linear-gradient(135deg, var(--sky), var(--emerald));
       box-shadow:0 12px 24px rgba(14,165,233,.25);
     }
     .brand-title { font-size:20px; font-weight:700; margin:0; }
     .brand-sub { margin:2px 0 0; color:var(--muted); font-size:14px; }
 
     .hero {
-      margin-top:24px; background:rgba(255,255,255,.88); border:1px solid rgba(255,255,255,.9);
-      border-radius:28px; overflow:hidden; box-shadow:var(--big-shadow);
+      margin-top:24px; background:rgba(255,255,255,.88);
+      border:1px solid rgba(255,255,255,.9); border-radius:28px;
+      overflow:hidden; box-shadow:var(--big-shadow);
     }
+
     .hero-grid { display:grid; grid-template-columns:1.2fr .8fr; }
     .hero-left { padding:32px; }
+
     .pill {
       display:inline-flex; align-items:center; gap:8px; border-radius:999px;
       padding:8px 12px; font-size:12px; font-weight:700;
     }
     .pill.blue { background:#e0f2fe; color:#0369a1; }
     .pill.white { background:rgba(255,255,255,.16); color:#fff; }
-    h1 { margin:16px 0 0; font-size:52px; line-height:1.02; letter-spacing:-0.03em; }
-    .hero-copy { margin-top:16px; max-width:700px; color:#475569; line-height:1.7; font-size:17px; }
+
+    h1 {
+      margin:16px 0 0; font-size:52px; line-height:1.02; letter-spacing:-0.03em;
+    }
+
+    .hero-copy {
+      margin-top:16px; max-width:700px; color:#475569; line-height:1.7; font-size:17px;
+    }
 
     .search-box {
-      margin-top:24px; background:rgba(248,250,252,.92); border:1px solid var(--line);
-      border-radius:24px; padding:14px;
+      margin-top:24px; background:rgba(248,250,252,.92);
+      border:1px solid var(--line); border-radius:24px; padding:14px;
     }
+
     .chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
     .chip {
-      background:#fff; border:1px solid var(--line); color:#475569; border-radius:999px;
-      padding:8px 12px; font-size:12px; font-weight:600;
+      background:#fff; border:1px solid var(--line); color:#475569;
+      border-radius:999px; padding:8px 12px; font-size:12px; font-weight:600;
     }
     .chip.green { background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
 
@@ -71,13 +90,18 @@
     }
     .field, .select { background:#fff; padding:0 14px; width:100%; }
     .search-btn {
-      border:none; background:var(--dark); color:#fff; font-weight:700; padding:0 18px; cursor:pointer;
+      border:none; background:var(--dark); color:#fff;
+      font-weight:700; padding:0 18px; cursor:pointer;
     }
 
     .hero-right {
-      color:#fff; padding:32px; background:linear-gradient(135deg, #0284c7, #06b6d4 45%, #10b981);
+      color:#fff; padding:32px;
+      background:linear-gradient(135deg, #0284c7, #06b6d4 45%, #10b981);
     }
-    .stats { margin-top:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+
+    .stats {
+      margin-top:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+    }
     .stat { border-radius:24px; background:rgba(255,255,255,.14); padding:16px; }
     .stat-label { font-size:14px; color:rgba(255,255,255,.84); }
     .stat-value { margin-top:8px; font-size:32px; font-weight:800; }
@@ -85,32 +109,44 @@
     .content {
       margin-top:24px; display:grid; grid-template-columns:1.15fr .85fr; gap:24px; align-items:start;
     }
+
     .section-title {
-      display:flex; justify-content:space-between; align-items:end; gap:12px; margin-bottom:16px;
+      display:flex; justify-content:space-between; align-items:end;
+      gap:12px; margin-bottom:16px;
     }
     .section-title h2 { margin:0; font-size:30px; letter-spacing:-0.02em; }
     .section-title p { margin:6px 0 0; color:var(--muted); font-size:14px; }
+
     .badge {
-      background:#fff; border:1px solid var(--line); border-radius:999px; padding:9px 12px;
-      font-size:12px; font-weight:700; color:#475569;
+      background:#fff; border:1px solid var(--line); border-radius:999px;
+      padding:9px 12px; font-size:12px; font-weight:700; color:#475569;
     }
 
     .stations { display:flex; flex-direction:column; gap:14px; }
+
     .station {
-      width:100%; text-align:left; border:1px solid rgba(255,255,255,.9); background:#fff;
-      border-radius:26px; padding:18px; box-shadow:var(--soft-shadow); cursor:pointer;
+      width:100%; text-align:left; border:1px solid rgba(255,255,255,.9);
+      background:#fff; border-radius:26px; padding:18px; box-shadow:var(--soft-shadow);
+      cursor:pointer;
     }
     .station.active { background:#f0f9ff; border-color:#7dd3fc; }
-    .station-top { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+
+    .station-top {
+      display:flex; justify-content:space-between; gap:16px; align-items:flex-start;
+    }
+
     .station-name-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .station-name { margin:0; font-size:20px; font-weight:700; }
     .tag {
-      background:#f1f5f9; color:#475569; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700;
+      background:#f1f5f9; color:#475569; border-radius:999px;
+      padding:6px 10px; font-size:12px; font-weight:700;
     }
     .tag.selected { background:#e0f2fe; color:#0369a1; }
+
     .address { margin-top:10px; color:#475569; font-size:14px; line-height:1.5; }
     .meta {
-      margin-top:14px; display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:13px; font-weight:600;
+      margin-top:14px; display:flex; flex-wrap:wrap; gap:14px;
+      color:var(--muted); font-size:13px; font-weight:600;
     }
 
     .price-panel { min-width:170px; display:grid; gap:10px; }
@@ -122,14 +158,17 @@
     .big-distance { margin-top:6px; font-size:24px; font-weight:800; }
 
     .map-card {
-      position:sticky; top:88px; background:#fff; border:1px solid rgba(255,255,255,.9);
-      border-radius:28px; overflow:hidden; box-shadow:var(--soft-shadow);
+      position:sticky; top:88px; background:#fff;
+      border:1px solid rgba(255,255,255,.9); border-radius:28px;
+      overflow:hidden; box-shadow:var(--soft-shadow);
     }
     .map-head { padding:18px; border-bottom:1px solid #f1f5f9; }
     .map-head h3 { margin:0; font-size:24px; }
     .map-head p { margin:6px 0 0; color:var(--muted); font-size:14px; }
+
     .map-area {
-      position:relative; height:360px; background:linear-gradient(135deg, #e0f2fe, #ecfeff 55%, #ecfdf5);
+      position:relative; height:360px;
+      background:linear-gradient(135deg, #e0f2fe, #ecfeff 55%, #ecfdf5);
       overflow:hidden;
     }
     .map-grid {
@@ -139,28 +178,38 @@
         linear-gradient(90deg, rgba(148,163,184,.25) 1px, transparent 1px);
       background-size:28px 28px;
     }
+
     .pin { position:absolute; transform:translate(-50%,-50%); border:none; background:none; cursor:pointer; }
     .pin-bubble {
-      background:#fff; color:#334155; border-radius:999px; padding:10px 12px; font-size:12px;
-      font-weight:800; box-shadow:0 10px 20px rgba(15,23,42,.12);
+      background:#fff; color:#334155; border-radius:999px;
+      padding:10px 12px; font-size:12px; font-weight:800;
+      box-shadow:0 10px 20px rgba(15,23,42,.12);
     }
     .pin.active .pin-bubble { background:var(--dark); color:#fff; }
 
     .selected-card { padding:18px; }
     .selected-inner {
-      background:#f8fafc; border:1px solid var(--line); border-radius:24px; padding:16px;
+      background:#f8fafc; border:1px solid var(--line);
+      border-radius:24px; padding:16px;
     }
     .selected-label { color:var(--muted); font-size:13px; font-weight:700; }
     .selected-name { margin-top:6px; font-size:20px; font-weight:800; }
     .selected-address { margin-top:6px; color:#475569; font-size:14px; line-height:1.5; }
+
     .selected-stats {
       margin-top:16px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
     }
     .selected-stat {
-      background:#fff; border:1px solid var(--line); border-radius:18px; padding:12px; text-align:center;
+      background:#fff; border:1px solid var(--line);
+      border-radius:18px; padding:12px; text-align:center;
     }
     .selected-stat .label { font-size:12px; color:var(--muted); }
     .selected-stat .value { margin-top:6px; font-size:16px; font-weight:800; }
+
+    .empty {
+      background:#fff; border:1px dashed var(--line); border-radius:26px;
+      padding:24px; color:#475569;
+    }
 
     footer { padding:24px 0 40px; text-align:center; color:var(--muted); font-size:14px; }
 
@@ -169,6 +218,7 @@
       .map-card { position:static; }
       h1 { font-size:42px; }
     }
+
     @media (max-width: 760px) {
       .topbar-inner { align-items:flex-start; flex-direction:column; }
       .hero-left, .hero-right { padding:22px; }
@@ -197,16 +247,16 @@
     <section class="hero">
       <div class="hero-grid">
         <div class="hero-left">
-          <div class="pill blue">One page • mobile friendly • CSV upload version</div>
+          <div class="pill blue">One page • mobile friendly • local CSV</div>
           <h1>Find the cheapest nearby fuel in seconds</h1>
           <p class="hero-copy">
-            Search by town, postcode, station name, or any text found in your CSV upload.
+            Search by town, postcode, station name, or any text found in your uploaded CSV file.
           </p>
 
           <div class="search-box">
             <div class="chip-row">
-              <span class="chip">Local CSV file</span>
-              <span class="chip green">No expiring links</span>
+              <span class="chip">CSV file in repo</span>
+              <span class="chip green">No test stations</span>
             </div>
 
             <div class="controls">
@@ -238,12 +288,12 @@
             <div class="stat">
               <div class="stat-label">Results found</div>
               <div class="stat-value" id="statCount">0</div>
-              <div class="stat-label">Rows loaded from CSV</div>
+              <div class="stat-label">Rows from your CSV</div>
             </div>
             <div class="stat">
               <div class="stat-label">CSV status</div>
-              <div class="stat-value" id="statFreshest">--</div>
-              <div class="stat-label">Live from repo upload</div>
+              <div class="stat-value" id="statStatus">--</div>
+              <div class="stat-label">Repo file loading</div>
             </div>
           </div>
         </div>
@@ -254,7 +304,7 @@
       <div>
         <div class="section-title">
           <div>
-            <h2>Nearby stations</h2>
+            <h2>Stations</h2>
             <p>Search works across all text found in the CSV rows</p>
           </div>
           <div class="badge" id="resultsBadge">0 matching results</div>
@@ -287,23 +337,6 @@
   <script>
     const CSV_URL = "./access-latest-fuelprices.csv";
 
-    const fallbackStations = [
-      {
-        id: 1,
-        name: "Shell London Road",
-        brand: "Shell",
-        town: "Manchester",
-        postcode: "M1 1AE",
-        address: "214 London Road, Manchester",
-        open: "Open 24 hours",
-        updatedMins: 12,
-        distance: 0.6,
-        pin: { x: "18%", y: "24%" },
-        prices: { "Petrol": 136.9, "Diesel": 141.5, "Premium Petrol": 149.9 },
-        searchText: "shell london road manchester m1 1ae 214 london road manchester"
-      }
-    ];
-
     const searchInput = document.getElementById("searchInput");
     const fuelType = document.getElementById("fuelType");
     const sortBy = document.getElementById("sortBy");
@@ -314,11 +347,12 @@
     const resultsBadgeEl = document.getElementById("resultsBadge");
     const statCheapestEl = document.getElementById("statCheapest");
     const statCountEl = document.getElementById("statCount");
-    const statFreshestEl = document.getElementById("statFreshest");
+    const statStatusEl = document.getElementById("statStatus");
 
-    let stationsData = [...fallbackStations];
-    let selectedId = 1;
+    let stationsData = [];
+    let selectedId = null;
     let csvLoaded = false;
+    let csvError = "";
 
     function parseCsvLine(line) {
       const result = [];
@@ -354,25 +388,37 @@
       return -1;
     }
 
+    function makePin(index) {
+      return {
+        x: `${18 + (index % 5) * 14}%`,
+        y: `${24 + (index % 4) * 16}%`
+      };
+    }
+
     async function loadCsvData() {
       try {
-        const response = await fetch(CSV_URL);
-        if (!response.ok) throw new Error("CSV fetch failed");
+        const response = await fetch(CSV_URL, { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`Could not load CSV file (${response.status})`);
+        }
 
         const text = await response.text();
-        const lines = text.trim().split(/\r?\n/).filter(Boolean);
-        if (lines.length < 2) throw new Error("CSV empty");
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+        if (lines.length < 2) {
+          throw new Error("CSV file is empty or only contains headers");
+        }
 
-        const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+        const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase().trim());
 
         const nameIdx = findHeaderIndex(headers, ["site_name", "name", "station", "site"]);
         const brandIdx = findHeaderIndex(headers, ["brand", "operator"]);
         const townIdx = findHeaderIndex(headers, ["town", "city", "area"]);
         const postcodeIdx = findHeaderIndex(headers, ["postcode", "post code"]);
         const addressIdx = findHeaderIndex(headers, ["address", "street"]);
+
         const petrolIdx = findHeaderIndex(headers, ["regular_petrol", "petrol", "unleaded", "e10"]);
         const dieselIdx = findHeaderIndex(headers, ["regular_diesel", "diesel", "b7"]);
-        const premiumIdx = findHeaderIndex(headers, ["premium_petrol", "super unleaded", "premium", "e5"]);
+        const premiumIdx = findHeaderIndex(headers, ["premium_petrol", "premium", "super unleaded", "e5"]);
 
         const parsed = lines.slice(1).map((line, i) => {
           const cols = parseCsvLine(line);
@@ -388,7 +434,7 @@
           const postcode = (postcodeIdx !== -1 ? cols[postcodeIdx] : "") || "";
           const address =
             (addressIdx !== -1 ? cols[addressIdx] : "") ||
-            [town, postcode].filter(Boolean).join(" ");
+            [town, postcode].filter(Boolean).join(", ");
 
           return {
             id: i + 1,
@@ -397,13 +443,9 @@
             town,
             postcode,
             address,
-            open: "Check site",
             updatedMins: (i % 25) + 1,
             distance: Number((0.5 + (i % 7) * 0.6).toFixed(1)),
-            pin: {
-              x: `${18 + (i % 5) * 14}%`,
-              y: `${24 + (i % 4) * 16}%`
-            },
+            pin: makePin(i),
             prices: {
               "Petrol": petrolIdx !== -1 ? Number(cols[petrolIdx]) || 0 : 0,
               "Diesel": dieselIdx !== -1 ? Number(cols[dieselIdx]) || 0 : 0,
@@ -412,22 +454,18 @@
             searchText: rowText
           };
         }).filter(station =>
-          station.name ||
-          station.address ||
-          station.town ||
-          station.postcode
+          station.name || station.address || station.town || station.postcode
         );
 
-        if (parsed.length) {
-          stationsData = parsed;
-          selectedId = parsed[0].id;
-          csvLoaded = true;
-        } else {
-          throw new Error("No rows parsed");
-        }
+        stationsData = parsed;
+        selectedId = parsed.length ? parsed[0].id : null;
+        csvLoaded = true;
+        csvError = "";
       } catch (error) {
-        console.log("Using fallback data:", error.message);
+        stationsData = [];
+        selectedId = null;
         csvLoaded = false;
+        csvError = error.message || "Could not read CSV";
       }
     }
 
@@ -447,59 +485,92 @@
           return matchesQuery && hasPrice;
         });
 
-      if (chosenSort === "Lowest price") results.sort((a, b) => a.price - b.price);
-      if (chosenSort === "Nearest") results.sort((a, b) => a.distance - b.distance);
-      if (chosenSort === "Recently updated") results.sort((a, b) => a.updatedMins - b.updatedMins);
+      if (chosenSort === "Lowest price") {
+        results.sort((a, b) => a.price - b.price);
+      } else if (chosenSort === "Nearest") {
+        results.sort((a, b) => a.distance - b.distance);
+      } else if (chosenSort === "Recently updated") {
+        results.sort((a, b) => a.updatedMins - b.updatedMins);
+      }
 
       return results;
     }
 
+    function renderEmptyState(message) {
+      stationsEl.innerHTML = `<div class="empty">${message}</div>`;
+      pinsEl.innerHTML = "";
+      selectedCardEl.innerHTML = `
+        <div class="selected-label">Selected station</div>
+        <div class="selected-name">No station selected</div>
+        <div class="selected-address">${message}</div>
+      `;
+      resultsBadgeEl.textContent = "0 matching results";
+      statCheapestEl.textContent = "--";
+      statCountEl.textContent = "0";
+      statStatusEl.textContent = csvLoaded ? "Loaded" : "Error";
+    }
+
     function render() {
+      if (!csvLoaded) {
+        renderEmptyState(`CSV not loaded: ${csvError}`);
+        return;
+      }
+
       const results = getFilteredStations();
-      if (!results.find(s => s.id === selectedId) && results.length) selectedId = results[0].id;
+
+      if (!results.find(s => s.id === selectedId) && results.length) {
+        selectedId = results[0].id;
+      }
+
       const selected = results.find(s => s.id === selectedId) || null;
 
       resultsBadgeEl.textContent = `${results.length} matching results`;
-      statCountEl.textContent = results.length;
+      statCountEl.textContent = String(results.length);
       statCheapestEl.textContent = results.length ? `${results[0].price.toFixed(1)}p` : "--";
-      statFreshestEl.textContent = csvLoaded ? "Loaded" : "Fallback";
+      statStatusEl.textContent = "Loaded";
 
-      stationsEl.innerHTML = results.length
-        ? results.map(station => `
-          <button class="station ${station.id === selectedId ? "active" : ""}" onclick="selectStation(${station.id})">
-            <div class="station-top">
-              <div>
-                <div class="station-name-row">
-                  <h3 class="station-name">${station.name}</h3>
-                  <span class="tag">${station.brand}</span>
-                  ${station.id === selectedId ? `<span class="tag selected">Selected</span>` : ""}
-                </div>
-                <div class="address">${station.address || "Address not available"}</div>
-                <div class="meta">
-                  <span>${station.town || "Town not listed"}</span>
-                  <span>${station.postcode || "Postcode not listed"}</span>
-                  <span>Updated ${station.updatedMins} mins ago</span>
-                </div>
+      if (!results.length) {
+        stationsEl.innerHTML = `
+          <div class="empty">No stations matched your search. Try another town, postcode, or station name.</div>
+        `;
+        pinsEl.innerHTML = "";
+        selectedCardEl.innerHTML = `
+          <div class="selected-label">Selected station</div>
+          <div class="selected-name">No station selected</div>
+          <div class="selected-address">No matching results found.</div>
+        `;
+        return;
+      }
+
+      stationsEl.innerHTML = results.map(station => `
+        <button class="station ${station.id === selectedId ? "active" : ""}" onclick="selectStation(${station.id})">
+          <div class="station-top">
+            <div>
+              <div class="station-name-row">
+                <h3 class="station-name">${station.name}</h3>
+                <span class="tag">${station.brand}</span>
+                ${station.id === selectedId ? `<span class="tag selected">Selected</span>` : ""}
               </div>
-              <div class="price-panel">
-                <div class="price-box">
-                  <div class="mini-label">Price</div>
-                  <div class="big-price">${station.price.toFixed(1)}p</div>
-                </div>
-                <div class="distance-box">
-                  <div class="mini-label">Distance</div>
-                  <div class="big-distance">${station.distance} miles</div>
-                </div>
+              <div class="address">${station.address || "Address not available"}</div>
+              <div class="meta">
+                <span>${station.town || "Town not listed"}</span>
+                <span>${station.postcode || "Postcode not listed"}</span>
+                <span>Updated ${station.updatedMins} mins ago</span>
               </div>
             </div>
-          </button>
-        `).join("")
-        : `
-          <div class="station">
-            <div class="station-name">No stations found</div>
-            <div class="address">Try another search term from your CSV data.</div>
+            <div class="price-panel">
+              <div class="price-box">
+                <div class="mini-label">Price</div>
+                <div class="big-price">${station.price.toFixed(1)}p</div>
+              </div>
+              <div class="distance-box">
+                <div class="mini-label">Distance</div>
+                <div class="big-distance">${station.distance} miles</div>
+              </div>
+            </div>
           </div>
-        `;
+        </button>
+      `).join("");
 
       pinsEl.innerHTML = results.slice(0, 5).map(station => `
         <button class="pin ${station.id === selectedId ? "active" : ""}"
@@ -509,28 +580,27 @@
         </button>
       `).join("");
 
-      selectedCardEl.innerHTML = selected ? `
-        <div class="selected-label">Selected station</div>
-        <div class="selected-name">${selected.name}</div>
-        <div class="selected-address">${selected.address || "Address not available"}</div>
-        <div class="selected-stats">
-          <div class="selected-stat">
-            <div class="label">Price</div>
-            <div class="value">${selected.price.toFixed(1)}p</div>
+      if (selected) {
+        selectedCardEl.innerHTML = `
+          <div class="selected-label">Selected station</div>
+          <div class="selected-name">${selected.name}</div>
+          <div class="selected-address">${selected.address || "Address not available"}</div>
+          <div class="selected-stats">
+            <div class="selected-stat">
+              <div class="label">Price</div>
+              <div class="value">${selected.price.toFixed(1)}p</div>
+            </div>
+            <div class="selected-stat">
+              <div class="label">Town</div>
+              <div class="value">${selected.town || "-"}</div>
+            </div>
+            <div class="selected-stat">
+              <div class="label">Postcode</div>
+              <div class="value">${selected.postcode || "-"}</div>
+            </div>
           </div>
-          <div class="selected-stat">
-            <div class="label">Town</div>
-            <div class="value">${selected.town || "-"}</div>
-          </div>
-          <div class="selected-stat">
-            <div class="label">Postcode</div>
-            <div class="value">${selected.postcode || "-"}</div>
-          </div>
-        </div>
-      ` : `
-        <div class="selected-label">Selected station</div>
-        <div class="selected-name">No station selected</div>
-      `;
+        `;
+      }
     }
 
     function selectStation(id) {
@@ -542,6 +612,7 @@
     searchInput.addEventListener("input", render);
     fuelType.addEventListener("change", render);
     sortBy.addEventListener("change", render);
+
     window.selectStation = selectStation;
 
     async function init() {
