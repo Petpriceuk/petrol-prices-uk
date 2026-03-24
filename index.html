@@ -609,10 +609,10 @@
     }
 
     .brand-logo-img {
-      width: 48px;
-      height: 48px;
+      width: 62px;
+      height: 62px;
       object-fit: contain;
-      border-radius: 14px;
+      border-radius: 16px;
       background: #fff;
       border: 1px solid var(--line);
       padding: 8px;
@@ -1081,6 +1081,36 @@
       border-color: #bfdbfe;
     }
 
+    .selected-stat.stat-distance {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .selected-stat.stat-distance .small,
+    .selected-stat.stat-distance .strong {
+      color: #1d4ed8;
+    }
+
+    .selected-stat.stat-fill {
+      background: #eefcf4;
+      border-color: #b8e3c5;
+    }
+
+    .selected-stat.stat-fill .small,
+    .selected-stat.stat-fill .strong {
+      color: #15803d;
+    }
+
+    .selected-stat.stat-trip {
+      background: #fff4ef;
+      border-color: #fed7aa;
+    }
+
+    .selected-stat.stat-trip .small,
+    .selected-stat.stat-trip .strong {
+      color: #ea580c;
+    }
+
     .selected-stat .small {
       color: var(--muted);
       font-size: 0.74rem;
@@ -1382,9 +1412,9 @@
       }
 
       .brand-logo-img {
-        width: 42px;
-        height: 42px;
-        padding: 6px;
+        width: 52px;
+        height: 52px;
+        padding: 7px;
       }
 
       .section-head h2,
@@ -2255,7 +2285,7 @@
     function calculateResults(center, fuelCode, sortBy) {
       const { tankLitres, fuelEconomyMpg } = getEstimatorSettings();
       const searchRadiusMiles = getSearchRadiusMiles();
-      return state.stations
+      const filteredResults = state.stations
         .map(station => {
           const price = getStationPrice(station, fuelCode);
           const timestamp = getStationTimestamp(station, fuelCode);
@@ -2279,13 +2309,21 @@
             journeyFuelLitres: calculateJourneyFuelLitres(distanceMiles, fuelEconomyMpg)
           };
         })
-        .filter(station => Number.isFinite(station.price) && station.price > 0 && station.distanceMiles <= searchRadiusMiles)
+        .filter(station => Number.isFinite(station.price) && station.price > 0 && station.distanceMiles <= searchRadiusMiles);
+
+      const priceRanks = new Map(
+        [...filteredResults]
+          .sort((a, b) => a.price - b.price || a.distanceMiles - b.distanceMiles)
+          .map((station, index) => [station.id, index + 1])
+      );
+
+      return [...filteredResults]
         .sort((a, b) => {
           if (sortBy === "distance") return a.distanceMiles - b.distanceMiles || a.price - b.price;
           if (sortBy === "updated") return (minutesAgo(a.updatedAt) ?? 999999) - (minutesAgo(b.updatedAt) ?? 999999) || a.price - b.price;
           return a.price - b.price || a.distanceMiles - b.distanceMiles;
         })
-        .map((station, index) => ({ ...station, rank: index + 1 }));
+        .map(station => ({ ...station, rank: priceRanks.get(station.id) || null }));
     }
 
     function getSummaryStats(results) {
@@ -2444,7 +2482,7 @@
                 <div class="price-card ${getFuelToneClass(elements.fuelType.value)}">
                   <div class="metric-label">${escapeHtml(station.fuelLabel)}</div>
                   <div class="metric-value">${formatPrice(station.price)}</div>
-                  <div class="metric-subvalue">Ranked #${station.rank} for this search</div>
+                  <div class="metric-subvalue">Price rank #${station.rank} in this search</div>
                 </div>
                 <div class="distance-stack">
                   <div class="distance-card">
@@ -2503,15 +2541,15 @@
           ${elements.fuelType.value !== "E5" ? buildSelectedFuelStat("E5 Super Unleaded", selected.displaySuperUnleaded, "fuel-super") : ""}
           ${elements.fuelType.value !== "B7S" ? buildSelectedFuelStat("B7 Diesel", selected.displayDiesel, "fuel-diesel") : ""}
           ${elements.fuelType.value !== "B7P" ? buildSelectedFuelStat("SD Premium Diesel", selected.displayPremiumDiesel, "fuel-premium") : ""}
-          <div class="selected-stat">
+          <div class="selected-stat stat-distance">
             <div class="small">Distance</div>
             <div class="strong">${formatMiles(selected.distanceMiles)}</div>
           </div>
-          <div class="selected-stat">
+          <div class="selected-stat stat-fill">
             <div class="small">Approx full tank</div>
             <div class="strong">${formatCurrency(selected.fillCost)}</div>
           </div>
-          <div class="selected-stat">
+          <div class="selected-stat stat-trip">
             <div class="small">Drive cost</div>
             <div class="strong">${formatCurrency(selected.journeyCost)}</div>
           </div>
