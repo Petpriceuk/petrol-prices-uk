@@ -383,16 +383,6 @@
       letter-spacing: -0.03em;
     }
 
-    .summary-strip {
-      margin-top: 14px;
-      padding: 14px 16px;
-      border-radius: 18px;
-      background: #f7fafc;
-      border: 1px solid var(--line);
-      font-size: 0.96rem;
-      line-height: 1.65;
-      color: #43566f;
-    }
 
     .planner-card {
       margin-top: 16px;
@@ -467,18 +457,19 @@
       display: grid;
       grid-template-columns: 1.04fr 0.96fr;
       gap: 22px;
-      align-items: start;
+      align-items: stretch;
     }
 
     .results-panel,
     .map-panel {
       padding: 22px;
-    }
-
-    .results-panel {
       display: flex;
       flex-direction: column;
       min-height: 0;
+      height: 100%;
+    }
+
+    .results-panel {
       background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(249, 251, 255, 0.92));
     }
 
@@ -534,11 +525,12 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
+      flex: 1;
+      min-height: 0;
     }
 
     @media (min-width: 1161px) {
       .stations {
-        max-height: calc(100vh - 280px);
         overflow: auto;
         padding-right: 8px;
         margin-right: -4px;
@@ -736,16 +728,43 @@
     }
 
     .fuel-mini {
-      background: #fff8ee;
-      border: 1px solid #f1ddbc;
-      color: #5b4a2e;
+      border: 1px solid var(--line);
       gap: 10px;
     }
 
     .fuel-mini strong {
       font-size: 0.9rem;
-      color: var(--text);
       letter-spacing: -0.01em;
+    }
+
+    .fuel-unleaded {
+      background: #eaf8ef;
+      border-color: #b8e3c5;
+      color: #146c36;
+    }
+
+    .fuel-unleaded strong {
+      color: #0f5b2d;
+    }
+
+    .fuel-diesel {
+      background: #17212f;
+      border-color: #17212f;
+      color: #f8fafc;
+    }
+
+    .fuel-diesel strong {
+      color: #ffffff;
+    }
+
+    .fuel-super {
+      background: #fff1f0;
+      border-color: #f4beb8;
+      color: #b42318;
+    }
+
+    .fuel-super strong {
+      color: #991b1b;
     }
 
     .estimate-row {
@@ -812,10 +831,24 @@
     }
 
     .price-card {
-      background: linear-gradient(160deg, #24446d, #3763a0);
       color: #fff;
       border: none;
       box-shadow: 0 14px 28px rgba(36,68,109,0.20);
+    }
+
+    .price-card.fuel-unleaded {
+      background: linear-gradient(160deg, #15803d, #22c55e);
+      box-shadow: 0 14px 28px rgba(21,128,61,0.22);
+    }
+
+    .price-card.fuel-diesel {
+      background: linear-gradient(160deg, #111827, #334155);
+      box-shadow: 0 14px 28px rgba(17,24,39,0.24);
+    }
+
+    .price-card.fuel-super {
+      background: linear-gradient(160deg, #b42318, #ef4444);
+      box-shadow: 0 14px 28px rgba(180,35,24,0.22);
     }
 
     .distance-card {
@@ -903,6 +936,27 @@
       border-radius: 18px;
       background: #fff;
       border: 1px solid var(--line);
+    }
+
+    .selected-stat.fuel-unleaded {
+      background: #eaf8ef;
+      border-color: #b8e3c5;
+    }
+
+    .selected-stat.fuel-diesel {
+      background: #17212f;
+      border-color: #17212f;
+      color: #ffffff;
+    }
+
+    .selected-stat.fuel-diesel .small,
+    .selected-stat.fuel-diesel .strong {
+      color: #ffffff;
+    }
+
+    .selected-stat.fuel-super {
+      background: #fff1f0;
+      border-color: #f4beb8;
     }
 
     .selected-stat .small {
@@ -1170,9 +1224,6 @@
             </div>
           </div>
 
-          <div class="summary-strip" id="summaryStrip">
-            Choose a fuel type, search a location, and the summary will update instantly.
-          </div>
 
           <div class="planner-card">
             <div class="planner-head">
@@ -1189,12 +1240,12 @@
               </div>
               <div class="planner-input">
                 <label for="fuelEconomy">Fuel economy (mpg)</label>
-                <input id="fuelEconomy" type="number" min="10" max="120" step="1" value="42" inputmode="numeric" />
+                <input id="fuelEconomy" type="number" min="10" max="120" step="1" value="40" inputmode="numeric" />
               </div>
             </div>
 
             <div class="planner-note" id="plannerNote">
-              Estimates are based on a 50L tank and 42 mpg. Drive cost is one-way from your search point to the station.
+              Estimates are based on a 50L tank and 40 mpg. Drive cost is one-way from your search point to the station.
             </div>
           </div>
         </div>
@@ -1332,7 +1383,6 @@
       resultsBadge: document.getElementById("resultsBadge"),
       statusBanner: document.getElementById("statusBanner"),
       summaryHeadline: document.getElementById("summaryHeadline"),
-      summaryStrip: document.getElementById("summaryStrip"),
       statCount: document.getElementById("statCount"),
       statCheapest: document.getElementById("statCheapest"),
       statAverage: document.getElementById("statAverage"),
@@ -1537,9 +1587,16 @@
         : "—";
     }
 
+    function getFuelToneClass(fuelCode) {
+      if (fuelCode === "E10" || fuelCode === "B10" || fuelCode === "HVO") return "fuel-unleaded";
+      if (fuelCode === "E5") return "fuel-super";
+      if (fuelCode === "B7S" || fuelCode === "B7P") return "fuel-diesel";
+      return "fuel-unleaded";
+    }
+
     function getEstimatorSettings() {
       const tankLitres = Math.min(120, Math.max(20, Number(elements.tankSize.value) || 50));
-      const fuelEconomyMpg = Math.min(120, Math.max(10, Number(elements.fuelEconomy.value) || 42));
+      const fuelEconomyMpg = Math.min(120, Math.max(10, Number(elements.fuelEconomy.value) || 40));
       return { tankLitres, fuelEconomyMpg };
     }
 
@@ -1868,18 +1925,15 @@
       const fuelLabel = FUEL_CONFIG[elements.fuelType.value].label;
       if (!state.searchCenter) {
         elements.summaryHeadline.textContent = "Search for a location to see how many stations are nearby and what price range you can expect.";
-        elements.summaryStrip.textContent = `Results will show the cheapest, average and highest ${fuelLabel} price within 5 miles.`;
         return;
       }
 
       if (!stats) {
         elements.summaryHeadline.textContent = `No ${fuelLabel} prices found within 5 miles of ${state.searchLabel}.`;
-        elements.summaryStrip.textContent = "Try another fuel type or search a nearby postcode, town or city.";
         return;
       }
 
       elements.summaryHeadline.textContent = `${stats.count} stations found for ${fuelLabel} within 5 miles of ${state.searchLabel}.`;
-      elements.summaryStrip.textContent = `Cheapest ${formatPrice(stats.cheapest)} • Average ${formatPrice(stats.average)} • Highest ${formatPrice(stats.highest)}.`;
     }
 
     function updateResultsCopy() {
@@ -1968,8 +2022,8 @@
                 <p class="station-address">${escapeHtml(station.address)}</p>
 
                 <div class="fuel-glance">
-                  <span class="fuel-mini">Unleaded <strong>${formatPrice(station.displayUnleaded)}</strong></span>
-                  <span class="fuel-mini">Diesel <strong>${formatPrice(station.displayDiesel)}</strong></span>
+                  <span class="fuel-mini fuel-unleaded">Unleaded <strong>${formatPrice(station.displayUnleaded)}</strong></span>
+                  <span class="fuel-mini fuel-diesel">Diesel <strong>${formatPrice(station.displayDiesel)}</strong></span>
                 </div>
 
                 <div class="tag-row">
@@ -2003,7 +2057,7 @@
               </div>
 
               <div class="pricing-panel">
-                <div class="price-card">
+                <div class="price-card ${getFuelToneClass(elements.fuelType.value)}">
                   <div class="metric-label">${escapeHtml(station.fuelLabel)}</div>
                   <div class="metric-value">${formatPrice(station.price)}</div>
                   <div class="metric-subvalue">Ranked #${station.rank} for this search</div>
@@ -2044,15 +2098,15 @@
         <div class="selected-name">${escapeHtml(selected.brandDisplay)} • ${escapeHtml(selected.tradingName)}</div>
         <div class="selected-address">${escapeHtml(selected.address)}</div>
         <div class="selected-grid">
-          <div class="selected-stat">
+          <div class="selected-stat ${getFuelToneClass(elements.fuelType.value)}">
             <div class="small">Selected fuel</div>
             <div class="strong">${formatPrice(selected.price)}</div>
           </div>
-          <div class="selected-stat">
+          <div class="selected-stat fuel-unleaded">
             <div class="small">Unleaded</div>
             <div class="strong">${formatPrice(selected.displayUnleaded)}</div>
           </div>
-          <div class="selected-stat">
+          <div class="selected-stat fuel-diesel">
             <div class="small">Diesel</div>
             <div class="strong">${formatPrice(selected.displayDiesel)}</div>
           </div>
