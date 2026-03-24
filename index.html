@@ -843,13 +843,23 @@
     }
 
     .estimate-card.fill {
-      background: #eef8f4;
-      border-color: #cdeede;
+      background: #edf4ff;
+      border-color: #cfe0ff;
+    }
+
+    .estimate-card.fill .estimate-label,
+    .estimate-card.fill .estimate-value {
+      color: #1e4f9c;
     }
 
     .estimate-card.trip {
-      background: #fff8ee;
-      border-color: #f0debf;
+      background: #fff2f1;
+      border-color: #ffd0cb;
+    }
+
+    .estimate-card.trip .estimate-label,
+    .estimate-card.trip .estimate-value {
+      color: #c2410c;
     }
 
     .estimate-label {
@@ -1219,13 +1229,17 @@
         grid-template-columns: 1fr;
       }
 
+      .guide-grid {
+        display: none;
+      }
+
       .map-panel {
         position: static;
-        order: 2;
+        order: 1;
       }
 
       .results-panel {
-        order: 1;
+        order: 2;
       }
 
       .search-grid {
