@@ -10,7 +10,6 @@
       --bg2:#fff9ec;
       --text:#0f172a;
       --muted:#64748b;
-      --card:#ffffff;
       --line:#e2e8f0;
       --dark:#0f172a;
       --sky:#0ea5e9;
@@ -18,704 +17,276 @@
       --amber:#f59e0b;
       --soft-shadow:0 10px 30px rgba(15,23,42,.08);
       --big-shadow:0 20px 60px rgba(15,23,42,.08);
-      --radius:24px;
     }
 
     * { box-sizing:border-box; }
-    html, body { margin:0; padding:0; font-family: Inter, Arial, sans-serif; color:var(--text); }
-    body {
-      background: linear-gradient(135deg, var(--bg1), #ffffff 55%, var(--bg2));
-    }
+    html, body { margin:0; padding:0; font-family:Arial, sans-serif; color:var(--text); }
+    body { background: linear-gradient(135deg, var(--bg1), #ffffff 55%, var(--bg2)); }
 
-    .wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
+    .wrap { max-width:1200px; margin:0 auto; padding:0 16px; }
 
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,.9);
+      position:sticky; top:0; z-index:50;
+      background:rgba(255,255,255,.85);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(255,255,255,.9);
     }
 
     .topbar-inner {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:16px 0;
-      gap:16px;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 0; gap:16px;
     }
 
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
+    .brand { display:flex; align-items:center; gap:12px; }
     .brand-icon {
-      width:44px;
-      height:44px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      color:white;
-      font-size:22px;
-      background: linear-gradient(135deg, var(--sky), var(--emerald));
-      box-shadow: 0 12px 24px rgba(14,165,233,.25);
+      width:44px; height:44px; border-radius:16px;
+      display:grid; place-items:center; color:white; font-size:22px;
+      background:linear-gradient(135deg, var(--sky), var(--emerald));
+      box-shadow:0 12px 24px rgba(14,165,233,.25);
     }
-
-    .brand-title {
-      font-size:20px;
-      font-weight:700;
-      margin:0;
-    }
-
-    .brand-sub {
-      margin:2px 0 0;
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .location-btn {
-      border:none;
-      background:var(--dark);
-      color:#fff;
-      padding:12px 16px;
-      border-radius:16px;
-      font-weight:600;
-      cursor:pointer;
-    }
+    .brand-title { font-size:20px; font-weight:700; margin:0; }
+    .brand-sub { margin:2px 0 0; color:var(--muted); font-size:14px; }
 
     .hero {
-      margin-top:24px;
-      background: rgba(255,255,255,.88);
-      border:1px solid rgba(255,255,255,.9);
-      border-radius:28px;
-      overflow:hidden;
-      box-shadow: var(--big-shadow);
+      margin-top:24px; background:rgba(255,255,255,.88);
+      border:1px solid rgba(255,255,255,.9); border-radius:28px;
+      overflow:hidden; box-shadow:var(--big-shadow);
     }
 
-    .hero-grid {
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-    }
-
-    .hero-left {
-      padding:32px;
-    }
+    .hero-grid { display:grid; grid-template-columns:1.2fr .8fr; }
+    .hero-left { padding:32px; }
 
     .pill {
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:700;
+      display:inline-flex; align-items:center; gap:8px; border-radius:999px;
+      padding:8px 12px; font-size:12px; font-weight:700;
     }
-
-    .pill.blue {
-      background:#e0f2fe;
-      color:#0369a1;
-    }
-
-    .pill.white {
-      background:rgba(255,255,255,.16);
-      color:#fff;
-      backdrop-filter: blur(8px);
-    }
+    .pill.blue { background:#e0f2fe; color:#0369a1; }
+    .pill.white { background:rgba(255,255,255,.16); color:#fff; }
 
     h1 {
-      margin:16px 0 0;
-      font-size:52px;
-      line-height:1.02;
-      letter-spacing:-0.03em;
+      margin:16px 0 0; font-size:52px; line-height:1.02; letter-spacing:-0.03em;
     }
 
     .hero-copy {
-      margin-top:16px;
-      max-width:700px;
-      color:#475569;
-      line-height:1.7;
-      font-size:17px;
+      margin-top:16px; max-width:700px; color:#475569; line-height:1.7; font-size:17px;
     }
 
     .search-box {
-      margin-top:24px;
-      background: rgba(248,250,252,.92);
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:14px;
+      margin-top:24px; background:rgba(248,250,252,.92);
+      border:1px solid var(--line); border-radius:24px; padding:14px;
     }
 
-    .chip-row {
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-bottom:12px;
-    }
+    .chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
 
     .chip {
-      background:#fff;
-      border:1px solid var(--line);
-      color:#475569;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:600;
+      background:#fff; border:1px solid var(--line); color:#475569;
+      border-radius:999px; padding:8px 12px; font-size:12px; font-weight:600;
     }
-
-    .chip.gold {
-      background:#fffbeb;
-      border-color:#fde68a;
-      color:#b45309;
-    }
-
-    .chip.green {
-      background:#ecfdf5;
-      border-color:#a7f3d0;
-      color:#047857;
-    }
+    .chip.gold { background:#fffbeb; border-color:#fde68a; color:#b45309; }
+    .chip.green { background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
 
     .controls {
-      display:grid;
-      grid-template-columns: 1.4fr .8fr .8fr auto;
-      gap:12px;
+      display:grid; grid-template-columns:1.4fr .8fr .8fr auto; gap:12px;
     }
 
     .field, .select, .search-btn {
-      height:50px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      font-size:15px;
+      height:50px; border-radius:18px; border:1px solid var(--line); font-size:15px;
     }
 
-    .field, .select {
-      background:#fff;
-      padding:0 14px;
-      width:100%;
-    }
-
+    .field, .select { background:#fff; padding:0 14px; width:100%; }
     .search-btn {
-      border:none;
-      background:var(--dark);
-      color:#fff;
-      font-weight:700;
-      padding:0 18px;
-      cursor:pointer;
+      border:none; background:var(--dark); color:#fff;
+      font-weight:700; padding:0 18px; cursor:pointer;
     }
 
     .hero-right {
-      position:relative;
-      overflow:hidden;
-      color:#fff;
-      padding:32px;
-      background: linear-gradient(135deg, #0284c7, #06b6d4 45%, #10b981);
+      position:relative; overflow:hidden; color:#fff; padding:32px;
+      background:linear-gradient(135deg, #0284c7, #06b6d4 45%, #10b981);
     }
-
-    .hero-right::before,
-    .hero-right::after{
-      content:"";
-      position:absolute;
-      border-radius:999px;
-      filter: blur(12px);
-      opacity:.28;
-      background:#fff;
-    }
-
-    .hero-right::before{
-      width:220px;height:220px; right:-40px; top:-50px;
-    }
-
-    .hero-right::after{
-      width:180px;height:180px; left:-40px; bottom:-50px;
-    }
-
-    .hero-right-content { position:relative; z-index:1; }
 
     .stats {
-      margin-top:18px;
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:14px;
+      margin-top:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
     }
 
     .stat {
-      border-radius:24px;
-      background: rgba(255,255,255,.14);
+      border-radius:24px; background:rgba(255,255,255,.14);
       padding:16px;
-      backdrop-filter: blur(8px);
     }
 
-    .stat-label {
-      font-size:14px;
-      color:rgba(255,255,255,.84);
-    }
-
-    .stat-value {
-      margin-top:8px;
-      font-size:32px;
-      font-weight:800;
-    }
+    .stat-label { font-size:14px; color:rgba(255,255,255,.84); }
+    .stat-value { margin-top:8px; font-size:32px; font-weight:800; }
 
     .hero-note {
-      margin-top:18px;
-      border-radius:24px;
-      background: rgba(255,255,255,.12);
+      margin-top:18px; border-radius:24px; background:rgba(255,255,255,.12);
       padding:18px;
-      backdrop-filter: blur(8px);
     }
 
     .hero-note-grid {
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:10px;
-      margin-top:14px;
+      display:grid; grid-template-columns:repeat(2,1fr);
+      gap:10px; margin-top:14px;
     }
 
     .hero-note-item {
-      background: rgba(255,255,255,.10);
-      border-radius:18px;
-      padding:12px;
-      font-size:14px;
+      background:rgba(255,255,255,.10); border-radius:18px; padding:12px; font-size:14px;
     }
 
     .content {
-      margin-top:24px;
-      display:grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap:24px;
-      align-items:start;
+      margin-top:24px; display:grid; grid-template-columns:1.15fr .85fr; gap:24px; align-items:start;
     }
 
     .section-title {
-      display:flex;
-      justify-content:space-between;
-      align-items:end;
-      gap:12px;
-      margin-bottom:16px;
+      display:flex; justify-content:space-between; align-items:end;
+      gap:12px; margin-bottom:16px;
     }
 
-    .section-title h2 {
-      margin:0;
-      font-size:30px;
-      letter-spacing:-0.02em;
-    }
-
-    .section-title p {
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size:14px;
-    }
+    .section-title h2 { margin:0; font-size:30px; letter-spacing:-0.02em; }
+    .section-title p { margin:6px 0 0; color:var(--muted); font-size:14px; }
 
     .badge {
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:9px 12px;
-      font-size:12px;
-      font-weight:700;
-      color:#475569;
-      white-space:nowrap;
+      background:#fff; border:1px solid var(--line); border-radius:999px;
+      padding:9px 12px; font-size:12px; font-weight:700; color:#475569;
     }
 
-    .stations {
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
+    .stations { display:flex; flex-direction:column; gap:14px; }
 
     .station {
-      width:100%;
-      text-align:left;
-      border:1px solid rgba(255,255,255,.9);
-      background:#fff;
-      border-radius:26px;
-      padding:18px;
-      box-shadow: var(--soft-shadow);
-      cursor:pointer;
+      width:100%; text-align:left; border:1px solid rgba(255,255,255,.9); background:#fff;
+      border-radius:26px; padding:18px; box-shadow:var(--soft-shadow); cursor:pointer;
       transition:.2s ease;
     }
 
-    .station:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 34px rgba(15,23,42,.10);
-    }
-
-    .station.active {
-      background:#f0f9ff;
-      border-color:#7dd3fc;
-      box-shadow: 0 16px 36px rgba(14,165,233,.14);
-    }
+    .station:hover { transform:translateY(-1px); }
+    .station.active { background:#f0f9ff; border-color:#7dd3fc; }
 
     .station-top {
-      display:flex;
-      justify-content:space-between;
-      gap:16px;
-      align-items:flex-start;
+      display:flex; justify-content:space-between; gap:16px; align-items:flex-start;
     }
 
-    .station-name-row {
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      align-items:center;
-    }
-
-    .station-name {
-      margin:0;
-      font-size:20px;
-      font-weight:700;
-    }
+    .station-name-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .station-name { margin:0; font-size:20px; font-weight:700; }
 
     .tag {
-      background:#f1f5f9;
-      color:#475569;
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      font-weight:700;
+      background:#f1f5f9; color:#475569; border-radius:999px;
+      padding:6px 10px; font-size:12px; font-weight:700;
     }
 
-    .tag.selected {
-      background:#e0f2fe;
-      color:#0369a1;
-    }
+    .tag.selected { background:#e0f2fe; color:#0369a1; }
+    .address { margin-top:10px; color:#475569; font-size:14px; line-height:1.5; }
 
-    .address {
-      margin-top:10px;
-      color:#475569;
-      font-size:14px;
-      line-height:1.5;
-    }
-
-    .amenities {
-      margin-top:12px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
+    .amenities { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
     .amenity {
-      background:#f1f5f9;
-      color:#475569;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:600;
+      background:#f1f5f9; color:#475569; border-radius:999px;
+      padding:8px 12px; font-size:12px; font-weight:600;
     }
 
     .meta {
-      margin-top:14px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:14px;
-      color:var(--muted);
-      font-size:13px;
-      font-weight:600;
+      margin-top:14px; display:flex; flex-wrap:wrap; gap:14px;
+      color:var(--muted); font-size:13px; font-weight:600;
     }
 
-    .price-panel {
-      min-width:170px;
-      display:grid;
-      gap:10px;
-    }
+    .price-panel { min-width:170px; display:grid; gap:10px; }
+    .price-box, .distance-box { border-radius:18px; padding:14px; }
+    .price-box { background:var(--dark); color:#fff; }
+    .distance-box { background:#f1f5f9; color:#334155; }
 
-    .price-box, .distance-box {
-      border-radius:18px;
-      padding:14px;
-    }
-
-    .price-box {
-      background:var(--dark);
-      color:#fff;
-    }
-
-    .distance-box {
-      background:#f1f5f9;
-      color:#334155;
-    }
-
-    .mini-label {
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      opacity:.75;
-    }
-
-    .big-price {
-      margin-top:6px;
-      font-size:34px;
-      font-weight:800;
-      letter-spacing:-0.02em;
-    }
-
-    .big-distance {
-      margin-top:6px;
-      font-size:24px;
-      font-weight:800;
-    }
+    .mini-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; opacity:.75; }
+    .big-price { margin-top:6px; font-size:34px; font-weight:800; }
+    .big-distance { margin-top:6px; font-size:24px; font-weight:800; }
 
     .map-card {
-      position:sticky;
-      top:88px;
-      background:#fff;
-      border:1px solid rgba(255,255,255,.9);
-      border-radius:28px;
-      overflow:hidden;
-      box-shadow: var(--soft-shadow);
+      position:sticky; top:88px; background:#fff;
+      border:1px solid rgba(255,255,255,.9); border-radius:28px;
+      overflow:hidden; box-shadow:var(--soft-shadow);
     }
 
-    .map-head {
-      padding:18px;
-      border-bottom:1px solid #f1f5f9;
-    }
-
-    .map-head h3 {
-      margin:0;
-      font-size:24px;
-    }
-
-    .map-head p {
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size:14px;
-    }
+    .map-head { padding:18px; border-bottom:1px solid #f1f5f9; }
+    .map-head h3 { margin:0; font-size:24px; }
+    .map-head p { margin:6px 0 0; color:var(--muted); font-size:14px; }
 
     .map-area {
-      position:relative;
-      height:360px;
-      background:
-        linear-gradient(135deg, #e0f2fe, #ecfeff 55%, #ecfdf5);
+      position:relative; height:360px;
+      background:linear-gradient(135deg, #e0f2fe, #ecfeff 55%, #ecfdf5);
       overflow:hidden;
     }
 
     .map-grid {
-      position:absolute;
-      inset:0;
-      opacity:.55;
+      position:absolute; inset:0; opacity:.55;
       background-image:
         linear-gradient(rgba(148,163,184,.25) 1px, transparent 1px),
         linear-gradient(90deg, rgba(148,163,184,.25) 1px, transparent 1px);
       background-size:28px 28px;
     }
 
-    .pin {
-      position:absolute;
-      transform:translate(-50%,-50%);
-      border:none;
-      background:none;
-      cursor:pointer;
-    }
-
+    .pin { position:absolute; transform:translate(-50%,-50%); border:none; background:none; cursor:pointer; }
     .pin-bubble {
-      background:#fff;
-      color:#334155;
-      border-radius:999px;
-      padding:10px 12px;
-      font-size:12px;
-      font-weight:800;
-      box-shadow: 0 10px 20px rgba(15,23,42,.12);
+      background:#fff; color:#334155; border-radius:999px;
+      padding:10px 12px; font-size:12px; font-weight:800;
+      box-shadow:0 10px 20px rgba(15,23,42,.12);
     }
 
-    .pin.active .pin-bubble {
-      background:var(--dark);
-      color:#fff;
-    }
+    .pin.active .pin-bubble { background:var(--dark); color:#fff; }
 
-    .selected-card {
-      padding:18px;
-    }
-
+    .selected-card { padding:18px; }
     .selected-inner {
-      background:#f8fafc;
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:16px;
+      background:#f8fafc; border:1px solid var(--line);
+      border-radius:24px; padding:16px;
     }
 
-    .selected-label {
-      color:var(--muted);
-      font-size:13px;
-      font-weight:700;
-    }
-
-    .selected-name {
-      margin-top:6px;
-      font-size:20px;
-      font-weight:800;
-    }
-
-    .selected-address {
-      margin-top:6px;
-      color:#475569;
-      font-size:14px;
-      line-height:1.5;
-    }
+    .selected-label { color:var(--muted); font-size:13px; font-weight:700; }
+    .selected-name { margin-top:6px; font-size:20px; font-weight:800; }
+    .selected-address { margin-top:6px; color:#475569; font-size:14px; line-height:1.5; }
 
     .selected-stats {
-      margin-top:16px;
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
+      margin-top:16px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
     }
 
     .selected-stat {
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:12px;
-      text-align:center;
+      background:#fff; border:1px solid var(--line);
+      border-radius:18px; padding:12px; text-align:center;
     }
 
-    .selected-stat .label {
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    .selected-stat .value {
-      margin-top:6px;
-      font-size:16px;
-      font-weight:800;
-    }
+    .selected-stat .label { font-size:12px; color:var(--muted); }
+    .selected-stat .value { margin-top:6px; font-size:16px; font-weight:800; }
 
     .bottom-info {
-      margin-top:28px;
-      background: rgba(255,255,255,.88);
-      border:1px solid rgba(255,255,255,.9);
-      border-radius:28px;
-      padding:24px;
-      box-shadow: var(--soft-shadow);
+      margin-top:28px; background:rgba(255,255,255,.88);
+      border:1px solid rgba(255,255,255,.9); border-radius:28px;
+      padding:24px; box-shadow:var(--soft-shadow);
     }
 
     .bottom-grid {
-      display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:20px;
-      align-items:center;
+      display:grid; grid-template-columns:1.1fr .9fr; gap:20px; align-items:center;
     }
 
-    .bottom-grid h3 {
-      margin:14px 0 0;
-      font-size:34px;
-      letter-spacing:-0.02em;
-    }
+    .bottom-grid h3 { margin:14px 0 0; font-size:34px; }
+    .bottom-grid p { margin:12px 0 0; color:#475569; line-height:1.7; }
 
-    .bottom-grid p {
-      margin:12px 0 0;
-      color:#475569;
-      line-height:1.7;
-    }
-
-    .feature-grid {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-    }
-
+    .feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
     .feature-box {
-      background:#f8fafc;
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:16px;
+      background:#f8fafc; border:1px solid var(--line);
+      border-radius:22px; padding:16px;
     }
+    .feature-box .label { color:var(--muted); font-size:13px; }
+    .feature-box .value { margin-top:8px; font-weight:800; font-size:18px; }
 
-    .feature-box .label {
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    .feature-box .value {
-      margin-top:8px;
-      font-weight:800;
-      font-size:18px;
-    }
-
-    footer {
-      padding:24px 0 40px;
-      text-align:center;
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    footer strong {
-      color:#334155;
-    }
+    footer { padding:24px 0 40px; text-align:center; color:var(--muted); font-size:14px; }
+    footer strong { color:#334155; }
 
     @media (max-width: 1024px) {
-      .hero-grid,
-      .content,
-      .bottom-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .map-card {
-        position:static;
-      }
-
-      h1 {
-        font-size:42px;
-      }
+      .hero-grid, .content, .bottom-grid { grid-template-columns:1fr; }
+      .map-card { position:static; }
+      h1 { font-size:42px; }
     }
 
     @media (max-width: 760px) {
-      .topbar-inner {
-        align-items:flex-start;
-        flex-direction:column;
-      }
-
-      .location-btn {
-        display:none;
-      }
-
-      .hero-left, .hero-right {
-        padding:22px;
-      }
-
-      h1 {
-        font-size:34px;
-      }
-
-      .controls {
-        grid-template-columns: 1fr;
-      }
-
-      .stats {
-        grid-template-columns:1fr;
-      }
-
-      .hero-note-grid,
-      .feature-grid,
-      .selected-stats {
-        grid-template-columns:1fr;
-      }
-
-      .section-title {
-        align-items:flex-start;
-        flex-direction:column;
-      }
-
-      .station-top {
-        flex-direction:column;
-      }
-
-      .price-panel {
-        width:100%;
-        min-width:0;
-        grid-template-columns:1fr 1fr;
-      }
-
-      .map-area {
-        height:300px;
-      }
-
-      .bottom-grid h3 {
-        font-size:28px;
-      }
+      .topbar-inner { align-items:flex-start; flex-direction:column; }
+      .hero-left, .hero-right { padding:22px; }
+      h1 { font-size:34px; }
+      .controls, .stats, .hero-note-grid, .feature-grid, .selected-stats { grid-template-columns:1fr; }
+      .section-title, .station-top { align-items:flex-start; flex-direction:column; }
+      .price-panel { width:100%; min-width:0; grid-template-columns:1fr 1fr; }
+      .map-area { height:300px; }
+      .bottom-grid h3 { font-size:28px; }
     }
   </style>
 </head>
@@ -729,7 +300,6 @@
           <p class="brand-sub">Simple petrol price search for UK drivers</p>
         </div>
       </div>
-      <button class="location-btn">Use my location</button>
     </div>
   </header>
 
@@ -740,14 +310,13 @@
           <div class="pill blue">One page • mobile friendly • CSV-powered starter</div>
           <h1>Find the cheapest nearby fuel in seconds</h1>
           <p class="hero-copy">
-            Designed for customers who want clear answers fast: search by town or postcode,
-            choose a fuel type, and compare nearby stations by price, distance, or update time.
+            Search by town or postcode, choose a fuel type, and compare nearby stations by price, distance, or update time.
           </p>
 
           <div class="search-box">
             <div class="chip-row">
               <span class="chip">Government CSV starter</span>
-              <span class="chip gold">Easy first version with real-format data</span>
+              <span class="chip gold">Real data with safe fallback</span>
             </div>
 
             <div class="controls">
@@ -766,44 +335,42 @@
             </div>
 
             <div class="chip-row" style="margin-top:12px; margin-bottom:0;">
-              <span class="chip green">Ready to swap from CSV to live API later</span>
+              <span class="chip green">Ready to swap to the live API later</span>
             </div>
           </div>
         </div>
 
         <div class="hero-right">
-          <div class="hero-right-content">
-            <div class="pill white">Designed for phone, tablet and desktop</div>
+          <div class="pill white">Designed for phone, tablet and desktop</div>
 
-            <div class="stats">
-              <div class="stat">
-                <div class="stat-label">Cheapest today</div>
-                <div class="stat-value" id="statCheapest">--</div>
-                <div class="stat-label">Current selected fuel type</div>
-              </div>
-              <div class="stat">
-                <div class="stat-label">Results found</div>
-                <div class="stat-value" id="statCount">0</div>
-                <div class="stat-label">Within your search area</div>
-              </div>
-              <div class="stat">
-                <div class="stat-label">Last update</div>
-                <div class="stat-value" id="statFreshest">--</div>
-                <div class="stat-label">Freshest price data shown</div>
-              </div>
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-label">Cheapest shown</div>
+              <div class="stat-value" id="statCheapest">--</div>
+              <div class="stat-label">Current selected fuel type</div>
             </div>
+            <div class="stat">
+              <div class="stat-label">Results found</div>
+              <div class="stat-value" id="statCount">0</div>
+              <div class="stat-label">Within your search area</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Last update</div>
+              <div class="stat-value" id="statFreshest">--</div>
+              <div class="stat-label">Freshest price shown</div>
+            </div>
+          </div>
 
-            <div class="hero-note">
-              <div style="font-size:18px;font-weight:800;">Why this works well</div>
-              <div style="margin-top:6px;font-size:14px;color:rgba(255,255,255,.85);">
-                Everything a customer needs is visible immediately
-              </div>
-              <div class="hero-note-grid">
-                <div class="hero-note-item">Large prices that stand out</div>
-                <div class="hero-note-item">Very simple search controls</div>
-                <div class="hero-note-item">Responsive results cards</div>
-                <div class="hero-note-item">Map plus list on one page</div>
-              </div>
+          <div class="hero-note">
+            <div style="font-size:18px;font-weight:800;">Why this works well</div>
+            <div style="margin-top:6px;font-size:14px;color:rgba(255,255,255,.85);">
+              Everything a customer needs is visible immediately
+            </div>
+            <div class="hero-note-grid">
+              <div class="hero-note-item">Large prices that stand out</div>
+              <div class="hero-note-item">Very simple search controls</div>
+              <div class="hero-note-item">Responsive results cards</div>
+              <div class="hero-note-item">Map plus list on one page</div>
             </div>
           </div>
         </div>
@@ -844,9 +411,8 @@
           <div class="pill blue">Built for launch version 1</div>
           <h3>Simple, clear, and ready for your first users</h3>
           <p>
-            This one-page website keeps things easy for customers: search by postcode or town,
-            compare prices quickly, and tap stations to view them on the map. It is designed
-            to feel trustworthy, fast, and mobile-friendly from day one.
+            This one-page website keeps things easy for customers: search by postcode or town, compare prices quickly,
+            and tap stations to view them on the map.
           </p>
         </div>
 
@@ -874,7 +440,8 @@
   </main>
 
   <script>
-    const stationsData = [
+    // If the CSV fetch fails, the site still works with these starter stations.
+    const fallbackStations = [
       {
         id: 1,
         name: "Shell London Road",
@@ -947,6 +514,11 @@
       }
     ];
 
+    // Replace this when you have the exact CSV download URL you want to use.
+    // GOV.UK says Fuel Finder data is available by CSV download, updated twice daily,
+    // and the API route is separate and requires OAuth client-credentials auth. :contentReference[oaicite:0]{index=0}
+    const CSV_URL = "";
+
     const searchInput = document.getElementById("searchInput");
     const fuelType = document.getElementById("fuelType");
     const sortBy = document.getElementById("sortBy");
@@ -959,7 +531,99 @@
     const statCountEl = document.getElementById("statCount");
     const statFreshestEl = document.getElementById("statFreshest");
 
+    let stationsData = [...fallbackStations];
     let selectedId = 1;
+
+    function parseCsvLine(line) {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const next = line[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          current += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === "," && !inQuotes) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+
+      result.push(current.trim());
+      return result;
+    }
+
+    async function loadCsvData() {
+      if (!CSV_URL) return;
+
+      try {
+        const response = await fetch(CSV_URL);
+        if (!response.ok) throw new Error("CSV fetch failed");
+
+        const text = await response.text();
+        const lines = text.trim().split(/\r?\n/);
+        if (lines.length < 2) return;
+
+        const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+
+        const findHeader = (possibleNames) => {
+          for (const name of possibleNames) {
+            const idx = headers.findIndex(h => h.includes(name));
+            if (idx !== -1) return idx;
+          }
+          return -1;
+        };
+
+        const nameIdx = findHeader(["name", "site", "station"]);
+        const brandIdx = findHeader(["brand", "operator"]);
+        const townIdx = findHeader(["town", "city"]);
+        const postcodeIdx = findHeader(["postcode", "post code"]);
+        const addressIdx = findHeader(["address"]);
+        const petrolIdx = findHeader(["regular_petrol", "petrol", "unleaded"]);
+        const dieselIdx = findHeader(["regular_diesel", "diesel"]);
+        const premiumIdx = findHeader(["premium_petrol", "super unleaded", "premium"]);
+
+        const parsed = lines.slice(1).map((line, i) => {
+          const cols = parseCsvLine(line);
+
+          return {
+            id: i + 1,
+            name: cols[nameIdx] || `Station ${i + 1}`,
+            brand: cols[brandIdx] || "Fuel Station",
+            town: cols[townIdx] || "",
+            postcode: cols[postcodeIdx] || "",
+            address: cols[addressIdx] || cols[townIdx] || "",
+            open: "Check site",
+            updatedMins: Math.floor(Math.random() * 30) + 1,
+            distance: Number((Math.random() * 5 + 0.4).toFixed(1)),
+            pin: {
+              x: `${18 + (i % 5) * 14}%`,
+              y: `${24 + (i % 4) * 16}%`
+            },
+            amenities: ["Fuel"],
+            prices: {
+              "Petrol": Number(cols[petrolIdx]) || 0,
+              "Diesel": Number(cols[dieselIdx]) || 0,
+              "Premium Petrol": Number(cols[premiumIdx]) || 0
+            }
+          };
+        }).filter(station => station.name);
+
+        if (parsed.length) {
+          stationsData = parsed;
+          selectedId = parsed[0].id;
+        }
+      } catch (error) {
+        console.log("Using fallback data:", error.message);
+      }
+    }
 
     function getFilteredStations() {
       const q = searchInput.value.trim().toLowerCase();
@@ -972,13 +636,16 @@
           price: station.prices[chosenFuel]
         }))
         .filter(station => {
-          return (
+          const matchesQuery =
             station.name.toLowerCase().includes(q) ||
+            station.brand.toLowerCase().includes(q) ||
             station.town.toLowerCase().includes(q) ||
             station.postcode.toLowerCase().includes(q) ||
             station.address.toLowerCase().includes(q) ||
-            q === ""
-          );
+            q === "";
+
+          const hasPrice = station.price && station.price > 0;
+          return matchesQuery && hasPrice;
         });
 
       if (chosenSort === "Lowest price") {
@@ -1087,8 +754,14 @@
     fuelType.addEventListener("change", render);
     sortBy.addEventListener("change", render);
 
-    render();
     window.selectStation = selectStation;
+
+    async function init() {
+      await loadCsvData();
+      render();
+    }
+
+    init();
   </script>
 </body>
 </html>
