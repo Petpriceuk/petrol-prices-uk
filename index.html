@@ -14,201 +14,124 @@
       --dark:#0f172a;
       --sky:#0ea5e9;
       --emerald:#10b981;
-      --amber:#f59e0b;
       --soft-shadow:0 10px 30px rgba(15,23,42,.08);
       --big-shadow:0 20px 60px rgba(15,23,42,.08);
     }
-
     * { box-sizing:border-box; }
     html, body { margin:0; padding:0; font-family:Arial, sans-serif; color:var(--text); }
     body { background: linear-gradient(135deg, var(--bg1), #ffffff 55%, var(--bg2)); }
-
     .wrap { max-width:1200px; margin:0 auto; padding:0 16px; }
-
     .topbar {
-      position:sticky; top:0; z-index:50;
-      background:rgba(255,255,255,.85);
-      backdrop-filter:blur(12px);
-      border-bottom:1px solid rgba(255,255,255,.9);
+      position:sticky; top:0; z-index:50; background:rgba(255,255,255,.85);
+      backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.9);
     }
-
     .topbar-inner {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:16px 0; gap:16px;
+      display:flex; align-items:center; justify-content:space-between; padding:16px 0; gap:16px;
     }
-
     .brand { display:flex; align-items:center; gap:12px; }
     .brand-icon {
-      width:44px; height:44px; border-radius:16px;
-      display:grid; place-items:center; color:white; font-size:22px;
-      background:linear-gradient(135deg, var(--sky), var(--emerald));
+      width:44px; height:44px; border-radius:16px; display:grid; place-items:center;
+      color:white; font-size:22px; background:linear-gradient(135deg, var(--sky), var(--emerald));
       box-shadow:0 12px 24px rgba(14,165,233,.25);
     }
     .brand-title { font-size:20px; font-weight:700; margin:0; }
     .brand-sub { margin:2px 0 0; color:var(--muted); font-size:14px; }
 
     .hero {
-      margin-top:24px; background:rgba(255,255,255,.88);
-      border:1px solid rgba(255,255,255,.9); border-radius:28px;
-      overflow:hidden; box-shadow:var(--big-shadow);
+      margin-top:24px; background:rgba(255,255,255,.88); border:1px solid rgba(255,255,255,.9);
+      border-radius:28px; overflow:hidden; box-shadow:var(--big-shadow);
     }
-
     .hero-grid { display:grid; grid-template-columns:1.2fr .8fr; }
     .hero-left { padding:32px; }
-
     .pill {
       display:inline-flex; align-items:center; gap:8px; border-radius:999px;
       padding:8px 12px; font-size:12px; font-weight:700;
     }
     .pill.blue { background:#e0f2fe; color:#0369a1; }
     .pill.white { background:rgba(255,255,255,.16); color:#fff; }
-
-    h1 {
-      margin:16px 0 0; font-size:52px; line-height:1.02; letter-spacing:-0.03em;
-    }
-
-    .hero-copy {
-      margin-top:16px; max-width:700px; color:#475569; line-height:1.7; font-size:17px;
-    }
+    h1 { margin:16px 0 0; font-size:52px; line-height:1.02; letter-spacing:-0.03em; }
+    .hero-copy { margin-top:16px; max-width:700px; color:#475569; line-height:1.7; font-size:17px; }
 
     .search-box {
-      margin-top:24px; background:rgba(248,250,252,.92);
-      border:1px solid var(--line); border-radius:24px; padding:14px;
+      margin-top:24px; background:rgba(248,250,252,.92); border:1px solid var(--line);
+      border-radius:24px; padding:14px;
     }
-
     .chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
-
     .chip {
-      background:#fff; border:1px solid var(--line); color:#475569;
-      border-radius:999px; padding:8px 12px; font-size:12px; font-weight:600;
+      background:#fff; border:1px solid var(--line); color:#475569; border-radius:999px;
+      padding:8px 12px; font-size:12px; font-weight:600;
     }
-    .chip.gold { background:#fffbeb; border-color:#fde68a; color:#b45309; }
     .chip.green { background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
 
     .controls {
       display:grid; grid-template-columns:1.4fr .8fr .8fr auto; gap:12px;
     }
-
     .field, .select, .search-btn {
       height:50px; border-radius:18px; border:1px solid var(--line); font-size:15px;
     }
-
     .field, .select { background:#fff; padding:0 14px; width:100%; }
     .search-btn {
-      border:none; background:var(--dark); color:#fff;
-      font-weight:700; padding:0 18px; cursor:pointer;
+      border:none; background:var(--dark); color:#fff; font-weight:700; padding:0 18px; cursor:pointer;
     }
 
     .hero-right {
-      position:relative; overflow:hidden; color:#fff; padding:32px;
-      background:linear-gradient(135deg, #0284c7, #06b6d4 45%, #10b981);
+      color:#fff; padding:32px; background:linear-gradient(135deg, #0284c7, #06b6d4 45%, #10b981);
     }
-
-    .stats {
-      margin-top:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
-    }
-
-    .stat {
-      border-radius:24px; background:rgba(255,255,255,.14);
-      padding:16px;
-    }
-
+    .stats { margin-top:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .stat { border-radius:24px; background:rgba(255,255,255,.14); padding:16px; }
     .stat-label { font-size:14px; color:rgba(255,255,255,.84); }
     .stat-value { margin-top:8px; font-size:32px; font-weight:800; }
-
-    .hero-note {
-      margin-top:18px; border-radius:24px; background:rgba(255,255,255,.12);
-      padding:18px;
-    }
-
-    .hero-note-grid {
-      display:grid; grid-template-columns:repeat(2,1fr);
-      gap:10px; margin-top:14px;
-    }
-
-    .hero-note-item {
-      background:rgba(255,255,255,.10); border-radius:18px; padding:12px; font-size:14px;
-    }
 
     .content {
       margin-top:24px; display:grid; grid-template-columns:1.15fr .85fr; gap:24px; align-items:start;
     }
-
     .section-title {
-      display:flex; justify-content:space-between; align-items:end;
-      gap:12px; margin-bottom:16px;
+      display:flex; justify-content:space-between; align-items:end; gap:12px; margin-bottom:16px;
     }
-
     .section-title h2 { margin:0; font-size:30px; letter-spacing:-0.02em; }
     .section-title p { margin:6px 0 0; color:var(--muted); font-size:14px; }
-
     .badge {
-      background:#fff; border:1px solid var(--line); border-radius:999px;
-      padding:9px 12px; font-size:12px; font-weight:700; color:#475569;
+      background:#fff; border:1px solid var(--line); border-radius:999px; padding:9px 12px;
+      font-size:12px; font-weight:700; color:#475569;
     }
 
     .stations { display:flex; flex-direction:column; gap:14px; }
-
     .station {
       width:100%; text-align:left; border:1px solid rgba(255,255,255,.9); background:#fff;
       border-radius:26px; padding:18px; box-shadow:var(--soft-shadow); cursor:pointer;
-      transition:.2s ease;
     }
-
-    .station:hover { transform:translateY(-1px); }
     .station.active { background:#f0f9ff; border-color:#7dd3fc; }
-
-    .station-top {
-      display:flex; justify-content:space-between; gap:16px; align-items:flex-start;
-    }
-
+    .station-top { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
     .station-name-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .station-name { margin:0; font-size:20px; font-weight:700; }
-
     .tag {
-      background:#f1f5f9; color:#475569; border-radius:999px;
-      padding:6px 10px; font-size:12px; font-weight:700;
+      background:#f1f5f9; color:#475569; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700;
     }
-
     .tag.selected { background:#e0f2fe; color:#0369a1; }
     .address { margin-top:10px; color:#475569; font-size:14px; line-height:1.5; }
-
-    .amenities { margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
-    .amenity {
-      background:#f1f5f9; color:#475569; border-radius:999px;
-      padding:8px 12px; font-size:12px; font-weight:600;
-    }
-
     .meta {
-      margin-top:14px; display:flex; flex-wrap:wrap; gap:14px;
-      color:var(--muted); font-size:13px; font-weight:600;
+      margin-top:14px; display:flex; flex-wrap:wrap; gap:14px; color:var(--muted); font-size:13px; font-weight:600;
     }
 
     .price-panel { min-width:170px; display:grid; gap:10px; }
     .price-box, .distance-box { border-radius:18px; padding:14px; }
     .price-box { background:var(--dark); color:#fff; }
     .distance-box { background:#f1f5f9; color:#334155; }
-
     .mini-label { font-size:11px; text-transform:uppercase; letter-spacing:.08em; opacity:.75; }
     .big-price { margin-top:6px; font-size:34px; font-weight:800; }
     .big-distance { margin-top:6px; font-size:24px; font-weight:800; }
 
     .map-card {
-      position:sticky; top:88px; background:#fff;
-      border:1px solid rgba(255,255,255,.9); border-radius:28px;
-      overflow:hidden; box-shadow:var(--soft-shadow);
+      position:sticky; top:88px; background:#fff; border:1px solid rgba(255,255,255,.9);
+      border-radius:28px; overflow:hidden; box-shadow:var(--soft-shadow);
     }
-
     .map-head { padding:18px; border-bottom:1px solid #f1f5f9; }
     .map-head h3 { margin:0; font-size:24px; }
     .map-head p { margin:6px 0 0; color:var(--muted); font-size:14px; }
-
     .map-area {
-      position:relative; height:360px;
-      background:linear-gradient(135deg, #e0f2fe, #ecfeff 55%, #ecfdf5);
+      position:relative; height:360px; background:linear-gradient(135deg, #e0f2fe, #ecfeff 55%, #ecfdf5);
       overflow:hidden;
     }
-
     .map-grid {
       position:absolute; inset:0; opacity:.55;
       background-image:
@@ -216,77 +139,44 @@
         linear-gradient(90deg, rgba(148,163,184,.25) 1px, transparent 1px);
       background-size:28px 28px;
     }
-
     .pin { position:absolute; transform:translate(-50%,-50%); border:none; background:none; cursor:pointer; }
     .pin-bubble {
-      background:#fff; color:#334155; border-radius:999px;
-      padding:10px 12px; font-size:12px; font-weight:800;
-      box-shadow:0 10px 20px rgba(15,23,42,.12);
+      background:#fff; color:#334155; border-radius:999px; padding:10px 12px; font-size:12px;
+      font-weight:800; box-shadow:0 10px 20px rgba(15,23,42,.12);
     }
-
     .pin.active .pin-bubble { background:var(--dark); color:#fff; }
 
     .selected-card { padding:18px; }
     .selected-inner {
-      background:#f8fafc; border:1px solid var(--line);
-      border-radius:24px; padding:16px;
+      background:#f8fafc; border:1px solid var(--line); border-radius:24px; padding:16px;
     }
-
     .selected-label { color:var(--muted); font-size:13px; font-weight:700; }
     .selected-name { margin-top:6px; font-size:20px; font-weight:800; }
     .selected-address { margin-top:6px; color:#475569; font-size:14px; line-height:1.5; }
-
     .selected-stats {
       margin-top:16px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
     }
-
     .selected-stat {
-      background:#fff; border:1px solid var(--line);
-      border-radius:18px; padding:12px; text-align:center;
+      background:#fff; border:1px solid var(--line); border-radius:18px; padding:12px; text-align:center;
     }
-
     .selected-stat .label { font-size:12px; color:var(--muted); }
     .selected-stat .value { margin-top:6px; font-size:16px; font-weight:800; }
 
-    .bottom-info {
-      margin-top:28px; background:rgba(255,255,255,.88);
-      border:1px solid rgba(255,255,255,.9); border-radius:28px;
-      padding:24px; box-shadow:var(--soft-shadow);
-    }
-
-    .bottom-grid {
-      display:grid; grid-template-columns:1.1fr .9fr; gap:20px; align-items:center;
-    }
-
-    .bottom-grid h3 { margin:14px 0 0; font-size:34px; }
-    .bottom-grid p { margin:12px 0 0; color:#475569; line-height:1.7; }
-
-    .feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    .feature-box {
-      background:#f8fafc; border:1px solid var(--line);
-      border-radius:22px; padding:16px;
-    }
-    .feature-box .label { color:var(--muted); font-size:13px; }
-    .feature-box .value { margin-top:8px; font-weight:800; font-size:18px; }
-
     footer { padding:24px 0 40px; text-align:center; color:var(--muted); font-size:14px; }
-    footer strong { color:#334155; }
 
     @media (max-width: 1024px) {
-      .hero-grid, .content, .bottom-grid { grid-template-columns:1fr; }
+      .hero-grid, .content { grid-template-columns:1fr; }
       .map-card { position:static; }
       h1 { font-size:42px; }
     }
-
     @media (max-width: 760px) {
       .topbar-inner { align-items:flex-start; flex-direction:column; }
       .hero-left, .hero-right { padding:22px; }
       h1 { font-size:34px; }
-      .controls, .stats, .hero-note-grid, .feature-grid, .selected-stats { grid-template-columns:1fr; }
+      .controls, .stats, .selected-stats { grid-template-columns:1fr; }
       .section-title, .station-top { align-items:flex-start; flex-direction:column; }
       .price-panel { width:100%; min-width:0; grid-template-columns:1fr 1fr; }
       .map-area { height:300px; }
-      .bottom-grid h3 { font-size:28px; }
     }
   </style>
 </head>
@@ -307,20 +197,20 @@
     <section class="hero">
       <div class="hero-grid">
         <div class="hero-left">
-          <div class="pill blue">One page • mobile friendly • CSV-powered starter</div>
+          <div class="pill blue">One page • mobile friendly • CSV upload version</div>
           <h1>Find the cheapest nearby fuel in seconds</h1>
           <p class="hero-copy">
-            Search by town or postcode, choose a fuel type, and compare nearby stations by price, distance, or update time.
+            Search by town, postcode, station name, or any text found in your CSV upload.
           </p>
 
           <div class="search-box">
             <div class="chip-row">
-              <span class="chip">Government CSV starter</span>
-              <span class="chip gold">Real data with safe fallback</span>
+              <span class="chip">Local CSV file</span>
+              <span class="chip green">No expiring links</span>
             </div>
 
             <div class="controls">
-              <input id="searchInput" class="field" type="text" value="Manchester" placeholder="Enter postcode or town" />
+              <input id="searchInput" class="field" type="text" value="" placeholder="Enter town, postcode, or station" />
               <select id="fuelType" class="select">
                 <option>Petrol</option>
                 <option>Diesel</option>
@@ -332,10 +222,6 @@
                 <option>Recently updated</option>
               </select>
               <button id="searchBtn" class="search-btn">Search</button>
-            </div>
-
-            <div class="chip-row" style="margin-top:12px; margin-bottom:0;">
-              <span class="chip green">Ready to swap to the live API later</span>
             </div>
           </div>
         </div>
@@ -352,25 +238,12 @@
             <div class="stat">
               <div class="stat-label">Results found</div>
               <div class="stat-value" id="statCount">0</div>
-              <div class="stat-label">Within your search area</div>
+              <div class="stat-label">Rows loaded from CSV</div>
             </div>
             <div class="stat">
-              <div class="stat-label">Last update</div>
+              <div class="stat-label">CSV status</div>
               <div class="stat-value" id="statFreshest">--</div>
-              <div class="stat-label">Freshest price shown</div>
-            </div>
-          </div>
-
-          <div class="hero-note">
-            <div style="font-size:18px;font-weight:800;">Why this works well</div>
-            <div style="margin-top:6px;font-size:14px;color:rgba(255,255,255,.85);">
-              Everything a customer needs is visible immediately
-            </div>
-            <div class="hero-note-grid">
-              <div class="hero-note-item">Large prices that stand out</div>
-              <div class="hero-note-item">Very simple search controls</div>
-              <div class="hero-note-item">Responsive results cards</div>
-              <div class="hero-note-item">Map plus list on one page</div>
+              <div class="stat-label">Live from repo upload</div>
             </div>
           </div>
         </div>
@@ -382,7 +255,7 @@
         <div class="section-title">
           <div>
             <h2>Nearby stations</h2>
-            <p>Tap a station to highlight it on the map and compare prices quickly</p>
+            <p>Search works across all text found in the CSV rows</p>
           </div>
           <div class="badge" id="resultsBadge">0 matching results</div>
         </div>
@@ -393,7 +266,7 @@
       <aside class="map-card">
         <div class="map-head">
           <h3>Map view</h3>
-          <p>A simple visual area to support the list, not compete with it</p>
+          <p>Simple visual support for the list</p>
         </div>
         <div class="map-area">
           <div class="map-grid"></div>
@@ -405,34 +278,6 @@
       </aside>
     </section>
 
-    <section class="bottom-info">
-      <div class="bottom-grid">
-        <div>
-          <div class="pill blue">Built for launch version 1</div>
-          <h3>Simple, clear, and ready for your first users</h3>
-          <p>
-            This one-page website keeps things easy for customers: search by postcode or town, compare prices quickly,
-            and tap stations to view them on the map.
-          </p>
-        </div>
-
-        <div class="feature-grid">
-          <div class="feature-box">
-            <div class="label">Search</div>
-            <div class="value">Town or postcode</div>
-          </div>
-          <div class="feature-box">
-            <div class="label">Compare</div>
-            <div class="value">Price and distance</div>
-          </div>
-          <div class="feature-box">
-            <div class="label">View</div>
-            <div class="value">List plus map</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <footer>
       <strong>Petrol Prices UK</strong><br>
       Helping drivers find better fuel prices across the UK.
@@ -440,7 +285,8 @@
   </main>
 
   <script>
-    // If the CSV fetch fails, the site still works with these starter stations.
+    const CSV_URL = "./access-latest-fuelprices.csv";
+
     const fallbackStations = [
       {
         id: 1,
@@ -453,71 +299,10 @@
         updatedMins: 12,
         distance: 0.6,
         pin: { x: "18%", y: "24%" },
-        amenities: ["Pay at pump", "Coffee", "Toilets"],
-        prices: { "Petrol": 136.9, "Diesel": 141.5, "Premium Petrol": 149.9 }
-      },
-      {
-        id: 2,
-        name: "Tesco Petrol Filling Station",
-        brand: "Tesco",
-        town: "Manchester",
-        postcode: "M1 1AE",
-        address: "Kingsway Retail Park, Manchester",
-        open: "Open until 11pm",
-        updatedMins: 8,
-        distance: 1.1,
-        pin: { x: "58%", y: "18%" },
-        amenities: ["Supermarket", "Air", "Car wash"],
-        prices: { "Petrol": 137.4, "Diesel": 140.9, "Premium Petrol": 148.6 }
-      },
-      {
-        id: 3,
-        name: "bp Chorlton",
-        brand: "bp",
-        town: "Manchester",
-        postcode: "M21 8DG",
-        address: "Wilbraham Road, Manchester",
-        open: "Open until midnight",
-        updatedMins: 21,
-        distance: 1.8,
-        pin: { x: "32%", y: "52%" },
-        amenities: ["Food shop", "EV charging", "Open late"],
-        prices: { "Petrol": 138.1, "Diesel": 141.3, "Premium Petrol": 150.2 }
-      },
-      {
-        id: 4,
-        name: "Asda Eastlands Petrol",
-        brand: "Asda",
-        town: "Manchester",
-        postcode: "M11 3FF",
-        address: "Ashton New Road, Manchester",
-        open: "Open 24 hours",
-        updatedMins: 18,
-        distance: 2.2,
-        pin: { x: "72%", y: "56%" },
-        amenities: ["Supermarket", "Car wash", "Open 24 hours"],
-        prices: { "Petrol": 138.6, "Diesel": 141.1, "Premium Petrol": 149.4 }
-      },
-      {
-        id: 5,
-        name: "Esso Retail Park",
-        brand: "Esso",
-        town: "Manchester",
-        postcode: "M15 4RP",
-        address: "Chester Road, Manchester",
-        open: "Open until 11pm",
-        updatedMins: 5,
-        distance: 1.4,
-        pin: { x: "48%", y: "72%" },
-        amenities: ["Pay at pump", "Toilets", "Food shop"],
-        prices: { "Petrol": 139.7, "Diesel": 142.4, "Premium Petrol": 149.9 }
+        prices: { "Petrol": 136.9, "Diesel": 141.5, "Premium Petrol": 149.9 },
+        searchText: "shell london road manchester m1 1ae 214 london road manchester"
       }
     ];
-
-    // Replace this when you have the exact CSV download URL you want to use.
-    // GOV.UK says Fuel Finder data is available by CSV download, updated twice daily,
-    // and the API route is separate and requires OAuth client-credentials auth. :contentReference[oaicite:0]{index=0}
-    const CSV_URL = "access-latest-fuelprices";
 
     const searchInput = document.getElementById("searchInput");
     const fuelType = document.getElementById("fuelType");
@@ -533,6 +318,7 @@
 
     let stationsData = [...fallbackStations];
     let selectedId = 1;
+    let csvLoaded = false;
 
     function parseCsvLine(line) {
       const result = [];
@@ -560,68 +346,88 @@
       return result;
     }
 
-    async function loadCsvData() {
-      if (!CSV_URL) return;
+    function findHeaderIndex(headers, names) {
+      for (const name of names) {
+        const idx = headers.findIndex(h => h.includes(name));
+        if (idx !== -1) return idx;
+      }
+      return -1;
+    }
 
+    async function loadCsvData() {
       try {
         const response = await fetch(CSV_URL);
         if (!response.ok) throw new Error("CSV fetch failed");
 
         const text = await response.text();
-        const lines = text.trim().split(/\r?\n/);
-        if (lines.length < 2) return;
+        const lines = text.trim().split(/\r?\n/).filter(Boolean);
+        if (lines.length < 2) throw new Error("CSV empty");
 
         const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
 
-        const findHeader = (possibleNames) => {
-          for (const name of possibleNames) {
-            const idx = headers.findIndex(h => h.includes(name));
-            if (idx !== -1) return idx;
-          }
-          return -1;
-        };
-
-        const nameIdx = findHeader(["name", "site", "station"]);
-        const brandIdx = findHeader(["brand", "operator"]);
-        const townIdx = findHeader(["town", "city"]);
-        const postcodeIdx = findHeader(["postcode", "post code"]);
-        const addressIdx = findHeader(["address"]);
-        const petrolIdx = findHeader(["regular_petrol", "petrol", "unleaded"]);
-        const dieselIdx = findHeader(["regular_diesel", "diesel"]);
-        const premiumIdx = findHeader(["premium_petrol", "super unleaded", "premium"]);
+        const nameIdx = findHeaderIndex(headers, ["site_name", "name", "station", "site"]);
+        const brandIdx = findHeaderIndex(headers, ["brand", "operator"]);
+        const townIdx = findHeaderIndex(headers, ["town", "city", "area"]);
+        const postcodeIdx = findHeaderIndex(headers, ["postcode", "post code"]);
+        const addressIdx = findHeaderIndex(headers, ["address", "street"]);
+        const petrolIdx = findHeaderIndex(headers, ["regular_petrol", "petrol", "unleaded", "e10"]);
+        const dieselIdx = findHeaderIndex(headers, ["regular_diesel", "diesel", "b7"]);
+        const premiumIdx = findHeaderIndex(headers, ["premium_petrol", "super unleaded", "premium", "e5"]);
 
         const parsed = lines.slice(1).map((line, i) => {
           const cols = parseCsvLine(line);
+          const rowText = cols.join(" ").toLowerCase();
+
+          const name =
+            (nameIdx !== -1 ? cols[nameIdx] : "") ||
+            (brandIdx !== -1 ? cols[brandIdx] : "") ||
+            `Station ${i + 1}`;
+
+          const brand = (brandIdx !== -1 ? cols[brandIdx] : "") || "Fuel Station";
+          const town = (townIdx !== -1 ? cols[townIdx] : "") || "";
+          const postcode = (postcodeIdx !== -1 ? cols[postcodeIdx] : "") || "";
+          const address =
+            (addressIdx !== -1 ? cols[addressIdx] : "") ||
+            [town, postcode].filter(Boolean).join(" ");
 
           return {
             id: i + 1,
-            name: cols[nameIdx] || `Station ${i + 1}`,
-            brand: cols[brandIdx] || "Fuel Station",
-            town: cols[townIdx] || "",
-            postcode: cols[postcodeIdx] || "",
-            address: cols[addressIdx] || cols[townIdx] || "",
+            name,
+            brand,
+            town,
+            postcode,
+            address,
             open: "Check site",
-            updatedMins: Math.floor(Math.random() * 30) + 1,
-            distance: Number((Math.random() * 5 + 0.4).toFixed(1)),
+            updatedMins: (i % 25) + 1,
+            distance: Number((0.5 + (i % 7) * 0.6).toFixed(1)),
             pin: {
               x: `${18 + (i % 5) * 14}%`,
               y: `${24 + (i % 4) * 16}%`
             },
-            amenities: ["Fuel"],
             prices: {
-              "Petrol": Number(cols[petrolIdx]) || 0,
-              "Diesel": Number(cols[dieselIdx]) || 0,
-              "Premium Petrol": Number(cols[premiumIdx]) || 0
-            }
+              "Petrol": petrolIdx !== -1 ? Number(cols[petrolIdx]) || 0 : 0,
+              "Diesel": dieselIdx !== -1 ? Number(cols[dieselIdx]) || 0 : 0,
+              "Premium Petrol": premiumIdx !== -1 ? Number(cols[premiumIdx]) || 0 : 0
+            },
+            searchText: rowText
           };
-        }).filter(station => station.name);
+        }).filter(station =>
+          station.name ||
+          station.address ||
+          station.town ||
+          station.postcode
+        );
 
         if (parsed.length) {
           stationsData = parsed;
           selectedId = parsed[0].id;
+          csvLoaded = true;
+        } else {
+          throw new Error("No rows parsed");
         }
       } catch (error) {
         console.log("Using fallback data:", error.message);
+        csvLoaded = false;
       }
     }
 
@@ -636,42 +442,27 @@
           price: station.prices[chosenFuel]
         }))
         .filter(station => {
-          const matchesQuery =
-            station.name.toLowerCase().includes(q) ||
-            station.brand.toLowerCase().includes(q) ||
-            station.town.toLowerCase().includes(q) ||
-            station.postcode.toLowerCase().includes(q) ||
-            station.address.toLowerCase().includes(q) ||
-            q === "";
-
+          const matchesQuery = q === "" || station.searchText.includes(q);
           const hasPrice = station.price && station.price > 0;
           return matchesQuery && hasPrice;
         });
 
-      if (chosenSort === "Lowest price") {
-        results.sort((a, b) => a.price - b.price);
-      } else if (chosenSort === "Nearest") {
-        results.sort((a, b) => a.distance - b.distance);
-      } else if (chosenSort === "Recently updated") {
-        results.sort((a, b) => a.updatedMins - b.updatedMins);
-      }
+      if (chosenSort === "Lowest price") results.sort((a, b) => a.price - b.price);
+      if (chosenSort === "Nearest") results.sort((a, b) => a.distance - b.distance);
+      if (chosenSort === "Recently updated") results.sort((a, b) => a.updatedMins - b.updatedMins);
 
       return results;
     }
 
     function render() {
       const results = getFilteredStations();
-      if (!results.find(s => s.id === selectedId) && results.length) {
-        selectedId = results[0].id;
-      }
+      if (!results.find(s => s.id === selectedId) && results.length) selectedId = results[0].id;
       const selected = results.find(s => s.id === selectedId) || null;
 
       resultsBadgeEl.textContent = `${results.length} matching results`;
       statCountEl.textContent = results.length;
       statCheapestEl.textContent = results.length ? `${results[0].price.toFixed(1)}p` : "--";
-      statFreshestEl.textContent = results.length
-        ? `${Math.min(...results.map(s => s.updatedMins))} min`
-        : "--";
+      statFreshestEl.textContent = csvLoaded ? "Loaded" : "Fallback";
 
       stationsEl.innerHTML = results.length
         ? results.map(station => `
@@ -683,13 +474,11 @@
                   <span class="tag">${station.brand}</span>
                   ${station.id === selectedId ? `<span class="tag selected">Selected</span>` : ""}
                 </div>
-                <div class="address">${station.address}</div>
-                <div class="amenities">
-                  ${station.amenities.map(item => `<span class="amenity">${item}</span>`).join("")}
-                </div>
+                <div class="address">${station.address || "Address not available"}</div>
                 <div class="meta">
+                  <span>${station.town || "Town not listed"}</span>
+                  <span>${station.postcode || "Postcode not listed"}</span>
                   <span>Updated ${station.updatedMins} mins ago</span>
-                  <span>${station.open}</span>
                 </div>
               </div>
               <div class="price-panel">
@@ -708,7 +497,7 @@
         : `
           <div class="station">
             <div class="station-name">No stations found</div>
-            <div class="address">Try another postcode, town, or fuel type.</div>
+            <div class="address">Try another search term from your CSV data.</div>
           </div>
         `;
 
@@ -723,19 +512,19 @@
       selectedCardEl.innerHTML = selected ? `
         <div class="selected-label">Selected station</div>
         <div class="selected-name">${selected.name}</div>
-        <div class="selected-address">${selected.address}</div>
+        <div class="selected-address">${selected.address || "Address not available"}</div>
         <div class="selected-stats">
           <div class="selected-stat">
             <div class="label">Price</div>
             <div class="value">${selected.price.toFixed(1)}p</div>
           </div>
           <div class="selected-stat">
-            <div class="label">Distance</div>
-            <div class="value">${selected.distance} mi</div>
+            <div class="label">Town</div>
+            <div class="value">${selected.town || "-"}</div>
           </div>
           <div class="selected-stat">
-            <div class="label">Updated</div>
-            <div class="value">${selected.updatedMins} min</div>
+            <div class="label">Postcode</div>
+            <div class="value">${selected.postcode || "-"}</div>
           </div>
         </div>
       ` : `
@@ -753,7 +542,6 @@
     searchInput.addEventListener("input", render);
     fuelType.addEventListener("change", render);
     sortBy.addEventListener("change", render);
-
     window.selectStation = selectStation;
 
     async function init() {
