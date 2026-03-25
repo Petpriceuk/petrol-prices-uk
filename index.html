@@ -43,7 +43,7 @@
 
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 
     body {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -585,22 +585,24 @@
       white-space: nowrap;
       padding: 10px 14px;
       border-radius: 999px;
-      background: #edf4ff;
-      color: #1e4f9c;
+      background: linear-gradient(135deg, #e0e7ff 0%, #eff6ff 100%);
+      color: #1e40af;
       font-size: 0.88rem;
       font-weight: 900;
-      border: 1px solid #d4e3ff;
+      border: 1px solid #c7d2fe;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.58), 0 10px 22px rgba(37,99,235,0.1);
     }
 
     .status-banner {
       margin-bottom: 16px;
       padding: 14px 16px;
       border-radius: 18px;
-      background: #fffdf9;
+      background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
       border: 1px solid #ecdcc4;
       color: #60526b;
       font-size: 0.94rem;
       line-height: 1.65;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
     }
 
     .stations {
@@ -1013,8 +1015,14 @@
     }
 
     .distance-card {
-      background: var(--panel-mint);
-      border-color: #cdeede;
+      background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 54%, #f8fbff 100%);
+      border-color: #bfdbfe;
+      box-shadow: 0 12px 24px rgba(37,99,235,0.1);
+    }
+
+    .distance-card .metric-label,
+    .distance-card .metric-value {
+      color: #1d4ed8;
     }
 
     .distance-stack {
@@ -1023,8 +1031,14 @@
     }
 
     .updated-card {
-      background: var(--panel-warm);
-      border-color: #f0debf;
+      background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);
+      border-color: #fcd9ae;
+      box-shadow: 0 12px 24px rgba(217,119,6,0.1);
+    }
+
+    .updated-card .metric-label,
+    .updated-card .metric-subvalue {
+      color: #b45309;
     }
 
     .estimate-card.compact {
@@ -1166,8 +1180,9 @@
     }
 
     .selected-stat.stat-distance {
-      background: #eff6ff;
+      background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
       border-color: #bfdbfe;
+      box-shadow: 0 10px 22px rgba(37,99,235,0.08);
     }
 
     .selected-stat.stat-distance .small,
@@ -1176,8 +1191,9 @@
     }
 
     .selected-stat.stat-fill {
-      background: #f5f1ff;
+      background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
       border-color: #ddd0ff;
+      box-shadow: 0 10px 22px rgba(109,40,217,0.08);
     }
 
     .selected-stat.stat-fill .small,
@@ -1186,8 +1202,9 @@
     }
 
 .selected-stat.stat-trip {
-  background: #ecfeff;
+  background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
   border-color: #a5f3fc;
+  box-shadow: 0 10px 22px rgba(13,148,136,0.08);
 }
 
 .selected-stat.stat-trip .small,
@@ -1752,26 +1769,40 @@
     }
 
     .summary-chip,
+    .results-badge,
+    .status-banner,
+    .distance-card,
+    .updated-card,
     .estimate-card.fill,
     .estimate-card.trip,
     .supporting-pill.status-open,
     .supporting-pill.status-closed,
     .supporting-pill.status-unknown,
     .fuel-code,
-    .selected-badge {
+    .selected-badge,
+    .selected-stat.stat-distance,
+    .selected-stat.stat-fill,
+    .selected-stat.stat-trip {
       position: relative;
       overflow: hidden;
       isolation: isolate;
     }
 
     .summary-chip::after,
+    .results-badge::after,
+    .status-banner::after,
+    .distance-card::after,
+    .updated-card::after,
     .estimate-card.fill::after,
     .estimate-card.trip::after,
     .supporting-pill.status-open::after,
     .supporting-pill.status-closed::after,
     .supporting-pill.status-unknown::after,
     .fuel-code::after,
-    .selected-badge::after {
+    .selected-badge::after,
+    .selected-stat.stat-distance::after,
+    .selected-stat.stat-fill::after,
+    .selected-stat.stat-trip::after {
       content: "";
       position: absolute;
       inset: 0;
@@ -1781,12 +1812,19 @@
     }
 
     .summary-chip > *,
+    .results-badge > *,
+    .status-banner > *,
+    .distance-card > *,
+    .updated-card > *,
     .estimate-card.fill > *,
     .estimate-card.trip > *,
     .supporting-pill.status-open > *,
     .supporting-pill.status-closed > *,
     .supporting-pill.status-unknown > *,
-    .selected-badge > * {
+    .selected-badge > *,
+    .selected-stat.stat-distance > *,
+    .selected-stat.stat-fill > *,
+    .selected-stat.stat-trip > * {
       position: relative;
       z-index: 1;
     }
@@ -1845,6 +1883,15 @@
       .map-wrap {
         margin-bottom: 0;
       }
+    }
+
+    #pageTop {
+      scroll-margin-top: 0;
+    }
+
+    main.wrap {
+      padding-top: 18px;
+      padding-bottom: 32px;
     }
 
   </style>
@@ -2183,7 +2230,10 @@
       mobileFuelType: document.getElementById("mobileFuelType"),
       mobileSortBy: document.getElementById("mobileSortBy"),
       mobileRadiusMiles: document.getElementById("mobileRadiusMiles"),
-      mobileLocateBtn: document.getElementById("mobileLocateBtn")
+      mobileLocateBtn: document.getElementById("mobileLocateBtn"),
+      summaryCard: document.getElementById("summaryCard"),
+      topbar: document.querySelector(".topbar"),
+      brandHomeLink: document.querySelector(".brand-home-link")
     };
 
     const state = {
@@ -2919,7 +2969,7 @@
         const selectedClass = station.id === state.selectedId ? "active" : "";
         const tags = buildStationTags(station);
         const amenities = station.amenities.slice(0, 6);
-        const lastUpdated = station.updatedText;
+        const lastUpdated = formatAbsoluteDate(station.updatedAt);
         const phoneHtml = station.phone ? `<a class="supporting-pill" href="tel:${escapeHtml(station.phone.replace(/\s+/g, ''))}" onclick="event.stopPropagation()">📞 Call site</a>` : "";
         const directionsUrl = getDirectionsUrl(station);
 
@@ -2959,7 +3009,6 @@
 
                 <div class="supporting-row">
                   <span class="supporting-pill ${station.openState.className}">🕒 ${escapeHtml(station.openState.text)}</span>
-                  <span class="supporting-pill">⏱ Official UK Gov Fuel Data • ${escapeHtml(lastUpdated)}</span>
                   ${phoneHtml}
                 </div>
               </div>
@@ -2987,7 +3036,7 @@
                   </div>
                 </div>
                 <div class="updated-card">
-                  <div class="metric-label">Official UK Gov Fuel Data</div>
+                  <div class="metric-label">Last Update - Official UK Gov Fuel Data</div>
                   <div class="metric-subvalue">${escapeHtml(formatAbsoluteDate(station.updatedAt))}</div>
                 </div>
                 <a class="directions-link" href="${directionsUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Get directions</a>
@@ -3139,6 +3188,21 @@
       updateMap();
     }
 
+    function getStickyOffset(extra = 12) {
+      const topbarHeight = elements.topbar ? elements.topbar.offsetHeight : 0;
+      return topbarHeight + extra;
+    }
+
+    function smoothScrollToElement(element, extra = 12) {
+      if (!element) return;
+      const top = Math.max(0, window.pageYOffset + element.getBoundingClientRect().top - getStickyOffset(extra));
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+
+    function scrollToPageTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
     function shouldReuseCurrentLocationQuery(rawQuery) {
       return state.lastSearchMode === "browser location" && (!rawQuery || /^(using your current location|your location)$/i.test(rawQuery.trim()));
     }
@@ -3185,10 +3249,7 @@
         renderAll();
 
         if (scrollToSummary) {
-          requestAnimationFrame(() => {
-            const summaryCard = document.getElementById("summaryCard");
-            if (summaryCard) summaryCard.scrollIntoView({ behavior: "smooth", block: "start" });
-          });
+          requestAnimationFrame(() => smoothScrollToElement(elements.summaryCard, 12));
         }
       } catch (error) {
         state.results = [];
@@ -3232,6 +3293,7 @@
     }
 
     function useCurrentLocation() {
+      smoothScrollToElement(elements.summaryCard, 12);
       if (!navigator.geolocation) {
         setStatus("Location is not supported in this browser.", true);
         return;
@@ -3315,6 +3377,12 @@
     }
     if (elements.mobileLocateBtn) {
       elements.mobileLocateBtn.addEventListener("click", useCurrentLocation);
+    }
+    if (elements.brandHomeLink) {
+      elements.brandHomeLink.addEventListener("click", event => {
+        event.preventDefault();
+        scrollToPageTop();
+      });
     }
     elements.tankSize.addEventListener("input", rerunCurrentSearch);
     elements.fuelEconomy.addEventListener("input", rerunCurrentSearch);
