@@ -1720,6 +1720,111 @@
         font-size: 0.92rem;
       }
     }
+  
+
+    /* Final polish overrides */
+    .brand-icon {
+      background:
+        radial-gradient(circle at 24% 20%, rgba(255,255,255,0.24), transparent 30%),
+        linear-gradient(155deg, #0f2748 0%, #173f72 46%, #2563eb 100%);
+    }
+
+    .summary-chip,
+    .estimate-card.fill,
+    .estimate-card.trip,
+    .supporting-pill.status-open,
+    .supporting-pill.status-closed,
+    .supporting-pill.status-unknown,
+    .fuel-code,
+    .selected-badge {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .summary-chip::after,
+    .estimate-card.fill::after,
+    .estimate-card.trip::after,
+    .supporting-pill.status-open::after,
+    .supporting-pill.status-closed::after,
+    .supporting-pill.status-unknown::after,
+    .fuel-code::after,
+    .selected-badge::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0.02) 50%, transparent 72%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .summary-chip > *,
+    .estimate-card.fill > *,
+    .estimate-card.trip > *,
+    .supporting-pill.status-open > *,
+    .supporting-pill.status-closed > *,
+    .supporting-pill.status-unknown > *,
+    .selected-badge > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .summary-chip {
+      background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+      border-color: rgba(196,181,253,0.65);
+      color: #ffffff;
+      box-shadow: 0 14px 28px rgba(109,40,217,0.22);
+    }
+
+    .supporting-pill.status-open {
+      background: linear-gradient(135deg, #15803d 0%, #22c55e 100%);
+      color: #ffffff;
+      border-color: rgba(187,247,208,0.45);
+      box-shadow: 0 10px 22px rgba(22,163,74,0.18);
+    }
+
+    .supporting-pill.status-closed {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: #ffffff;
+      border-color: rgba(254,202,202,0.55);
+      box-shadow: 0 10px 22px rgba(220,38,38,0.18);
+    }
+
+    .supporting-pill.status-unknown {
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      color: #ffffff;
+      border-color: rgba(203,213,225,0.58);
+      box-shadow: 0 10px 22px rgba(71,85,105,0.18);
+    }
+
+    .estimate-card.fill {
+      background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+      border-color: #d8b4fe;
+      box-shadow: 0 12px 24px rgba(109,40,217,0.10);
+    }
+
+    .estimate-card.trip {
+      background: linear-gradient(135deg, #ecfeff 0%, #f0fdfa 100%);
+      border-color: #67e8f9;
+      box-shadow: 0 12px 24px rgba(13,148,136,0.10);
+    }
+
+    .code-e10 { background: linear-gradient(135deg, #15803d 0%, #22c55e 100%); }
+    .code-e5 { background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); }
+    .code-b7 { background: linear-gradient(135deg, #111827 0%, #374151 100%); }
+    .code-sd { background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); }
+
+    @media (max-width: 960px) {
+      .map-panel #selectedCard,
+      .map-panel .map-note {
+        display: none !important;
+      }
+
+      .map-wrap {
+        margin-bottom: 0;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1727,12 +1832,15 @@
     <div class="wrap topbar-inner">
       <div class="brand-lockup">
         <div class="brand-icon" aria-hidden="true">
-          <svg class="brand-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="32" cy="32" r="22" stroke="rgba(255,255,255,0.92)" stroke-width="3"/>
-            <path d="M32 16v8M32 40v8M16 32h8M40 32h8" stroke="rgba(255,255,255,0.9)" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="32" cy="32" r="6.5" fill="#34d399" stroke="white" stroke-width="2.2"/>
-            <path d="M31.7 22.5c4 0 7.3 3.2 7.3 7.2 0 4.9-5.5 9.6-6.7 10.5a1.1 1.1 0 0 1-1.3 0c-1.2-.9-6.7-5.6-6.7-10.5 0-4 3.3-7.2 7.4-7.2Z" fill="white"/>
-            <circle cx="32" cy="29.8" r="2.4" fill="#173f72"/>
+          <svg class="brand-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="18" y="10" width="20" height="36" rx="6" fill="white" fill-opacity="0.96"/>
+            <rect x="22" y="15" width="12" height="9" rx="2.5" fill="#1d4ed8" fill-opacity="0.95"/>
+            <rect x="22" y="28" width="12" height="3.5" rx="1.75" fill="#f59e0b"/>
+            <rect x="25" y="33.5" width="6" height="9.5" rx="2.2" fill="#0f172a" fill-opacity="0.18"/>
+            <path d="M38 18.5h5.2c2.2 0 4 1.8 4 4v17.7c0 2.1-1.7 3.8-3.8 3.8h-2.1" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M47.2 23.5v8.8c0 1.4-1.1 2.5-2.5 2.5H42" stroke="#86efac" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18 46h24" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            <path d="M49.2 46.5c0 2.4-1.9 4.1-4.1 4.1-2.2 0-4.1-1.7-4.1-4.1 0-2.2 2.3-4.9 3.4-6.1.4-.4 1-.4 1.4 0 1.1 1.2 3.4 3.9 3.4 6.1Z" fill="#22c55e" stroke="white" stroke-width="1.5"/>
           </svg>
         </div>
         <div>
@@ -1805,7 +1913,7 @@
           <div id="searchStatus" class="notice" style="margin-top: 12px;">Enter a location to start comparing nearby fuel prices.</div>
         </div>
 
-        <div class="summary-card">
+        <div id="summaryCard" class="summary-card">
           <div class="summary-title-row">
             <div>
               <h2>Live search summary</h2>
@@ -2063,7 +2171,8 @@
       searchCenter: null,
       searchLabel: "",
       lastSearchMode: "none",
-      lastResolvedQuery: ""
+      lastResolvedQuery: "",
+      lastLocateInputLabel: "Using your current location"
     };
 
     const map = L.map("map", {
@@ -2994,7 +3103,11 @@
       registerRevealItems();
     }
 
-    async function performSearch({ useCurrentLocation = false, coords = null } = {}) {
+    function shouldReuseCurrentLocationQuery(rawQuery) {
+      return state.lastSearchMode === "browser location" && (!rawQuery || /^(using your current location|your location)$/i.test(rawQuery.trim()));
+    }
+
+    async function performSearch({ useCurrentLocation = false, coords = null, scrollToSummary = false } = {}) {
       const fuelCode = elements.fuelType.value;
       const sortBy = elements.sortBy.value;
       try {
@@ -3002,6 +3115,8 @@
         elements.locateBtn.disabled = true;
 
         let resolved;
+        const rawQuery = elements.searchInput.value.trim();
+
         if (useCurrentLocation && coords) {
           resolved = {
             lat: coords.latitude,
@@ -3009,9 +3124,17 @@
             label: "your location",
             source: "browser location"
           };
-          elements.searchInput.value = "Using your current location";
+          elements.searchInput.value = state.lastLocateInputLabel;
+        } else if (shouldReuseCurrentLocationQuery(rawQuery) && state.searchCenter) {
+          resolved = {
+            lat: state.searchCenter.lat,
+            lng: state.searchCenter.lng,
+            label: state.searchLabel || "your location",
+            source: "browser location"
+          };
+          elements.searchInput.value = state.lastLocateInputLabel;
         } else {
-          const query = normalizeQuery(elements.searchInput.value);
+          const query = normalizeQuery(rawQuery);
           resolved = await resolveSearchLocation(query);
           state.lastResolvedQuery = query;
         }
@@ -3024,6 +3147,13 @@
         state.results = calculateResults(state.searchCenter, fuelCode, sortBy);
         state.selectedId = state.results.length ? state.results[0].id : null;
         renderAll();
+
+        if (scrollToSummary) {
+          requestAnimationFrame(() => {
+            const summaryCard = document.getElementById("summaryCard");
+            if (summaryCard) summaryCard.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }
       } catch (error) {
         state.results = [];
         state.selectedId = null;
@@ -3135,7 +3265,7 @@ function registerRevealItems() {
       }
     }
 
-    elements.searchBtn.addEventListener("click", () => performSearch());
+    elements.searchBtn.addEventListener("click", () => performSearch({ scrollToSummary: true }));
     elements.locateBtn.addEventListener("click", useCurrentLocation);
     elements.fuelType.addEventListener("change", () => {
       syncQuickFilters("desktop");
@@ -3173,7 +3303,7 @@ function registerRevealItems() {
     elements.tankSize.addEventListener("input", rerunCurrentSearch);
     elements.fuelEconomy.addEventListener("input", rerunCurrentSearch);
     elements.searchInput.addEventListener("keydown", event => {
-      if (event.key === "Enter") performSearch();
+      if (event.key === "Enter") performSearch({ scrollToSummary: true });
     });
 
     syncQuickFilters("desktop");
