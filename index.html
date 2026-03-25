@@ -1259,6 +1259,10 @@
         grid-template-columns: 1fr;
       }
 
+      .layout {
+        gap: 18px;
+      }
+
       .guide-grid {
         display: none;
       }
@@ -1266,10 +1270,19 @@
       .map-panel {
         position: static;
         order: 1;
+        height: auto;
+        min-height: auto;
       }
 
       .results-panel {
         order: 2;
+        height: auto;
+        min-height: auto;
+        overflow: visible;
+      }
+
+      .stations {
+        flex: none;
       }
 
       .search-grid {
@@ -1328,6 +1341,19 @@
         align-items: flex-start;
       }
 
+      .section-head {
+        margin-bottom: 18px;
+      }
+
+      .status-banner {
+        margin-bottom: 18px;
+      }
+
+      .stations {
+        gap: 12px;
+        margin-top: 2px;
+      }
+
       .search-grid,
       .planner-grid,
       .pricing-panel,
@@ -1370,11 +1396,19 @@
         padding: 0 14px;
       }
 
+      .layout {
+        gap: 16px;
+      }
+
       .hero-panel,
       .results-panel,
       .map-panel,
       .guide-card {
         padding: 18px;
+      }
+
+      .results-panel {
+        margin-top: 0;
       }
 
       .header-pill {
@@ -1568,7 +1602,7 @@
         <div class="section-head">
           <div>
             <h2>Nearby petrol stations</h2>
-            <p class="section-copy">Cards show the brand first, then the trading name, full address, rank, opening status, fuel prices, travel cost and directions for quick comparison.</p>
+            <p class="section-copy">See each station clearly with brand, location, live fuel prices, opening status, estimated travel costs and quick directions in one place.</p>
           </div>
           <div id="resultsBadge" class="results-badge">0 results</div>
         </div>
