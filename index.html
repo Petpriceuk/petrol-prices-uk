@@ -569,6 +569,13 @@
       flex-wrap: wrap;
     }
 
+    .results-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 16px;
+    }
+
     .section-head > * {
       min-width: 0;
     }
@@ -590,10 +597,11 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      white-space: normal;
+      white-space: nowrap;
       text-align: center;
       line-height: 1.25;
       max-width: 100%;
+      min-width: max-content;
       flex-shrink: 0;
       padding: 10px 14px;
       border-radius: 999px;
@@ -1609,8 +1617,14 @@
         margin-bottom: 18px;
       }
 
+      .results-head {
+        display: flex;
+      }
+
       .results-badge {
-        width: 100%;
+        width: auto;
+        min-width: 0;
+        white-space: normal;
       }
 
       .status-banner {
@@ -2056,7 +2070,7 @@
 
     <section class="layout">
       <section class="results-panel">
-        <div class="section-head">
+        <div class="section-head results-head">
           <div>
             <h2>Nearby petrol stations</h2>
             <p class="section-copy">See each station clearly with brand, location, live fuel prices, opening status, estimated travel costs and quick directions in one place.</p>
@@ -3318,23 +3332,27 @@
     window.selectStation = selectStation;
     window.handleCardKey = handleCardKey;
 
-    function rerunCurrentSearch() {
+    function rerunCurrentSearch({ resetSelection = false } = {}) {
       if (!state.searchCenter) {
         renderAll();
         return;
       }
       state.results = calculateResults(state.searchCenter, elements.fuelType.value, elements.sortBy.value);
-      state.selectedId = state.results.length ? (state.results.some(item => item.id === state.selectedId) ? state.selectedId : state.results[0].id) : null;
+      if (!state.results.length) {
+        state.selectedId = null;
+      } else if (resetSelection || !state.results.some(item => item.id === state.selectedId)) {
+        state.selectedId = state.results[0].id;
+      }
       renderAll();
     }
 
-    async function refreshDataAndRerunCurrentSearch() {
+    async function refreshDataAndRerunCurrentSearch({ resetSelection = false } = {}) {
       try {
         await loadCsvData();
       } catch (error) {
         console.warn("Using existing loaded fuel data.", error);
       }
-      rerunCurrentSearch();
+      rerunCurrentSearch({ resetSelection });
     }
 
     function useCurrentLocation() {
@@ -3391,32 +3409,32 @@
     });
     elements.fuelType.addEventListener("change", async () => {
       syncQuickFilters("desktop");
-      await refreshDataAndRerunCurrentSearch();
+      await refreshDataAndRerunCurrentSearch({ resetSelection: true });
     });
     elements.sortBy.addEventListener("change", async () => {
       syncQuickFilters("desktop");
-      await refreshDataAndRerunCurrentSearch();
+      await refreshDataAndRerunCurrentSearch({ resetSelection: true });
     });
     elements.radiusMiles.addEventListener("change", async () => {
       syncQuickFilters("desktop");
-      await refreshDataAndRerunCurrentSearch();
+      await refreshDataAndRerunCurrentSearch({ resetSelection: true });
     });
     if (elements.mobileFuelType) {
       elements.mobileFuelType.addEventListener("change", async () => {
         syncQuickFilters("mobile");
-        await refreshDataAndRerunCurrentSearch();
+        await refreshDataAndRerunCurrentSearch({ resetSelection: true });
       });
     }
     if (elements.mobileSortBy) {
       elements.mobileSortBy.addEventListener("change", async () => {
         syncQuickFilters("mobile");
-        await refreshDataAndRerunCurrentSearch();
+        await refreshDataAndRerunCurrentSearch({ resetSelection: true });
       });
     }
     if (elements.mobileRadiusMiles) {
       elements.mobileRadiusMiles.addEventListener("change", async () => {
         syncQuickFilters("mobile");
-        await refreshDataAndRerunCurrentSearch();
+        await refreshDataAndRerunCurrentSearch({ resetSelection: true });
       });
     }
     if (elements.mobileLocateBtn) {
