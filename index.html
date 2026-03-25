@@ -1373,9 +1373,11 @@
       gap: 10px;
       padding: 12px;
       border-radius: 22px;
-      background: rgba(255,255,255,0.96);
-      border: 1px solid rgba(219,228,239,0.95);
-      box-shadow: 0 20px 40px rgba(28,43,71,0.16);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.18), transparent 28%),
+        linear-gradient(135deg, rgba(15,39,72,0.96) 0%, rgba(37,99,235,0.94) 52%, rgba(34,197,94,0.92) 100%);
+      border: 1px solid rgba(191,219,254,0.42);
+      box-shadow: 0 22px 44px rgba(15,23,42,0.26);
       backdrop-filter: blur(16px);
     }
 
@@ -1384,6 +1386,13 @@
       min-height: 50px;
       border-radius: 16px;
       padding: 0 14px;
+    }
+
+    .mobile-filter-dock .select {
+      background: rgba(255,255,255,0.96);
+      border-color: rgba(255,255,255,0.26);
+      color: #0f172a;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
     }
 
     .map-note {
@@ -1644,11 +1653,18 @@
       }
 
       .search-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
+      }
+
+      .search-grid #fuelType,
+      .search-grid #sortBy,
+      .search-grid #radiusMiles,
+      .search-grid #locateBtn {
+        display: none;
       }
 
       .search-grid .field,
-      .search-grid #locateBtn {
+      .search-grid #searchBtn {
         grid-column: 1 / -1;
       }
 
@@ -1727,11 +1743,18 @@
       }
 
       .search-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
+      }
+
+      .search-grid #fuelType,
+      .search-grid #sortBy,
+      .search-grid #radiusMiles,
+      .search-grid #locateBtn {
+        display: none;
       }
 
       .search-grid .field,
-      .search-grid #locateBtn {
+      .search-grid #searchBtn {
         grid-column: 1 / -1;
       }
 
@@ -3253,6 +3276,16 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    function isResponsiveMode() {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
+
+    function scrollToFirstStationInResults() {
+      const target = elements.stations.querySelector(".station-card") || elements.statusBanner || elements.stations;
+      if (!target) return;
+      smoothScrollToElement(target, 12);
+    }
+
     function shouldReuseCurrentLocationQuery(rawQuery) {
       return state.lastSearchMode === "browser location" && (!rawQuery || /^(using your current location|your location)$/i.test(rawQuery.trim()));
     }
@@ -3346,13 +3379,16 @@
       renderAll();
     }
 
-    async function refreshDataAndRerunCurrentSearch({ resetSelection = false } = {}) {
+    async function refreshDataAndRerunCurrentSearch({ resetSelection = false, scrollToFirstStationOnMobile = false } = {}) {
       try {
         await loadCsvData();
       } catch (error) {
         console.warn("Using existing loaded fuel data.", error);
       }
       rerunCurrentSearch({ resetSelection });
+      if (scrollToFirstStationOnMobile && isResponsiveMode() && state.searchCenter) {
+        requestAnimationFrame(() => scrollToFirstStationInResults());
+      }
     }
 
     function useCurrentLocation() {
@@ -3409,32 +3445,32 @@
     });
     elements.fuelType.addEventListener("change", async () => {
       syncQuickFilters("desktop");
-      await refreshDataAndRerunCurrentSearch({ resetSelection: true });
+      await refreshDataAndRerunCurrentSearch({ resetSelection: true, scrollToFirstStationOnMobile: true });
     });
     elements.sortBy.addEventListener("change", async () => {
       syncQuickFilters("desktop");
-      await refreshDataAndRerunCurrentSearch({ resetSelection: true });
+      await refreshDataAndRerunCurrentSearch({ resetSelection: true, scrollToFirstStationOnMobile: true });
     });
     elements.radiusMiles.addEventListener("change", async () => {
       syncQuickFilters("desktop");
-      await refreshDataAndRerunCurrentSearch({ resetSelection: true });
+      await refreshDataAndRerunCurrentSearch({ resetSelection: true, scrollToFirstStationOnMobile: true });
     });
     if (elements.mobileFuelType) {
       elements.mobileFuelType.addEventListener("change", async () => {
         syncQuickFilters("mobile");
-        await refreshDataAndRerunCurrentSearch({ resetSelection: true });
+        await refreshDataAndRerunCurrentSearch({ resetSelection: true, scrollToFirstStationOnMobile: true });
       });
     }
     if (elements.mobileSortBy) {
       elements.mobileSortBy.addEventListener("change", async () => {
         syncQuickFilters("mobile");
-        await refreshDataAndRerunCurrentSearch({ resetSelection: true });
+        await refreshDataAndRerunCurrentSearch({ resetSelection: true, scrollToFirstStationOnMobile: true });
       });
     }
     if (elements.mobileRadiusMiles) {
       elements.mobileRadiusMiles.addEventListener("change", async () => {
         syncQuickFilters("mobile");
-        await refreshDataAndRerunCurrentSearch({ resetSelection: true });
+        await refreshDataAndRerunCurrentSearch({ resetSelection: true, scrollToFirstStationOnMobile: true });
       });
     }
     if (elements.mobileLocateBtn) {
