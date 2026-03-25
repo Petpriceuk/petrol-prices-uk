@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Petrol Prices UK</title>
-  <meta name="description" content="Compare nearby petrol and diesel prices. Search by postcode, town or city, adjust your search radius, and check opening times, directions and forecourt details." />
+  <title>UK Petrol Prices</title>
+  <meta name="description" content="UK Petrol Prices helps drivers compare nearby petrol and diesel prices, opening times, directions and useful forecourt details." />
 
   <link
     rel="stylesheet"
@@ -43,6 +43,7 @@
 
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -86,34 +87,46 @@
       gap: 14px;
     }
 
-    .brand-icon {
-      width: 58px;
-      height: 58px;
-      border-radius: 20px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(150deg, #163560, #2563eb 58%, #38bdf8 100%);
-      box-shadow: 0 16px 34px rgba(36,68,109,0.24);
-      position: relative;
-      overflow: hidden;
-    }
+.brand-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 26% 22%, rgba(255,255,255,0.22), transparent 32%),
+    linear-gradient(155deg, #0f2748 0%, #173f72 52%, #2563eb 100%);
+  box-shadow: 0 18px 38px rgba(23,63,114,0.26);
+  position: relative;
+  overflow: hidden;
+}
 
-    .brand-icon::after {
-      content: "";
-      position: absolute;
-      inset: 1px;
-      border-radius: 19px;
-      border: 1px solid rgba(255,255,255,0.24);
-      pointer-events: none;
-    }
+.brand-icon::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 18px;
+  background: radial-gradient(circle at top, rgba(255,255,255,0.12), transparent 54%);
+  border: 1px solid rgba(255,255,255,0.12);
+}
 
-    .brand-mark {
-      width: 34px;
-      height: 34px;
-      display: block;
-      position: relative;
-      z-index: 1;
-    }
+.brand-icon::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 21px;
+  border: 1px solid rgba(255,255,255,0.18);
+  pointer-events: none;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  display: block;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
+}
 
     .brand-title {
       margin: 0;
@@ -298,18 +311,18 @@
       box-shadow: 0 12px 28px rgba(36,68,109,0.18);
     }
 
-    .btn-secondary,
-    .btn-locate {
-      border: none;
-      color: #fff;
-      background: linear-gradient(135deg, #7c3aed, #2563eb);
-      box-shadow: 0 14px 28px rgba(99, 102, 241, 0.24);
-    }
+.btn-secondary,
+.btn-locate {
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 55%, #0ea5e9 100%);
+  box-shadow: 0 16px 32px rgba(79, 70, 229, 0.28);
+}
 
-    .btn-secondary:hover,
-    .btn-locate:hover {
-      box-shadow: 0 18px 32px rgba(99, 102, 241, 0.28);
-    }
+.btn-secondary:hover,
+.btn-locate:hover {
+  box-shadow: 0 22px 38px rgba(79, 70, 229, 0.32);
+}
 
     .btn-icon {
       width: 18px;
@@ -353,16 +366,17 @@
       line-height: 1.6;
     }
 
-    .summary-chip {
-      white-space: nowrap;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: #fff8ee;
-      border: 1px solid #f0ddbd;
-      color: #94620a;
-      font-size: 0.85rem;
-      font-weight: 900;
-    }
+.summary-chip {
+  white-space: nowrap;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #f3e8ff;
+  border: 1px solid #d8b4fe;
+  color: #6d28d9;
+  font-size: 0.85rem;
+  font-weight: 900;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.48);
+}
 
     .stats-grid {
       margin-top: 16px;
@@ -371,47 +385,63 @@
       gap: 12px;
     }
 
-    .stat-card {
-      padding: 16px;
-      border-radius: 22px;
-      border: 1px solid transparent;
-      min-height: 118px;
-    }
+.stat-card {
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid transparent;
+  min-height: 118px;
+  color: #fff;
+  box-shadow: 0 16px 32px rgba(27,39,64,0.12);
+  position: relative;
+  overflow: hidden;
+}
 
-    .stat-card:nth-child(1) {
-      background: #eef4ff;
-      border-color: #d6e4ff;
-    }
+.stat-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.16), transparent 44%);
+  pointer-events: none;
+}
 
-    .stat-card:nth-child(2) {
-      background: #eef8f4;
-      border-color: #ccefe2;
-    }
+.stat-card:nth-child(1) {
+  background: linear-gradient(145deg, #6d28d9 0%, #8b5cf6 100%);
+  border-color: rgba(196,181,253,0.55);
+}
 
-    .stat-card:nth-child(3) {
-      background: #fff8ee;
-      border-color: #f2dec0;
-    }
+.stat-card:nth-child(2) {
+  background: linear-gradient(145deg, #15803d 0%, #22c55e 100%);
+  border-color: rgba(187,247,208,0.55);
+}
 
-    .stat-card:nth-child(4) {
-      background: #fff2f0;
-      border-color: #f7d6d0;
-    }
+.stat-card:nth-child(3) {
+  background: linear-gradient(145deg, #d97706 0%, #f59e0b 100%);
+  border-color: rgba(253,186,116,0.55);
+}
 
-    .stat-label {
-      font-size: 0.8rem;
-      color: #5f718a;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
+.stat-card:nth-child(4) {
+  background: linear-gradient(145deg, #dc2626 0%, #ef4444 100%);
+  border-color: rgba(252,165,165,0.55);
+}
 
-    .stat-value {
-      margin-top: 8px;
-      font-size: clamp(1.55rem, 2.4vw, 2.2rem);
-      font-weight: 900;
-      letter-spacing: -0.03em;
-    }
+.stat-label {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.84);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-value {
+  margin-top: 8px;
+  font-size: clamp(1.55rem, 2.4vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  position: relative;
+  z-index: 1;
+}
 
 
     .planner-card {
@@ -824,15 +854,15 @@
       color: #15803d;
     }
 
-    .fuel-diesel {
-      background: #111827;
-      border-color: #111827;
-      color: #f8fafc;
-    }
+.fuel-diesel {
+  background: #ffffff;
+  border-color: #111827;
+  color: #111827;
+}
 
-    .fuel-diesel strong {
-      color: #ffffff;
-    }
+.fuel-diesel strong {
+  color: #111827;
+}
 
     .fuel-super {
       background: #fff1f0;
@@ -882,15 +912,15 @@
       color: #6d28d9;
     }
 
-    .estimate-card.trip {
-      background: #fff7eb;
-      border-color: #fbd3a4;
-    }
+.estimate-card.trip {
+  background: #ecfeff;
+  border-color: #a5f3fc;
+}
 
-    .estimate-card.trip .estimate-label,
-    .estimate-card.trip .estimate-value {
-      color: #b45309;
-    }
+.estimate-card.trip .estimate-label,
+.estimate-card.trip .estimate-value {
+  color: #0f766e;
+}
 
     .estimate-label {
       font-size: 0.72rem;
@@ -943,10 +973,12 @@
       box-shadow: 0 14px 28px rgba(21,128,61,0.22);
     }
 
-    .price-card.fuel-diesel {
-      background: linear-gradient(160deg, #111827, #334155);
-      box-shadow: 0 14px 28px rgba(17,24,39,0.24);
-    }
+.price-card.fuel-diesel {
+  background: linear-gradient(160deg, #ffffff, #f8fafc);
+  border: 1px solid #111827;
+  color: #111827;
+  box-shadow: 0 14px 28px rgba(17,24,39,0.14);
+}
 
     .price-card.fuel-super {
       background: linear-gradient(160deg, #dc2626, #ef4444);
@@ -1090,16 +1122,16 @@
       border-color: #b8e3c5;
     }
 
-    .selected-stat.fuel-diesel {
-      background: #17212f;
-      border-color: #17212f;
-      color: #ffffff;
-    }
+.selected-stat.fuel-diesel {
+  background: #ffffff;
+  border-color: #111827;
+  color: #111827;
+}
 
-    .selected-stat.fuel-diesel .small,
-    .selected-stat.fuel-diesel .strong {
-      color: #ffffff;
-    }
+.selected-stat.fuel-diesel .small,
+.selected-stat.fuel-diesel .strong {
+  color: #111827;
+}
 
     .selected-stat.fuel-super {
       background: #fff1f0;
@@ -1131,15 +1163,15 @@
       color: #6d28d9;
     }
 
-    .selected-stat.stat-trip {
-      background: #fff7eb;
-      border-color: #fbd3a4;
-    }
+.selected-stat.stat-trip {
+  background: #ecfeff;
+  border-color: #a5f3fc;
+}
 
-    .selected-stat.stat-trip .small,
-    .selected-stat.stat-trip .strong {
-      color: #b45309;
-    }
+.selected-stat.stat-trip .small,
+.selected-stat.stat-trip .strong {
+  color: #0f766e;
+}
 
     .selected-stat .small {
       color: var(--muted);
@@ -1194,6 +1226,83 @@
       border-color: #fcd9ae;
       color: #b45309;
     }
+
+
+.hero-panel,
+.search-card,
+.summary-card,
+.results-panel,
+.map-panel,
+.guide-card,
+.station-card,
+.selected-card,
+.btn,
+.directions-link,
+.stat-card {
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease, background-color 0.24s ease, opacity 0.24s ease;
+  will-change: transform;
+}
+
+.hero-panel:hover,
+.search-card:hover,
+.summary-card:hover,
+.map-panel:hover,
+.results-panel:hover,
+.guide-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 48px rgba(28, 43, 71, 0.10);
+}
+
+.stat-card:hover,
+.station-card:hover,
+.directions-link:hover,
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.station-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.station-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(59,130,246,0.05), transparent 42%);
+  opacity: 0;
+  transition: opacity 0.24s ease;
+  pointer-events: none;
+}
+
+.station-card:hover::before,
+.station-card.active::before {
+  opacity: 1;
+}
+
+.btn:active,
+.directions-link:active,
+.station-card:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.btn:focus-visible,
+.directions-link:focus-visible,
+.station-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.14), var(--shadow-soft);
+}
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.22,1,.36,1);
+}
+
+.reveal-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
     .mobile-filter-dock {
       display: none;
@@ -1619,14 +1728,15 @@
       <div class="brand-lockup">
         <div class="brand-icon" aria-hidden="true">
           <svg class="brand-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M32 7c11.6 0 21 9.4 21 21 0 14.8-16.6 28.6-20.1 31.3a1.5 1.5 0 0 1-1.8 0C27.6 56.6 11 42.8 11 28 11 16.4 20.4 7 32 7Z" fill="rgba(255,255,255,0.18)"/>
-            <path d="M35 18h-9a3 3 0 0 0-3 3v18h5v-7h6a3 3 0 0 0 3-3V21a3 3 0 0 0-2-2.83Z" fill="white"/>
-            <path d="M37 25h4.5c2.5 0 4.5 2 4.5 4.5V37h-3v-7.2c0-1-.8-1.8-1.8-1.8H37v-3Z" fill="white" opacity="0.9"/>
-            <circle cx="32" cy="28" r="4.2" fill="#93c5fd"/>
+            <circle cx="32" cy="32" r="22" stroke="rgba(255,255,255,0.92)" stroke-width="3"/>
+            <path d="M32 16v8M32 40v8M16 32h8M40 32h8" stroke="rgba(255,255,255,0.9)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="32" cy="32" r="6.5" fill="#34d399" stroke="white" stroke-width="2.2"/>
+            <path d="M31.7 22.5c4 0 7.3 3.2 7.3 7.2 0 4.9-5.5 9.6-6.7 10.5a1.1 1.1 0 0 1-1.3 0c-1.2-.9-6.7-5.6-6.7-10.5 0-4 3.3-7.2 7.4-7.2Z" fill="white"/>
+            <circle cx="32" cy="29.8" r="2.4" fill="#173f72"/>
           </svg>
         </div>
         <div>
-          <p class="brand-title">Petrol Prices UK</p>
+          <p class="brand-title">UK Petrol Prices</p>
           <p class="brand-subtitle">Find nearby fuel prices, compare stations and head straight to the best option for you.</p>
         </div>
       </div>
@@ -1684,11 +1794,10 @@
             <button id="searchBtn" class="btn btn-primary" type="button">Find stations</button>
             <button id="locateBtn" class="btn btn-locate" type="button">
               <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M12 3.5 4.75 6.75 12 10l7.25-3.25L12 3.5Z" fill="currentColor" opacity="0.72"/>
-                <path d="M12 10v10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                <path d="M19.25 6.75 12 10 4.75 6.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="10" r="2.4" fill="currentColor"/>
-              </svg>
+            <path d="M12 3.25v3.1M12 17.65v3.1M3.25 12h3.1M17.65 12h3.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="5.15" stroke="currentColor" stroke-width="1.9"/>
+            <circle cx="12" cy="12" r="1.75" fill="currentColor"/>
+          </svg>
               Locate me
             </button>
           </div>
@@ -1854,10 +1963,9 @@
 
         <button id="mobileLocateBtn" class="btn btn-locate" type="button">
           <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M12 3.5 4.75 6.75 12 10l7.25-3.25L12 3.5Z" fill="currentColor" opacity="0.72"/>
-            <path d="M12 10v10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            <path d="M19.25 6.75 12 10 4.75 6.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="12" cy="10" r="2.4" fill="currentColor"/>
+            <path d="M12 3.25v3.1M12 17.65v3.1M3.25 12h3.1M17.65 12h3.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="5.15" stroke="currentColor" stroke-width="1.9"/>
+            <circle cx="12" cy="12" r="1.75" fill="currentColor"/>
           </svg>
           Locate me
         </button>
@@ -1865,7 +1973,7 @@
     </div>
 
     <footer>
-      <strong>Petrol Prices UK</strong> • Helping drivers compare nearby fuel prices with clearer search, clearer cards and clearer forecourt detail.
+      <strong>UK Petrol Prices</strong> • Helping drivers compare nearby fuel prices with clearer search, smarter maps and useful forecourt detail.
     </footer>
   </main>
 
@@ -2883,6 +2991,7 @@
       renderStations();
       renderSelectedCard();
       updateMap();
+      registerRevealItems();
     }
 
     async function performSearch({ useCurrentLocation = false, coords = null } = {}) {
@@ -2977,6 +3086,37 @@
       );
     }
 
+
+let revealObserver = null;
+
+function ensureRevealObserver() {
+  if (revealObserver || !("IntersectionObserver" in window)) return;
+  revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: "0px 0px -10% 0px", threshold: 0.08 });
+}
+
+function registerRevealItems() {
+  ensureRevealObserver();
+  const items = document.querySelectorAll(".hero-panel, .search-card, .summary-card, .results-panel, .map-panel, .guide-card, .station-card, .selected-card");
+  items.forEach((item, index) => {
+    if (!item.classList.contains("reveal-item")) {
+      item.classList.add("reveal-item");
+      item.style.transitionDelay = `${Math.min(index * 35, 180)}ms`;
+    }
+    if (revealObserver) {
+      revealObserver.observe(item);
+    } else {
+      item.classList.add("is-visible");
+    }
+  });
+}
+
     async function init() {
       try {
         await loadCsvData();
@@ -2991,6 +3131,7 @@
           </div>
         `;
         setStatus("Fuel price data could not be loaded.", true);
+        registerRevealItems();
       }
     }
 
