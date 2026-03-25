@@ -87,15 +87,32 @@
     }
 
     .brand-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 18px;
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
       display: grid;
       place-items: center;
-      color: #fff;
-      font-size: 24px;
-      background: linear-gradient(135deg, var(--navy), var(--blue));
-      box-shadow: 0 14px 28px rgba(36,68,109,0.22);
+      background: linear-gradient(150deg, #163560, #2563eb 58%, #38bdf8 100%);
+      box-shadow: 0 16px 34px rgba(36,68,109,0.24);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-icon::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 19px;
+      border: 1px solid rgba(255,255,255,0.24);
+      pointer-events: none;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: block;
+      position: relative;
+      z-index: 1;
     }
 
     .brand-title {
@@ -112,7 +129,7 @@
     }
 
     .header-pill {
-      display: inline-flex;
+      display: none;
       align-items: center;
       gap: 8px;
       padding: 10px 14px;
@@ -281,10 +298,23 @@
       box-shadow: 0 12px 28px rgba(36,68,109,0.18);
     }
 
-    .btn-secondary {
-      background: #fff9ef;
-      border-color: #eed9b5;
-      color: #7b5a12;
+    .btn-secondary,
+    .btn-locate {
+      border: none;
+      color: #fff;
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      box-shadow: 0 14px 28px rgba(99, 102, 241, 0.24);
+    }
+
+    .btn-secondary:hover,
+    .btn-locate:hover {
+      box-shadow: 0 18px 32px rgba(99, 102, 241, 0.28);
+    }
+
+    .btn-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
     }
 
     .btn:hover,
@@ -843,23 +873,23 @@
     }
 
     .estimate-card.fill {
-      background: #edf4ff;
-      border-color: #cfe0ff;
+      background: #f5f1ff;
+      border-color: #ddd0ff;
     }
 
     .estimate-card.fill .estimate-label,
     .estimate-card.fill .estimate-value {
-      color: #1e4f9c;
+      color: #6d28d9;
     }
 
     .estimate-card.trip {
-      background: #fff2f1;
-      border-color: #ffd0cb;
+      background: #fff7eb;
+      border-color: #fbd3a4;
     }
 
     .estimate-card.trip .estimate-label,
     .estimate-card.trip .estimate-value {
-      color: #c2410c;
+      color: #b45309;
     }
 
     .estimate-label {
@@ -1092,23 +1122,23 @@
     }
 
     .selected-stat.stat-fill {
-      background: #eefcf4;
-      border-color: #b8e3c5;
+      background: #f5f1ff;
+      border-color: #ddd0ff;
     }
 
     .selected-stat.stat-fill .small,
     .selected-stat.stat-fill .strong {
-      color: #15803d;
+      color: #6d28d9;
     }
 
     .selected-stat.stat-trip {
-      background: #fff4ef;
-      border-color: #fed7aa;
+      background: #fff7eb;
+      border-color: #fbd3a4;
     }
 
     .selected-stat.stat-trip .small,
     .selected-stat.stat-trip .strong {
-      color: #ea580c;
+      color: #b45309;
     }
 
     .selected-stat .small {
@@ -1124,6 +1154,68 @@
       font-weight: 900;
       font-size: 0.98rem;
       letter-spacing: -0.02em;
+    }
+
+
+    .selected-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .selected-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .selected-badge.compare-price {
+      background: #ecfdf3;
+      border-color: #b7ebca;
+      color: #15803d;
+    }
+
+    .selected-badge.compare-distance {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .selected-badge.compare-updated {
+      background: #fff7eb;
+      border-color: #fcd9ae;
+      color: #b45309;
+    }
+
+    .mobile-filter-dock {
+      display: none;
+    }
+
+    .mobile-filter-inner {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid rgba(219,228,239,0.95);
+      box-shadow: 0 20px 40px rgba(28,43,71,0.16);
+      backdrop-filter: blur(16px);
+    }
+
+    .mobile-filter-dock .select,
+    .mobile-filter-dock .btn {
+      min-height: 50px;
+      border-radius: 16px;
+      padding: 0 14px;
     }
 
     .map-note {
@@ -1325,18 +1417,30 @@
     }
 
     @media (max-width: 900px) {
+      body {
+        padding-bottom: 124px;
+      }
+
       .topbar-inner {
-        flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+      }
+
+      .brand-subtitle {
+        display: none;
       }
 
       .hero-head {
         grid-template-columns: 1fr;
       }
 
+      .hero-callout {
+        display: none;
+      }
+
       .summary-title-row,
       .planner-head,
-      .section-head {
+      .section-head,
+      .selected-top {
         flex-direction: column;
         align-items: flex-start;
       }
@@ -1359,6 +1463,15 @@
       .pricing-panel,
       .selected-grid {
         grid-template-columns: 1fr;
+      }
+
+      .search-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .search-grid .field,
+      .search-grid #locateBtn {
+        grid-column: 1 / -1;
       }
 
       .pricing-panel > .price-card,
@@ -1389,11 +1502,24 @@
       .map-note {
         display: none;
       }
+
+      .mobile-filter-dock {
+        display: block;
+        position: fixed;
+        left: 14px;
+        right: 14px;
+        bottom: 12px;
+        z-index: 1200;
+      }
     }
 
     @media (max-width: 640px) {
       .wrap {
         padding: 0 14px;
+      }
+
+      body {
+        padding-bottom: 136px;
       }
 
       .layout {
@@ -1415,12 +1541,20 @@
         display: none;
       }
 
-      .search-grid,
       .stats-grid,
       .selected-grid,
       .planner-grid,
       .fuel-glance {
         grid-template-columns: 1fr;
+      }
+
+      .search-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .search-grid .field,
+      .search-grid #locateBtn {
+        grid-column: 1 / -1;
       }
 
       .stations {
@@ -1468,26 +1602,39 @@
         padding: 16px;
       }
     }
+      @media (max-width: 520px) {
+      .mobile-filter-inner {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .mobile-filter-dock .btn {
+        font-size: 0.92rem;
+      }
+    }
   </style>
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-inner">
       <div class="brand-lockup">
-        <div class="brand-icon">⛽</div>
+        <div class="brand-icon" aria-hidden="true">
+          <svg class="brand-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M32 7c11.6 0 21 9.4 21 21 0 14.8-16.6 28.6-20.1 31.3a1.5 1.5 0 0 1-1.8 0C27.6 56.6 11 42.8 11 28 11 16.4 20.4 7 32 7Z" fill="rgba(255,255,255,0.18)"/>
+            <path d="M35 18h-9a3 3 0 0 0-3 3v18h5v-7h6a3 3 0 0 0 3-3V21a3 3 0 0 0-2-2.83Z" fill="white"/>
+            <path d="M37 25h4.5c2.5 0 4.5 2 4.5 4.5V37h-3v-7.2c0-1-.8-1.8-1.8-1.8H37v-3Z" fill="white" opacity="0.9"/>
+            <circle cx="32" cy="28" r="4.2" fill="#93c5fd"/>
+          </svg>
+        </div>
         <div>
           <p class="brand-title">Petrol Prices UK</p>
-          <p class="brand-subtitle">Search nearby fuel prices, compare forecourts, and choose the stop that suits you best</p>
+          <p class="brand-subtitle">Find nearby fuel prices, compare stations and head straight to the best option for you.</p>
         </div>
       </div>
-      <div class="header-pill">Cheapest • nearest • latest updates</div>
     </div>
   </header>
 
   <main class="wrap">
     <section class="hero-panel">
-      <div class="eyebrow">Search by postcode, town or city</div>
-
       <div class="hero-head">
         <div>
           <h1>Find nearby fuel prices fast and compare them clearly</h1>
@@ -1535,7 +1682,15 @@
             </select>
 
             <button id="searchBtn" class="btn btn-primary" type="button">Find stations</button>
-            <button id="locateBtn" class="btn btn-secondary" type="button">Locate me</button>
+            <button id="locateBtn" class="btn btn-locate" type="button">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M12 3.5 4.75 6.75 12 10l7.25-3.25L12 3.5Z" fill="currentColor" opacity="0.72"/>
+                <path d="M12 10v10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M19.25 6.75 12 10 4.75 6.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="10" r="2.4" fill="currentColor"/>
+              </svg>
+              Locate me
+            </button>
           </div>
 
           <div id="searchStatus" class="notice" style="margin-top: 12px;">Enter a location to start comparing nearby fuel prices.</div>
@@ -1670,6 +1825,45 @@
       </article>
     </section>
 
+
+    <div class="mobile-filter-dock" aria-label="Quick filters">
+      <div class="mobile-filter-inner">
+        <select id="mobileFuelType" class="select" aria-label="Quick fuel filter">
+          <option value="E10">Unleaded (E10)</option>
+          <option value="E5">Super Unleaded (E5)</option>
+          <option value="B7S">Diesel (B7)</option>
+          <option value="B7P">Premium Diesel (SD)</option>
+          <option value="B10">B10</option>
+          <option value="HVO">HVO</option>
+        </select>
+
+        <select id="mobileSortBy" class="select" aria-label="Quick sort filter">
+          <option value="price">Lowest price</option>
+          <option value="distance">Nearest</option>
+          <option value="updated">Recently updated</option>
+        </select>
+
+        <select id="mobileRadiusMiles" class="select" aria-label="Quick search radius filter">
+          <option value="1">1 mile</option>
+          <option value="3">3 miles</option>
+          <option value="5" selected>5 miles</option>
+          <option value="10">10 miles</option>
+          <option value="15">15 miles</option>
+          <option value="25">25 miles</option>
+        </select>
+
+        <button id="mobileLocateBtn" class="btn btn-locate" type="button">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 3.5 4.75 6.75 12 10l7.25-3.25L12 3.5Z" fill="currentColor" opacity="0.72"/>
+            <path d="M12 10v10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M19.25 6.75 12 10 4.75 6.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="10" r="2.4" fill="currentColor"/>
+          </svg>
+          Locate me
+        </button>
+      </div>
+    </div>
+
     <footer>
       <strong>Petrol Prices UK</strong> • Helping drivers compare nearby fuel prices with clearer search, clearer cards and clearer forecourt detail.
     </footer>
@@ -1747,7 +1941,11 @@
       tankSize: document.getElementById("tankSize"),
       fuelEconomy: document.getElementById("fuelEconomy"),
       plannerNote: document.getElementById("plannerNote"),
-      summaryRadiusChip: document.getElementById("summaryRadiusChip")
+      summaryRadiusChip: document.getElementById("summaryRadiusChip"),
+      mobileFuelType: document.getElementById("mobileFuelType"),
+      mobileSortBy: document.getElementById("mobileSortBy"),
+      mobileRadiusMiles: document.getElementById("mobileRadiusMiles"),
+      mobileLocateBtn: document.getElementById("mobileLocateBtn")
     };
 
     const state = {
@@ -2546,6 +2744,31 @@
       }).join("");
     }
 
+
+    function getSortDescriptor() {
+      const sortValue = elements.sortBy.value;
+      if (sortValue === "distance") {
+        return { text: "Closest first", className: "compare-distance" };
+      }
+      if (sortValue === "updated") {
+        return { text: "Latest update", className: "compare-updated" };
+      }
+      return { text: "Cheapest first", className: "compare-price" };
+    }
+
+    function syncQuickFilters(source = "desktop") {
+      if (source !== "mobile") {
+        if (elements.mobileFuelType) elements.mobileFuelType.value = elements.fuelType.value;
+        if (elements.mobileSortBy) elements.mobileSortBy.value = elements.sortBy.value;
+        if (elements.mobileRadiusMiles) elements.mobileRadiusMiles.value = elements.radiusMiles.value;
+      }
+      if (source !== "desktop") {
+        if (elements.mobileFuelType) elements.fuelType.value = elements.mobileFuelType.value;
+        if (elements.mobileSortBy) elements.sortBy.value = elements.mobileSortBy.value;
+        if (elements.mobileRadiusMiles) elements.radiusMiles.value = elements.mobileRadiusMiles.value;
+      }
+    }
+
     function renderSelectedCard() {
       const selected = state.results.find(station => station.id === state.selectedId);
       if (!selected) {
@@ -2562,8 +2785,13 @@
       if (selected.county) extraBits.push(selected.county);
       if (selected.country) extraBits.push(selected.country);
 
+      const sortDescriptor = getSortDescriptor();
+
       elements.selectedCard.innerHTML = `
-        <div class="selected-label">Selected station</div>
+        <div class="selected-top">
+          <div class="selected-label">Selected station</div>
+          <div class="selected-badge ${sortDescriptor.className}">${sortDescriptor.text}</div>
+        </div>
         <div class="selected-name">${escapeHtml(selected.brandDisplay)} • ${escapeHtml(selected.tradingName)}</div>
         <div class="selected-address">${escapeHtml(selected.address)}</div>
         <div class="selected-grid">
@@ -2768,15 +2996,46 @@
 
     elements.searchBtn.addEventListener("click", () => performSearch());
     elements.locateBtn.addEventListener("click", useCurrentLocation);
-    elements.fuelType.addEventListener("change", rerunCurrentSearch);
-    elements.sortBy.addEventListener("change", rerunCurrentSearch);
-    elements.radiusMiles.addEventListener("change", rerunCurrentSearch);
+    elements.fuelType.addEventListener("change", () => {
+      syncQuickFilters("desktop");
+      rerunCurrentSearch();
+    });
+    elements.sortBy.addEventListener("change", () => {
+      syncQuickFilters("desktop");
+      rerunCurrentSearch();
+    });
+    elements.radiusMiles.addEventListener("change", () => {
+      syncQuickFilters("desktop");
+      rerunCurrentSearch();
+    });
+    if (elements.mobileFuelType) {
+      elements.mobileFuelType.addEventListener("change", () => {
+        syncQuickFilters("mobile");
+        rerunCurrentSearch();
+      });
+    }
+    if (elements.mobileSortBy) {
+      elements.mobileSortBy.addEventListener("change", () => {
+        syncQuickFilters("mobile");
+        rerunCurrentSearch();
+      });
+    }
+    if (elements.mobileRadiusMiles) {
+      elements.mobileRadiusMiles.addEventListener("change", () => {
+        syncQuickFilters("mobile");
+        rerunCurrentSearch();
+      });
+    }
+    if (elements.mobileLocateBtn) {
+      elements.mobileLocateBtn.addEventListener("click", useCurrentLocation);
+    }
     elements.tankSize.addEventListener("input", rerunCurrentSearch);
     elements.fuelEconomy.addEventListener("input", rerunCurrentSearch);
     elements.searchInput.addEventListener("keydown", event => {
       if (event.key === "Enter") performSearch();
     });
 
+    syncQuickFilters("desktop");
     init();
   </script>
 </body>
