@@ -87,6 +87,27 @@
       gap: 14px;
     }
 
+    .brand-home-link {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .brand-home-link:hover .brand-icon,
+    .brand-home-link:focus-visible .brand-icon {
+      transform: translateY(-1px) scale(1.01);
+      box-shadow: 0 22px 42px rgba(23,63,114,0.3);
+    }
+
+    .brand-home-link:focus-visible {
+      outline: none;
+    }
+
+    .brand-home-link:focus-visible .brand-title {
+      text-decoration: underline;
+      text-underline-offset: 0.16em;
+    }
+
 .brand-icon {
   width: 62px;
   height: 62px;
@@ -99,6 +120,7 @@
   box-shadow: 0 18px 38px rgba(23,63,114,0.26);
   position: relative;
   overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .brand-icon::before {
@@ -1294,14 +1316,14 @@
 }
 
 .reveal-item {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.22,1,.36,1);
+  opacity: 1;
+  transform: none;
+  transition: none;
 }
 
 .reveal-item.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
 }
 
     .mobile-filter-dock {
@@ -1827,27 +1849,27 @@
 
   </style>
 </head>
-<body>
+<body id="pageTop">
   <header class="topbar">
     <div class="wrap topbar-inner">
-      <div class="brand-lockup">
+      <a href="#pageTop" class="brand-lockup brand-home-link" aria-label="Back to top">
         <div class="brand-icon" aria-hidden="true">
           <svg class="brand-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="18" y="10" width="20" height="36" rx="6" fill="white" fill-opacity="0.96"/>
-            <rect x="22" y="15" width="12" height="9" rx="2.5" fill="#1d4ed8" fill-opacity="0.95"/>
-            <rect x="22" y="28" width="12" height="3.5" rx="1.75" fill="#f59e0b"/>
-            <rect x="25" y="33.5" width="6" height="9.5" rx="2.2" fill="#0f172a" fill-opacity="0.18"/>
-            <path d="M38 18.5h5.2c2.2 0 4 1.8 4 4v17.7c0 2.1-1.7 3.8-3.8 3.8h-2.1" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M47.2 23.5v8.8c0 1.4-1.1 2.5-2.5 2.5H42" stroke="#86efac" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M18 46h24" stroke="white" stroke-width="4" stroke-linecap="round"/>
-            <path d="M49.2 46.5c0 2.4-1.9 4.1-4.1 4.1-2.2 0-4.1-1.7-4.1-4.1 0-2.2 2.3-4.9 3.4-6.1.4-.4 1-.4 1.4 0 1.1 1.2 3.4 3.9 3.4 6.1Z" fill="#22c55e" stroke="white" stroke-width="1.5"/>
+            <path d="M19 13.5C19 10.46 21.46 8 24.5 8h12C39.54 8 42 10.46 42 13.5V46H19V13.5Z" fill="white" fill-opacity="0.98"/>
+            <rect x="23" y="14" width="15" height="10" rx="2.8" fill="#22c55e"/>
+            <rect x="24.5" y="28" width="12" height="3.8" rx="1.9" fill="#f59e0b"/>
+            <rect x="26" y="35" width="9" height="7.5" rx="2.2" fill="#0f2748" fill-opacity="0.14"/>
+            <path d="M42 18h5.6c2.98 0 5.4 2.42 5.4 5.4V40c0 2.21-1.79 4-4 4h-2.5" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M48 23v8.9c0 1.44-1.16 2.6-2.6 2.6H42" stroke="#93c5fd" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16.5 46h28" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            <path d="M50.5 51.2c0 2.57-2.08 4.65-4.65 4.65s-4.65-2.08-4.65-4.65c0-2.3 2.44-5.12 3.65-6.44.54-.59 1.46-.59 2 0 1.21 1.32 3.65 4.14 3.65 6.44Z" fill="#ef4444" stroke="white" stroke-width="1.5"/>
           </svg>
         </div>
         <div>
           <p class="brand-title">UK Petrol Prices</p>
           <p class="brand-subtitle">Find nearby fuel prices, compare stations and head straight to the best option for you.</p>
         </div>
-      </div>
+      </a>
     </div>
   </header>
 
@@ -1953,7 +1975,7 @@
             <div class="planner-grid">
               <div class="planner-input">
                 <label for="tankSize">Tank size (litres)</label>
-                <input id="tankSize" type="number" min="20" max="120" step="1" value="50" inputmode="numeric" />
+                <input id="tankSize" type="number" min="20" max="120" step="1" value="55" inputmode="numeric" />
               </div>
               <div class="planner-input">
                 <label for="fuelEconomy">Fuel economy (mpg)</label>
@@ -1962,7 +1984,7 @@
             </div>
 
             <div class="planner-note" id="plannerNote">
-              Estimates are based on a 50L tank and 40 mpg. Drive cost is one-way from your search point to the station.
+              Estimates are based on a 55L tank and 40 mpg. Drive cost is one-way from your search point to the station.
             </div>
           </div>
         </div>
@@ -2415,7 +2437,7 @@
     }
 
     function getEstimatorSettings() {
-      const tankLitres = Math.min(120, Math.max(20, Number(elements.tankSize.value) || 50));
+      const tankLitres = Math.min(120, Math.max(20, Number(elements.tankSize.value) || 55));
       const fuelEconomyMpg = Math.min(120, Math.max(10, Number(elements.fuelEconomy.value) || 40));
       return { tankLitres, fuelEconomyMpg };
     }
@@ -2524,9 +2546,10 @@
     }
 
     function getLocalCentroid(query) {
-      const q = query.toLowerCase();
+      const q = normalizeQuery(query).toLowerCase();
+      const compactQuery = q.replace(/\s+/g, "");
       const matches = state.stations.filter(station => {
-        return [
+        const values = [
           station.postcode,
           station.city,
           station.county,
@@ -2534,29 +2557,43 @@
           station.address,
           station.tradingName,
           station.brandDisplay
-        ].filter(Boolean).some(value => String(value).toLowerCase().includes(q));
+        ].filter(Boolean).map(value => String(value).toLowerCase());
+
+        return values.some(value => {
+          const compactValue = value.replace(/\s+/g, "");
+          return value.includes(q) || compactValue.includes(compactQuery);
+        });
       });
 
       if (!matches.length) return null;
 
       const lat = matches.reduce((sum, station) => sum + station.latitude, 0) / matches.length;
       const lng = matches.reduce((sum, station) => sum + station.longitude, 0) / matches.length;
-      return { lat, lng, label: query, source: "local lookup" };
+      const label = matches.length === 1 ? (matches[0].postcode || matches[0].city || query) : query;
+      return { lat, lng, label, source: "local lookup" };
     }
 
     async function resolveSearchLocation(query) {
       const cleanQuery = normalizeQuery(query);
       if (!cleanQuery) throw new Error("Please enter a postcode, town or city.");
 
+      const localCentroid = getLocalCentroid(cleanQuery);
+      if (localCentroid) return localCentroid;
+
       if (isLikelyUkPostcode(cleanQuery)) {
-        const postcodeLookup = await fetchJson(`https://api.postcodes.io/postcodes/${encodeURIComponent(cleanQuery)}`);
-        if (!postcodeLookup.result) throw new Error("We could not find that postcode.");
-        return {
-          lat: Number(postcodeLookup.result.latitude),
-          lng: Number(postcodeLookup.result.longitude),
-          label: postcodeLookup.result.postcode,
-          source: "postcode lookup"
-        };
+        try {
+          const postcodeLookup = await fetchJson(`https://api.postcodes.io/postcodes/${encodeURIComponent(cleanQuery)}`);
+          if (postcodeLookup.result) {
+            return {
+              lat: Number(postcodeLookup.result.latitude),
+              lng: Number(postcodeLookup.result.longitude),
+              label: postcodeLookup.result.postcode,
+              source: "postcode lookup"
+            };
+          }
+        } catch (error) {
+          // Fall through to wider place search below.
+        }
       }
 
       try {
@@ -2570,11 +2607,11 @@
           };
         }
       } catch (error) {
-        // Fall through to local lookup.
+        // Fall through to the final local retry.
       }
 
-      const localCentroid = getLocalCentroid(cleanQuery);
-      if (localCentroid) return localCentroid;
+      const localRetry = getLocalCentroid(cleanQuery);
+      if (localRetry) return localRetry;
 
       throw new Error("We could not locate that town or city. Please try a nearby postcode or another place name.");
     }
@@ -2922,7 +2959,7 @@
 
                 <div class="supporting-row">
                   <span class="supporting-pill ${station.openState.className}">🕒 ${escapeHtml(station.openState.text)}</span>
-                  <span class="supporting-pill">⏱ ${escapeHtml(lastUpdated)}</span>
+                  <span class="supporting-pill">⏱ Official UK Gov Fuel Data • ${escapeHtml(lastUpdated)}</span>
                   ${phoneHtml}
                 </div>
               </div>
@@ -2950,7 +2987,7 @@
                   </div>
                 </div>
                 <div class="updated-card">
-                  <div class="metric-label">Last update</div>
+                  <div class="metric-label">Official UK Gov Fuel Data</div>
                   <div class="metric-subvalue">${escapeHtml(formatAbsoluteDate(station.updatedAt))}</div>
                 </div>
                 <a class="directions-link" href="${directionsUrl}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">Get directions</a>
@@ -3100,7 +3137,6 @@
       renderStations();
       renderSelectedCard();
       updateMap();
-      registerRevealItems();
     }
 
     function shouldReuseCurrentLocationQuery(rawQuery) {
@@ -3204,7 +3240,7 @@
       setStatus("Requesting your location…", false);
 
       navigator.geolocation.getCurrentPosition(
-        position => performSearch({ useCurrentLocation: true, coords: position.coords }),
+        position => performSearch({ useCurrentLocation: true, coords: position.coords, scrollToSummary: true }),
         error => {
           let message = "We could not access your location.";
           if (error.code === 1) message = "Location access was blocked. Please allow location access and try again.";
@@ -3217,35 +3253,9 @@
     }
 
 
-let revealObserver = null;
-
-function ensureRevealObserver() {
-  if (revealObserver || !("IntersectionObserver" in window)) return;
-  revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { rootMargin: "0px 0px -10% 0px", threshold: 0.08 });
-}
-
-function registerRevealItems() {
-  ensureRevealObserver();
-  const items = document.querySelectorAll(".hero-panel, .search-card, .summary-card, .results-panel, .map-panel, .guide-card, .station-card, .selected-card");
-  items.forEach((item, index) => {
-    if (!item.classList.contains("reveal-item")) {
-      item.classList.add("reveal-item");
-      item.style.transitionDelay = `${Math.min(index * 35, 180)}ms`;
+    function registerRevealItems() {
+      return;
     }
-    if (revealObserver) {
-      revealObserver.observe(item);
-    } else {
-      item.classList.add("is-visible");
-    }
-  });
-}
 
     async function init() {
       try {
@@ -3267,6 +3277,12 @@ function registerRevealItems() {
 
     elements.searchBtn.addEventListener("click", () => performSearch({ scrollToSummary: true }));
     elements.locateBtn.addEventListener("click", useCurrentLocation);
+    elements.searchInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        performSearch({ scrollToSummary: true });
+      }
+    });
     elements.fuelType.addEventListener("change", () => {
       syncQuickFilters("desktop");
       rerunCurrentSearch();
