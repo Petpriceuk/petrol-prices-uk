@@ -14,7 +14,6 @@ async function getAccessToken() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json",
     },
     body: JSON.stringify({
       client_id: process.env.FUEL_FINDER_CLIENT_ID,
