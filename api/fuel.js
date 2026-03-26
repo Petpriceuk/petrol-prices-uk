@@ -46,7 +46,7 @@ async function getAccessToken() {
 
 async function fetchGovJson(url) {
   if (!url) {
-    throw new Error("Missing API URL (check Vercel env variables)");
+    throw new Error("Missing API URL (check Vercel environment variables)");
   }
 
   const token = await getAccessToken();
