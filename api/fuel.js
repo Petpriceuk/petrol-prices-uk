@@ -15,9 +15,19 @@ async function getAccessToken() {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      client_id: process.env.FUEL_FINDER_CLIENT_ID,
-      client_secret: process.env.FUEL_FINDER_CLIENT_SECRET,
+    const body = new URLSearchParams({
+  grant_type: "client_credentials",
+  client_id: process.env.FUEL_FINDER_CLIENT_ID,
+  client_secret: process.env.FUEL_FINDER_CLIENT_SECRET
+});
+
+const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  body: body.toString()
+});
     }),
   });
 
