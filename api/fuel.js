@@ -6,29 +6,23 @@ let tokenCache = {
 async function getAccessToken() {
   const now = Date.now();
 
+  // reuse token if still valid
   if (tokenCache.accessToken && now < tokenCache.expiresAt - 60000) {
     return tokenCache.accessToken;
   }
 
+  const body = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: process.env.FUEL_FINDER_CLIENT_ID,
+    client_secret: process.env.FUEL_FINDER_CLIENT_SECRET,
+  });
+
   const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded"
     },
-    const body = new URLSearchParams({
-  grant_type: "client_credentials",
-  client_id: process.env.FUEL_FINDER_CLIENT_ID,
-  client_secret: process.env.FUEL_FINDER_CLIENT_SECRET
-});
-
-const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded"
-  },
-  body: body.toString()
-});
-    }),
+    body: body.toString()
   });
 
   if (!response.ok) {
@@ -37,6 +31,10 @@ const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
   }
 
   const data = await response.json();
+
+  if (!data.access_token) {
+    throw new Error("No access token returned");
+  }
 
   tokenCache = {
     accessToken: data.access_token,
@@ -47,14 +45,18 @@ const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
 }
 
 async function fetchGovJson(url) {
+  if (!url) {
+    throw new Error("Missing API URL (check Vercel env variables)");
+  }
+
   const token = await getAccessToken();
 
   const response = await fetch(url, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${token}`,
-      "Accept": "application/json",
-    },
+      "Accept": "application/json"
+    }
   });
 
   if (!response.ok) {
@@ -67,18 +69,19 @@ async function fetchGovJson(url) {
 
 export default async function handler(req, res) {
   try {
-    const [prices, stations] = await Promise.all([
-      fetchGovJson(process.env.FUEL_FINDER_PRICES_URL),
-      fetchGovJson(process.env.FUEL_FINDER_STATIONS_URL),
-    ]);
+    const prices = await fetchGovJson(process.env.FUEL_FINDER_PRICES_URL);
+    const stations = await fetchGovJson(process.env.FUEL_FINDER_STATIONS_URL);
 
     return res.status(200).json({
       prices,
-      stations,
+      stations
     });
+
   } catch (error) {
+    console.error("ERROR:", error);
+
     return res.status(500).json({
-      error: error.message || "Something went wrong",
+      error: error.message || "Something went wrong"
     });
   }
 }
