@@ -10,20 +10,15 @@ async function getAccessToken() {
     return tokenCache.accessToken;
   }
 
-  const body = new URLSearchParams({
-    grant_type: "client_credentials",
-    client_id: process.env.FUEL_FINDER_CLIENT_ID,
-    client_secret: process.env.FUEL_FINDER_CLIENT_SECRET,
-    scope: "fuelfinder.read",
-  });
-
   const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
     method: "POST",
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Accept": "application/json",
+      "Content-Type": "application/json"
     },
-    body: body.toString(),
+    body: JSON.stringify({
+      client_id: process.env.FUEL_FINDER_CLIENT_ID,
+      client_secret: process.env.FUEL_FINDER_CLIENT_SECRET
+    })
   });
 
   const text = await response.text();
@@ -36,34 +31,29 @@ async function getAccessToken() {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("Token response was not valid JSON: " + text);
+    throw new Error("Invalid JSON response: " + text);
   }
 
   if (!data.access_token) {
-    throw new Error("No access_token returned: " + text);
+    throw new Error("No access_token returned");
   }
 
   tokenCache = {
     accessToken: data.access_token,
-    expiresAt: now + Number(data.expires_in || 3600) * 1000,
+    expiresAt: now + (Number(data.expires_in || 3600) * 1000),
   };
 
   return tokenCache.accessToken;
 }
 
 async function fetchGovJson(url) {
-  if (!url) {
-    throw new Error("Missing API URL in Vercel environment variables");
-  }
-
   const token = await getAccessToken();
 
   const response = await fetch(url, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${token}`,
-      "Accept": "application/json",
-    },
+      "Authorization": `Bearer ${token}`
+    }
   });
 
   const text = await response.text();
@@ -72,11 +62,7 @@ async function fetchGovJson(url) {
     throw new Error("API request failed: " + response.status + " " + text);
   }
 
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error("API response was not valid JSON: " + text);
-  }
+  return JSON.parse(text);
 }
 
 export default async function handler(req, res) {
@@ -86,13 +72,14 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       prices,
-      stations,
+      stations
     });
+
   } catch (error) {
-    console.error("Fuel API error:", error);
+    console.error(error);
 
     return res.status(500).json({
-      error: error.message || "Something went wrong",
+      error: error.message
     });
   }
 }
