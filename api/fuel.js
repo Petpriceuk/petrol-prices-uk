@@ -13,7 +13,8 @@ async function getAccessToken() {
   const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Accept": "application/json"
     },
     body: JSON.stringify({
       client_id: process.env.FUEL_FINDER_CLIENT_ID,
@@ -31,7 +32,7 @@ async function getAccessToken() {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("Invalid JSON response: " + text);
+    throw new Error("Token response was not valid JSON: " + text);
   }
 
   if (!data.access_token) {
@@ -52,7 +53,8 @@ async function fetchGovJson(url) {
   const response = await fetch(url, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${token}`
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/json"
     }
   });
 
@@ -62,7 +64,11 @@ async function fetchGovJson(url) {
     throw new Error("API request failed: " + response.status + " " + text);
   }
 
-  return JSON.parse(text);
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error("API response was not valid JSON: " + text);
+  }
 }
 
 export default async function handler(req, res) {
@@ -74,12 +80,9 @@ export default async function handler(req, res) {
       prices,
       stations
     });
-
   } catch (error) {
-    console.error(error);
-
     return res.status(500).json({
-      error: error.message
+      error: error.message || "Something went wrong"
     });
   }
 }
