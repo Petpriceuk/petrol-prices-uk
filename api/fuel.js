@@ -68,20 +68,20 @@ export default async function handler(req, res) {
   }
 
   try {
-    const apiBaseUrl = process.env.FUEL_FINDER_API_BASE_URL;
+    const pricesUrl = process.env.FUEL_FINDER_PRICES_URL;
 
-    if (!apiBaseUrl) {
-      throw new Error("Missing environment variable: FUEL_FINDER_API_BASE_URL");
+    if (!pricesUrl) {
+      throw new Error("Missing environment variable: FUEL_FINDER_PRICES_URL");
     }
 
     const token = await getAccessToken();
 
-    const cleanBaseUrl = apiBaseUrl.replace(/\/+$/, "");
-    const upstreamUrl = new URL(`${cleanBaseUrl}/v1/prices`);
+    const upstreamUrl = new URL(pricesUrl);
 
     const query = req.query || {};
     for (const [key, value] of Object.entries(query)) {
       if (Array.isArray(value)) {
+        upstreamUrl.searchParams.delete(key);
         value.forEach((v) => upstreamUrl.searchParams.append(key, v));
       } else if (value !== undefined && value !== null && value !== "") {
         upstreamUrl.searchParams.set(key, String(value));
