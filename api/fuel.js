@@ -10,20 +10,16 @@ async function getAccessToken() {
     return tokenCache.accessToken;
   }
 
-  const body = new URLSearchParams({
-    grant_type: "client_credentials",
-    client_id: process.env.FUEL_FINDER_CLIENT_ID,
-    client_secret: process.env.FUEL_FINDER_CLIENT_SECRET,
-    scope: "fuelfinder.read",
-  });
-
   const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
     method: "POST",
     headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
       "Accept": "application/json",
     },
-    body: body.toString(),
+    body: JSON.stringify({
+      client_id: process.env.FUEL_FINDER_CLIENT_ID,
+      client_secret: process.env.FUEL_FINDER_CLIENT_SECRET,
+    }),
   });
 
   const text = await response.text();
@@ -39,12 +35,14 @@ async function getAccessToken() {
     throw new Error("Token response was not valid JSON: " + text);
   }
 
-  if (!data.access_token) {
-    throw new Error("No access_token returned: " + text);
+  const accessToken = data.access_token || data.token || data.accessToken;
+
+  if (!accessToken) {
+    throw new Error("No token returned: " + text);
   }
 
   tokenCache = {
-    accessToken: data.access_token,
+    accessToken,
     expiresAt: now + Number(data.expires_in || 3600) * 1000,
   };
 
@@ -53,7 +51,7 @@ async function getAccessToken() {
 
 async function fetchGovJson(url) {
   if (!url) {
-    throw new Error("Missing API URL in Vercel environment variables");
+    throw new Error("Missing API URL in environment variables");
   }
 
   const token = await getAccessToken();
@@ -61,8 +59,8 @@ async function fetchGovJson(url) {
   const response = await fetch(url, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${token}`,
-      "Accept": "application/json",
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
     },
   });
 
