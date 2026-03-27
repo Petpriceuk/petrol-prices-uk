@@ -3,6 +3,12 @@ let tokenCache = {
   expiresAt: 0,
 };
 
+function cleanEnv(name) {
+  const value = process.env[name];
+  if (!value) return "";
+  return String(value).trim().replace(/^['"]|['"]$/g, "");
+}
+
 async function getAccessToken() {
   const now = Date.now();
 
@@ -10,9 +16,9 @@ async function getAccessToken() {
     return tokenCache.accessToken;
   }
 
-  const tokenUrl = process.env.FUEL_FINDER_TOKEN_URL;
-  const clientId = process.env.FUEL_FINDER_CLIENT_ID;
-  const clientSecret = process.env.FUEL_FINDER_CLIENT_SECRET;
+  const tokenUrl = cleanEnv("FUEL_FINDER_TOKEN_URL");
+  const clientId = cleanEnv("FUEL_FINDER_CLIENT_ID");
+  const clientSecret = cleanEnv("FUEL_FINDER_CLIENT_SECRET");
 
   if (!tokenUrl || !clientId || !clientSecret) {
     throw new Error(
@@ -31,15 +37,18 @@ async function getAccessToken() {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Accept: "application/json",
+      "Accept": "application/json",
     },
     body: body.toString(),
+    cache: "no-store",
   });
 
   const tokenText = await tokenResponse.text();
 
   if (!tokenResponse.ok) {
-    throw new Error(`Token request failed: ${tokenResponse.status} ${tokenText}`);
+    throw new Error(
+      `Token request failed: ${tokenResponse.status} ${tokenText} | token host: ${new URL(tokenUrl).host}`
+    );
   }
 
   let tokenData;
@@ -55,7 +64,7 @@ async function getAccessToken() {
 
   tokenCache = {
     accessToken: tokenData.access_token,
-    expiresAt: Date.now() + (Number(tokenData.expires_in || 3600) * 1000),
+    expiresAt: Date.now() + Number(tokenData.expires_in || 3600) * 1000,
   };
 
   return tokenCache.accessToken;
@@ -68,14 +77,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const pricesUrl = process.env.FUEL_FINDER_PRICES_URL;
+    const pricesUrl = cleanEnv("FUEL_FINDER_PRICES_URL");
 
     if (!pricesUrl) {
       throw new Error("Missing environment variable: FUEL_FINDER_PRICES_URL");
     }
 
     const token = await getAccessToken();
-
     const upstreamUrl = new URL(pricesUrl);
 
     const query = req.query || {};
@@ -98,6 +106,7 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
+      cache: "no-store",
     });
 
     const apiText = await apiResponse.text();
