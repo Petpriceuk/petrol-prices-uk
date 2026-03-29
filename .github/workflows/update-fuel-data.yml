@@ -1,0 +1,43 @@
+name: Update fuel-data.csv
+
+on:
+  schedule:
+    - cron: '5 10,16 * * *'
+      timezone: 'Europe/London'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-fuel-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download latest fuel CSV
+        run: |
+          curl -L --fail --retry 3 --retry-delay 10 \
+            -A "Mozilla/5.0" \
+            -H "Accept: text/csv,*/*" \
+            "https://www.fuel-finder.service.gov.uk/internal/v1.0.2/csv/get-latest-fuel-prices-csv" \
+            -o fuel-data.csv
+
+          test -s fuel-data.csv
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add fuel-data.csv
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update fuel data CSV"
+          git push
