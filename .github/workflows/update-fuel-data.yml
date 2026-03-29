@@ -15,17 +15,43 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download latest fuel CSV
         run: |
-          curl -L --fail --retry 3 --retry-delay 10 \
-            -A "Mozilla/5.0" \
-            -H "Accept: text/csv,*/*" \
-            "https://www.fuel-finder.service.gov.uk/internal/v1.0.2/csv/get-latest-fuel-prices-csv" \
-            -o fuel-data.csv
+          set -euo pipefail
 
-          test -s fuel-data.csv
+          URL="https://www.fuel-finder.service.gov.uk/internal/v1.0.2/csv/get-latest-fuel-prices-csv"
+          TMP_FILE="$(mktemp)"
+          HEADER_FILE="$(mktemp)"
+
+          STATUS=$(curl -L --silent --show-error --http1.1 \
+            --retry 3 --retry-delay 10 \
+            --user-agent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36" \
+            -H "Accept: text/csv,text/plain;q=0.9,*/*;q=0.8" \
+            -H "Referer: https://www.fuel-finder.service.gov.uk/" \
+            -D "$HEADER_FILE" \
+            -o "$TMP_FILE" \
+            -w "%{http_code}" \
+            "$URL")
+
+          echo "HTTP status: $STATUS"
+          echo "Response headers:"
+          sed -n '1,20p' "$HEADER_FILE" || true
+
+          if [ "$STATUS" -lt 200 ] || [ "$STATUS" -ge 300 ]; then
+            echo "Download failed. First part of response body:"
+            sed -n '1,40p' "$TMP_FILE" || true
+            exit 1
+          fi
+
+          if ! head -n 1 "$TMP_FILE" | grep -q ','; then
+            echo "Response was 2xx but does not look like CSV."
+            sed -n '1,20p' "$TMP_FILE" || true
+            exit 1
+          fi
+
+          mv "$TMP_FILE" fuel-data.csv
 
       - name: Commit and push if changed
         run: |
