@@ -1,7 +1,10 @@
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).json({ ok: false, error: "Method not allowed" });
+    return res.status(405).json({
+      ok: false,
+      error: "Method not allowed"
+    });
   }
 
   try {
@@ -14,10 +17,11 @@ export default async function handler(req, res) {
     ];
 
     const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+
     if (missingEnv.length > 0) {
       return res.status(500).json({
         ok: false,
-        error: "Missing environment variables",
+        error: "Missing required environment variables",
         missingEnv
       });
     }
@@ -26,12 +30,14 @@ export default async function handler(req, res) {
 
     const [pricesResponse, stationsResponse] = await Promise.all([
       fetch(process.env.FUEL_FINDER_PRICES_URL, {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: "application/json"
         }
       }),
       fetch(process.env.FUEL_FINDER_STATIONS_URL, {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: "application/json"
@@ -45,21 +51,41 @@ export default async function handler(req, res) {
     if (!pricesResponse.ok) {
       return res.status(pricesResponse.status).json({
         ok: false,
-        error: "Prices request failed",
-        details: pricesText.slice(0, 800)
+        error: "Fuel Finder prices request failed",
+        details: pricesText.slice(0, 1000)
       });
     }
 
     if (!stationsResponse.ok) {
       return res.status(stationsResponse.status).json({
         ok: false,
-        error: "Stations request failed",
-        details: stationsText.slice(0, 800)
+        error: "Fuel Finder stations request failed",
+        details: stationsText.slice(0, 1000)
       });
     }
 
-    const pricesJson = JSON.parse(pricesText);
-    const stationsJson = JSON.parse(stationsText);
+    let pricesJson;
+    let stationsJson;
+
+    try {
+      pricesJson = JSON.parse(pricesText);
+    } catch {
+      return res.status(500).json({
+        ok: false,
+        error: "Prices endpoint did not return valid JSON",
+        details: pricesText.slice(0, 1000)
+      });
+    }
+
+    try {
+      stationsJson = JSON.parse(stationsText);
+    } catch {
+      return res.status(500).json({
+        ok: false,
+        error: "Stations endpoint did not return valid JSON",
+        details: stationsText.slice(0, 1000)
+      });
+    }
 
     const stations = mergeFuelFinderData(stationsJson, pricesJson);
 
@@ -93,7 +119,13 @@ async function getAccessToken() {
   });
 
   const tokenText = await tokenResponse.text();
-  const tokenJson = JSON.parse(tokenText);
+
+  let tokenJson;
+  try {
+    tokenJson = JSON.parse(tokenText);
+  } catch {
+    throw new Error(`Token endpoint did not return valid JSON: ${tokenText.slice(0, 500)}`);
+  }
 
   const accessToken =
     tokenJson?.access_token ||
@@ -222,9 +254,7 @@ function findFuelPrice(fuelPrices, acceptedTypes) {
 }
 
 function normalizeFuelType(value) {
-  return String(value || "")
-    .trim()
-    .toUpperCase();
+  return String(value || "").trim().toUpperCase();
 }
 
 function toNumber(value) {
