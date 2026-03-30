@@ -2214,8 +2214,7 @@
  ></script>
 
  <script>
- const FUEL_DATA_API_URL = "/api/fuel-data";
- const DEFAULT_SEARCH_RADIUS_MILES = 5;
+  const DEFAULT_SEARCH_RADIUS_MILES = 5;
  const DEFAULT_MAP_CENTER = [54.5, -3.2];
  const DEFAULT_MAP_ZOOM = 6;
 
@@ -2314,7 +2313,19 @@
  let radiusCircle = null;
  let searchCenterMarker = null;
 
-  else if (char === '"') {
+ function parseCsvLine(line) {
+ const result = [];
+ let current = "";
+ let inQuotes = false;
+
+ for (let i = 0; i < line.length; i++) {
+ const char = line[i];
+ const next = line[i + 1];
+
+ if (char === '"' && inQuotes && next === '"') {
+ current += '"';
+ i++;
+ } else if (char === '"') {
  inQuotes = !inQuotes;
  } else if (char === ',' && !inQuotes) {
  result.push(current);
@@ -2727,104 +2738,104 @@
  throw new Error("We could not locate that town or city. Please try a nearby postcode or another place name.");
  }
 
- 
-function firstDefined(...values) {
- return values.find(value => value !== undefined && value !== null && value !== "");
- }
+ function parseStationsFromCsv(text) {
+ const lines = text.split(/\r?\n/).filter(Boolean);
+ const headers = parseCsvLine(lines[0]);
+ const idx = key => headers.indexOf(key);
 
- function getApiArray(payload) {
- if (Array.isArray(payload)) return payload;
- if (!payload || typeof payload !== "object") return [];
- const candidates = [payload.data, payload.results, payload.forecourts, payload.pfs, payload.items];
- for (const candidate of candidates) {
- if (Array.isArray(candidate)) return candidate;
- }
- return [];
- }
-
- function getNodeId(record, fallback = "") {
- return String(firstDefined(record?.node_id, record?.forecourt_id, record?.pfs_id, record?.id, fallback) || "");
- }
-
- function getFuelPriceValue(record, ...codes) {
- const direct = record?.fuel_prices || record?.prices || record?.fuel_price || record || {};
- for (const code of codes) {
- const value = firstDefined(
- direct?.[code],
- direct?.[code?.toLowerCase?.() || code],
- record?.[code],
- record?.[code?.toLowerCase?.() || code]
- );
- const numeric = asNumber(value);
- if (Number.isFinite(numeric)) return numeric;
- }
- return null;
- }
-
- function getFuelTimestampValue(record, ...codes) {
- const direct = record?.price_submission_timestamps || record?.price_submission_timestamp || record?.timestamps || {};
- for (const code of codes) {
- const value = firstDefined(
- direct?.[code],
- direct?.[code?.toLowerCase?.() || code],
- record?.[`timestamp_${code}`],
- record?.[`price_submission_timestamp_${code}`]
- );
- const parsed = safeDate(value);
- if (parsed) return parsed;
- }
- return safeDate(firstDefined(record?.updated_at, record?.last_updated, record?.updatedAt));
- }
-
- function normalizeOpeningTimes(record) {
- const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
- const usualDays = record?.opening_times?.usual_days || record?.usual_days || record?.openingTimes || {};
- return Object.fromEntries(days.map(day => {
- const value = usualDays?.[day] || record?.[day] || {};
- return [day, {
- open: firstDefined(value?.open_time, value?.open, ""),
- close: firstDefined(value?.close_time, value?.close, ""),
- is24Hours: toBool(firstDefined(value?.is_24_hours, value?.is24Hours, false))
- }];
- }));
- }
-
- function normalizeAmenities(record) {
- const fuelServices = record?.amenities?.fuel_and_energy_services || {};
- const vehicleServices = record?.amenities?.vehicle_services || {};
- return {
- hasAdbluePumps: toBool(firstDefined(fuelServices?.adblue_pumps, record?.hasAdbluePumps, false)),
- hasAdbluePackaged: toBool(firstDefined(fuelServices?.adblue_packaged, record?.hasAdbluePackaged, false)),
- hasLpg: toBool(firstDefined(fuelServices?.lpg_pumps, record?.hasLpg, false)),
- hasCarWash: toBool(firstDefined(vehicleServices?.car_wash, record?.hasCarWash, false)),
- hasWater: toBool(firstDefined(record?.amenities?.water_filling, record?.hasWater, false)),
- is24HoursAmenity: toBool(firstDefined(record?.amenities?.twenty_four_hour_fuel, record?.is24HoursAmenity, false)),
- hasToilets: toBool(firstDefined(record?.amenities?.customer_toilets, record?.hasToilets, false))
+ const headerIndex = {
+ nodeId: idx("forecourts.node_id"),
+ tradingName: idx("forecourts.trading_name"),
+ brandName: idx("forecourts.brand_name"),
+ isMotorway: idx("forecourts.is_motorway_service_station"),
+ isSupermarket: idx("forecourts.is_supermarket_service_station"),
+ phone: idx("forecourts.public_phone_number"),
+ temporaryClosure: idx("forecourts.temporary_closure"),
+ permanentClosure: idx("forecourts.permanent_closure"),
+ postcode: idx("forecourts.location.postcode"),
+ line1: idx("forecourts.location.address_line_1"),
+ line2: idx("forecourts.location.address_line_2"),
+ city: idx("forecourts.location.city"),
+ county: idx("forecourts.location.county"),
+ country: idx("forecourts.location.country"),
+ lat: idx("forecourts.location.latitude"),
+ lng: idx("forecourts.location.longitude"),
+ update: idx("forecourt_update_timestamp"),
+ priceE5: idx("forecourts.fuel_price.E5"),
+ priceE10: idx("forecourts.fuel_price.E10"),
+ priceB7S: idx("forecourts.fuel_price.B7S"),
+ priceB7P: idx("forecourts.fuel_price.B7P"),
+ priceB10: idx("forecourts.fuel_price.B10"),
+ priceHVO: idx("forecourts.fuel_price.HVO"),
+ timestampE5: idx("forecourts.price_submission_timestamp.E5"),
+ timestampE10: idx("forecourts.price_submission_timestamp.E10"),
+ timestampB7S: idx("forecourts.price_submission_timestamp.B7S"),
+ timestampB7P: idx("forecourts.price_submission_timestamp.B7P"),
+ timestampB10: idx("forecourts.price_submission_timestamp.B10"),
+ timestampHVO: idx("forecourts.price_submission_timestamp.HVO"),
+ mondayOpen: idx("forecourts.opening_times.usual_days.monday.open_time"),
+ mondayClose: idx("forecourts.opening_times.usual_days.monday.close_time"),
+ monday24: idx("forecourts.opening_times.usual_days.monday.is_24_hours"),
+ tuesdayOpen: idx("forecourts.opening_times.usual_days.tuesday.open_time"),
+ tuesdayClose: idx("forecourts.opening_times.usual_days.tuesday.close_time"),
+ tuesday24: idx("forecourts.opening_times.usual_days.tuesday.is_24_hours"),
+ wednesdayOpen: idx("forecourts.opening_times.usual_days.wednesday.open_time"),
+ wednesdayClose: idx("forecourts.opening_times.usual_days.wednesday.close_time"),
+ wednesday24: idx("forecourts.opening_times.usual_days.wednesday.is_24_hours"),
+ thursdayOpen: idx("forecourts.opening_times.usual_days.thursday.open_time"),
+ thursdayClose: idx("forecourts.opening_times.usual_days.thursday.close_time"),
+ thursday24: idx("forecourts.opening_times.usual_days.thursday.is_24_hours"),
+ fridayOpen: idx("forecourts.opening_times.usual_days.friday.open_time"),
+ fridayClose: idx("forecourts.opening_times.usual_days.friday.close_time"),
+ friday24: idx("forecourts.opening_times.usual_days.friday.is_24_hours"),
+ saturdayOpen: idx("forecourts.opening_times.usual_days.saturday.open_time"),
+ saturdayClose: idx("forecourts.opening_times.usual_days.saturday.close_time"),
+ saturday24: idx("forecourts.opening_times.usual_days.saturday.is_24_hours"),
+ sundayOpen: idx("forecourts.opening_times.usual_days.sunday.open_time"),
+ sundayClose: idx("forecourts.opening_times.usual_days.sunday.close_time"),
+ sunday24: idx("forecourts.opening_times.usual_days.sunday.is_24_hours"),
+ adbluePumps: idx("forecourts.amenities.fuel_and_energy_services.adblue_pumps"),
+ adbluePackaged: idx("forecourts.amenities.fuel_and_energy_services.adblue_packaged"),
+ lpg: idx("forecourts.amenities.fuel_and_energy_services.lpg_pumps"),
+ carWash: idx("forecourts.amenities.vehicle_services.car_wash"),
+ water: idx("forecourts.amenities.water_filling"),
+ fuel24: idx("forecourts.amenities.twenty_four_hour_fuel"),
+ toilets: idx("forecourts.amenities.customer_toilets")
  };
- }
 
- function normalizeStationRecord(record, index, priceRecord) {
- const latitude = asNumber(firstDefined(record?.location?.latitude, record?.latitude));
- const longitude = asNumber(firstDefined(record?.location?.longitude, record?.longitude));
+ const dayFields = {
+ monday: [headerIndex.mondayOpen, headerIndex.mondayClose, headerIndex.monday24],
+ tuesday: [headerIndex.tuesdayOpen, headerIndex.tuesdayClose, headerIndex.tuesday24],
+ wednesday: [headerIndex.wednesdayOpen, headerIndex.wednesdayClose, headerIndex.wednesday24],
+ thursday: [headerIndex.thursdayOpen, headerIndex.thursdayClose, headerIndex.thursday24],
+ friday: [headerIndex.fridayOpen, headerIndex.fridayClose, headerIndex.friday24],
+ saturday: [headerIndex.saturdayOpen, headerIndex.saturdayClose, headerIndex.saturday24],
+ sunday: [headerIndex.sundayOpen, headerIndex.sundayClose, headerIndex.sunday24]
+ };
+
+ return lines.slice(1).map((line, index) => {
+ const cols = parseCsvLine(line);
+ const latitude = asNumber(cols[headerIndex.lat]);
+ const longitude = asNumber(cols[headerIndex.lng]);
  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
 
- const temporarilyClosed = toBool(firstDefined(record?.temporary_closure, record?.status?.temporary_closure, false));
- const permanentlyClosed = toBool(firstDefined(record?.permanent_closure, record?.status?.permanent_closure, false));
- if (temporarilyClosed || permanentlyClosed) return null;
+ const closed = toBool(cols[headerIndex.temporaryClosure]) || toBool(cols[headerIndex.permanentClosure]);
+ if (closed) return null;
 
- const postcode = String(firstDefined(record?.location?.postcode, record?.postcode, "") || "").toUpperCase();
- const addressLine1 = titleCase(firstDefined(record?.location?.address_line_1, record?.address_line_1, ""));
- const addressLine2 = titleCase(firstDefined(record?.location?.address_line_2, record?.address_line_2, ""));
- const city = titleCase(firstDefined(record?.location?.city, record?.city, record?.town, ""));
- const county = titleCase(firstDefined(record?.location?.county, record?.county, ""));
- const country = titleCase(firstDefined(record?.location?.country, record?.country, "UK"));
- const brandRaw = firstDefined(record?.brand_name, record?.brand, "") || "";
+ const brandDisplay = formatBrandName(cols[headerIndex.brandName]);
+ const tradingName = titleCase(cols[headerIndex.tradingName] || "Fuel Station");
+ const city = titleCase(cols[headerIndex.city]);
+ const county = titleCase(cols[headerIndex.county]);
+ const country = titleCase(cols[headerIndex.country]);
+ const postcode = (cols[headerIndex.postcode] || "").toUpperCase();
+ const addressLine1 = titleCase(cols[headerIndex.line1]);
+ const addressLine2 = titleCase(cols[headerIndex.line2]);
 
  const station = {
- id: getNodeId(record, `station-${index + 1}`),
- brandRaw,
- brandDisplay: formatBrandName(brandRaw),
- tradingName: titleCase(firstDefined(record?.trading_name, record?.name, "Fuel Station")),
+ id: cols[headerIndex.nodeId] || `station-${index + 1}`,
+ brandRaw: cols[headerIndex.brandName] || "",
+ brandDisplay,
+ tradingName,
  postcode,
  city,
  county,
@@ -2834,39 +2845,62 @@ function firstDefined(...values) {
  address: composeAddress([addressLine1, addressLine2, city, county, postcode]),
  latitude,
  longitude,
- phone: firstDefined(record?.public_phone_number, record?.phone, "") || "",
- isMotorway: toBool(firstDefined(record?.is_motorway_service_station, record?.isMotorway, false)),
- isSupermarket: toBool(firstDefined(record?.is_supermarket_service_station, record?.isSupermarket, false)),
- forecourtUpdatedAt: safeDate(firstDefined(record?.forecourt_update_timestamp, record?.updated_at, record?.last_updated)),
- priceE5: getFuelPriceValue(priceRecord, "E5"),
- priceE10: getFuelPriceValue(priceRecord, "E10"),
- priceB7S: getFuelPriceValue(priceRecord, "B7S", "B7"),
- priceB7P: getFuelPriceValue(priceRecord, "B7P", "SD", "SDV"),
- priceB10: getFuelPriceValue(priceRecord, "B10"),
- priceHVO: getFuelPriceValue(priceRecord, "HVO"),
- timestampE5: getFuelTimestampValue(priceRecord, "E5"),
- timestampE10: getFuelTimestampValue(priceRecord, "E10"),
- timestampB7S: getFuelTimestampValue(priceRecord, "B7S", "B7"),
- timestampB7P: getFuelTimestampValue(priceRecord, "B7P", "SD", "SDV"),
- timestampB10: getFuelTimestampValue(priceRecord, "B10"),
- timestampHVO: getFuelTimestampValue(priceRecord, "HVO"),
- openingTimes: normalizeOpeningTimes(record)
+ phone: cols[headerIndex.phone] || "",
+ isMotorway: toBool(cols[headerIndex.isMotorway]),
+ isSupermarket: toBool(cols[headerIndex.isSupermarket]),
+ forecourtUpdatedAt: safeDate(cols[headerIndex.update]),
+ priceE5: asNumber(cols[headerIndex.priceE5]),
+ priceE10: asNumber(cols[headerIndex.priceE10]),
+ priceB7S: asNumber(cols[headerIndex.priceB7S]),
+ priceB7P: asNumber(cols[headerIndex.priceB7P]),
+ priceB10: asNumber(cols[headerIndex.priceB10]),
+ priceHVO: asNumber(cols[headerIndex.priceHVO]),
+ timestampE5: safeDate(cols[headerIndex.timestampE5]),
+ timestampE10: safeDate(cols[headerIndex.timestampE10]),
+ timestampB7S: safeDate(cols[headerIndex.timestampB7S]),
+ timestampB7P: safeDate(cols[headerIndex.timestampB7P]),
+ timestampB10: safeDate(cols[headerIndex.timestampB10]),
+ timestampHVO: safeDate(cols[headerIndex.timestampHVO]),
+ hasAdbluePumps: toBool(cols[headerIndex.adbluePumps]),
+ hasAdbluePackaged: toBool(cols[headerIndex.adbluePackaged]),
+ hasLpg: toBool(cols[headerIndex.lpg]),
+ hasCarWash: toBool(cols[headerIndex.carWash]),
+ hasWater: toBool(cols[headerIndex.water]),
+ is24HoursAmenity: toBool(cols[headerIndex.fuel24]),
+ hasToilets: toBool(cols[headerIndex.toilets]),
+ openingTimes: Object.fromEntries(Object.entries(dayFields).map(([day, fieldIndexes]) => {
+ const [openIdx, closeIdx, is24Idx] = fieldIndexes;
+ return [day, {
+ open: cols[openIdx] || "",
+ close: cols[closeIdx] || "",
+ is24Hours: toBool(cols[is24Idx])
+ }];
+ }))
  };
 
- Object.assign(station, normalizeAmenities(record));
  station.amenities = buildAmenities(station);
  return station;
+ }).filter(Boolean);
  }
 
  async function loadApiData() {
- const payload = await fetchJson(FUEL_DATA_API_URL);
- const stationRecords = Array.isArray(payload) ? payload : getApiArray(payload);
- state.stations = stationRecords
- .map((record, index) => normalizeStationRecord(record, index, record))
- .filter(Boolean);
+ const data = await fetchJson("/api/fuel-data");
+ if (!Array.isArray(data)) {
+ throw new Error("Fuel API did not return a station list.");
  }
 
-
+ state.stations = data.map(station => ({
+ ...station,
+ forecourtUpdatedAt: station.forecourtUpdatedAt ? new Date(station.forecourtUpdatedAt) : null,
+ timestampE5: station.timestampE5 ? new Date(station.timestampE5) : null,
+ timestampE10: station.timestampE10 ? new Date(station.timestampE10) : null,
+ timestampB7S: station.timestampB7S ? new Date(station.timestampB7S) : null,
+ timestampB7P: station.timestampB7P ? new Date(station.timestampB7P) : null,
+ timestampB10: station.timestampB10 ? new Date(station.timestampB10) : null,
+ timestampHVO: station.timestampHVO ? new Date(station.timestampHVO) : null,
+ amenities: Array.isArray(station.amenities) ? station.amenities : buildAmenities(station)
+ }));
+ }
 
  function calculateResults(center, fuelCode, sortBy) {
  const { tankLitres, fuelEconomyMpg } = getEstimatorSettings();
@@ -3360,7 +3394,7 @@ function firstDefined(...values) {
  try {
  await loadApiData();
  } catch (error) {
- console.warn("Using existing loaded API data.", error);
+ console.warn("Using existing loaded fuel data.", error);
  }
  rerunCurrentSearch({ resetSelection });
  if (scrollToFirstStationOnMobile && isResponsiveMode() && state.searchCenter) {
