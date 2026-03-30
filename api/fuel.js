@@ -13,7 +13,8 @@ export default async function handler(req, res) {
       "FUEL_FINDER_TOKEN_URL",
       "FUEL_FINDER_CLIENT_ID",
       "FUEL_FINDER_CLIENT_SECRET",
-      "FUEL_FINDER_API_URL"
+      "FUEL_FINDER_PRICES_URL",
+      "FUEL_FINDER_STATIONS_URL"
     ];
 
     const missingEnv = requiredEnv.filter((key) => !process.env[key]);
@@ -29,39 +30,72 @@ export default async function handler(req, res) {
 
     const accessToken = await getAccessToken();
 
-    const apiResponse = await fetch(process.env.FUEL_FINDER_API_URL, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json"
-      }
-    });
+    const [pricesResponse, stationsResponse] = await Promise.all([
+      fetch(process.env.FUEL_FINDER_PRICES_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json"
+        }
+      }),
+      fetch(process.env.FUEL_FINDER_STATIONS_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json"
+        }
+      })
+    ]);
 
-    const rawText = await apiResponse.text();
+    const pricesText = await pricesResponse.text();
+    const stationsText = await stationsResponse.text();
 
-    if (!apiResponse.ok) {
-      return res.status(apiResponse.status).json({
+    if (!pricesResponse.ok) {
+      return res.status(pricesResponse.status).json({
         ok: false,
-        step: "fuel-api",
-        error: "Fuel Finder API request failed",
-        status: apiResponse.status,
-        details: safeSnippet(rawText)
+        step: "prices-api",
+        error: "Fuel Finder prices request failed",
+        status: pricesResponse.status,
+        details: safeSnippet(pricesText)
       });
     }
 
-    let raw;
+    if (!stationsResponse.ok) {
+      return res.status(stationsResponse.status).json({
+        ok: false,
+        step: "stations-api",
+        error: "Fuel Finder stations request failed",
+        status: stationsResponse.status,
+        details: safeSnippet(stationsText)
+      });
+    }
+
+    let pricesJson;
+    let stationsJson;
+
     try {
-      raw = JSON.parse(rawText);
+      pricesJson = JSON.parse(pricesText);
     } catch {
       return res.status(500).json({
         ok: false,
-        step: "fuel-api-parse",
-        error: "Fuel Finder API did not return valid JSON",
-        details: safeSnippet(rawText)
+        step: "prices-parse",
+        error: "Prices endpoint did not return valid JSON",
+        details: safeSnippet(pricesText)
       });
     }
 
-    const stations = normalizeFuelFinderResponse(raw);
+    try {
+      stationsJson = JSON.parse(stationsText);
+    } catch {
+      return res.status(500).json({
+        ok: false,
+        step: "stations-parse",
+        error: "Stations endpoint did not return valid JSON",
+        details: safeSnippet(stationsText)
+      });
+    }
+
+    const stations = mergeFuelFinderData(stationsJson, pricesJson);
 
     return res.status(200).json({
       ok: true,
@@ -87,10 +121,7 @@ async function getAccessToken() {
     body: new URLSearchParams({
       grant_type: "client_credentials",
       client_id: process.env.FUEL_FINDER_CLIENT_ID,
-      client_secret: process.env.FUEL_FINDER_CLIENT_SECRET,
-      ...(process.env.FUEL_FINDER_SCOPE
-        ? { scope: process.env.FUEL_FINDER_SCOPE }
-        : {})
+      client_secret: process.env.FUEL_FINDER_CLIENT_SECRET
     }).toString()
   });
 
@@ -116,22 +147,39 @@ async function getAccessToken() {
   return tokenJson.access_token;
 }
 
-function normalizeFuelFinderResponse(raw) {
-  const items =
-    raw.forecourts ||
-    raw.stations ||
-    raw.items ||
-    raw.data ||
-    raw.results ||
-    [];
+function mergeFuelFinderData(stationsRaw, pricesRaw) {
+  const stationsList = getArrayFromPayload(stationsRaw);
+  const pricesList = getArrayFromPayload(pricesRaw);
 
-  if (!Array.isArray(items)) {
-    throw new Error("Fuel Finder payload did not contain a station array");
+  const pricesById = new Map();
+
+  for (const item of pricesList) {
+    const siteId = String(
+      item.forecourtId ??
+      item.stationId ??
+      item.siteId ??
+      item.id ??
+      ""
+    ).trim();
+
+    if (!siteId) continue;
+
+    const prices = Array.isArray(item.prices) ? item.prices : [];
+    const existing = pricesById.get(siteId) || [];
+    pricesById.set(siteId, existing.concat(prices));
   }
 
-  return items
+  return stationsList
     .map((site, index) => {
-      const prices = Array.isArray(site.prices) ? site.prices : [];
+      const siteId = String(
+        site.forecourtId ??
+        site.stationId ??
+        site.siteId ??
+        site.id ??
+        `${index + 1}`
+      ).trim();
+
+      const prices = pricesById.get(siteId) || [];
 
       const e10 = findFuelPrice(prices, ["E10", "Unleaded"]);
       const e5 = findFuelPrice(prices, ["E5", "Super Unleaded", "Premium Unleaded"]);
@@ -140,16 +188,16 @@ function normalizeFuelFinderResponse(raw) {
 
       const latitude = toNumber(
         site.latitude ??
-          site.location?.latitude ??
-          site.coordinates?.latitude ??
-          site.lat
+        site.location?.latitude ??
+        site.coordinates?.latitude ??
+        site.lat
       );
 
       const longitude = toNumber(
         site.longitude ??
-          site.location?.longitude ??
-          site.coordinates?.longitude ??
-          site.lng
+        site.location?.longitude ??
+        site.coordinates?.longitude ??
+        site.lng
       );
 
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -185,38 +233,65 @@ function normalizeFuelFinderResponse(raw) {
         "";
 
       return {
-        id: String(site.forecourtId || site.id || site.siteId || `${brand}-${index + 1}`),
+        id: siteId,
         latitude,
         longitude,
+
         brandRaw: brand,
         brandDisplay: brand,
         tradingName,
+
         address: [addressLine1, addressLine2, city, county, postcode]
           .filter(Boolean)
           .join(", "),
         city,
         county,
         postcode,
+
         priceE10: e10?.price ?? null,
         priceE5: e5?.price ?? null,
         priceB7S: b7s?.price ?? null,
         priceB7P: b7p?.price ?? null,
+
         timestampE10: e10?.updatedAt ?? null,
         timestampE5: e5?.updatedAt ?? null,
         timestampB7S: b7s?.updatedAt ?? null,
         timestampB7P: b7p?.updatedAt ?? null,
+
         forecourtUpdatedAt:
           site.updatedAt ||
           site.lastUpdated ||
           site.forecourtUpdatedAt ||
           null,
+
         openingHours: site.openingHours || site.hours || null,
         amenities: normalizeAmenities(site.amenities),
+
         isMotorway: Boolean(site.isMotorway),
         isSupermarket: Boolean(site.isSupermarket)
       };
     })
     .filter(Boolean);
+}
+
+function getArrayFromPayload(payload) {
+  if (Array.isArray(payload)) return payload;
+
+  const possibleKeys = [
+    "forecourts",
+    "stations",
+    "items",
+    "data",
+    "results"
+  ];
+
+  for (const key of possibleKeys) {
+    if (Array.isArray(payload?.[key])) {
+      return payload[key];
+    }
+  }
+
+  return [];
 }
 
 function findFuelPrice(prices, acceptedNames) {
@@ -225,10 +300,10 @@ function findFuelPrice(prices, acceptedNames) {
   const entry = prices.find((item) => {
     const code = normalizeFuelCode(
       item.fuelType ||
-        item.fuelCode ||
-        item.product ||
-        item.grade ||
-        item.name
+      item.fuelCode ||
+      item.product ||
+      item.grade ||
+      item.name
     );
     return accepted.includes(code);
   });
@@ -236,9 +311,13 @@ function findFuelPrice(prices, acceptedNames) {
   if (!entry) return null;
 
   return {
-    price: toNumber(entry.price ?? entry.amount ?? entry.pencePerLitre),
+    price: toNumber(itemPrice(entry)),
     updatedAt: entry.updatedAt || entry.lastUpdated || entry.timestamp || null
   };
+}
+
+function itemPrice(entry) {
+  return entry.price ?? entry.amount ?? entry.pencePerLitre ?? null;
 }
 
 function normalizeFuelCode(value) {
