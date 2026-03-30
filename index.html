@@ -1,3 +1,7 @@
+###  Translation from RTF performed by UnRTF, version 0.21.10 
+### font table contains 1 fonts total
+
+-----------------
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2102,9 +2106,7 @@
  </div>
 
  <div id="statusBanner" class="status-banner">
- Ready when you are. Search by postcode, town or city or use the 
-Locate me
- button.
+ Ready when you are. Search by postcode, town or city or use the Locate me button.
  </div>
 
  <div id="stations" class="stations"></div>
@@ -2741,95 +2743,235 @@ Locate me
  throw new Error("We could not locate that town or city. Please try a nearby postcode or another place name.");
  }
 
- function hydrateApiStation(station, index) {
- const latitude = Number(station.latitude);
- const longitude = Number(station.longitude);
+ function parseStationsFromCsv(text) {
+ const lines = text.split(/\r?\n/).filter(Boolean);
+ const headers = parseCsvLine(lines[0]);
+ const idx = key => headers.indexOf(key);
+
+ const headerIndex = {
+ nodeId: idx("forecourts.node_id"),
+ tradingName: idx("forecourts.trading_name"),
+ brandName: idx("forecourts.brand_name"),
+ isMotorway: idx("forecourts.is_motorway_service_station"),
+ isSupermarket: idx("forecourts.is_supermarket_service_station"),
+ phone: idx("forecourts.public_phone_number"),
+ temporaryClosure: idx("forecourts.temporary_closure"),
+ permanentClosure: idx("forecourts.permanent_closure"),
+ postcode: idx("forecourts.location.postcode"),
+ line1: idx("forecourts.location.address_line_1"),
+ line2: idx("forecourts.location.address_line_2"),
+ city: idx("forecourts.location.city"),
+ county: idx("forecourts.location.county"),
+ country: idx("forecourts.location.country"),
+ lat: idx("forecourts.location.latitude"),
+ lng: idx("forecourts.location.longitude"),
+ update: idx("forecourt_update_timestamp"),
+ priceE5: idx("forecourts.fuel_price.E5"),
+ priceE10: idx("forecourts.fuel_price.E10"),
+ priceB7S: idx("forecourts.fuel_price.B7S"),
+ priceB7P: idx("forecourts.fuel_price.B7P"),
+ priceB10: idx("forecourts.fuel_price.B10"),
+ priceHVO: idx("forecourts.fuel_price.HVO"),
+ timestampE5: idx("forecourts.price_submission_timestamp.E5"),
+ timestampE10: idx("forecourts.price_submission_timestamp.E10"),
+ timestampB7S: idx("forecourts.price_submission_timestamp.B7S"),
+ timestampB7P: idx("forecourts.price_submission_timestamp.B7P"),
+ timestampB10: idx("forecourts.price_submission_timestamp.B10"),
+ timestampHVO: idx("forecourts.price_submission_timestamp.HVO"),
+ mondayOpen: idx("forecourts.opening_times.usual_days.monday.open_time"),
+ mondayClose: idx("forecourts.opening_times.usual_days.monday.close_time"),
+ monday24: idx("forecourts.opening_times.usual_days.monday.is_24_hours"),
+ tuesdayOpen: idx("forecourts.opening_times.usual_days.tuesday.open_time"),
+ tuesdayClose: idx("forecourts.opening_times.usual_days.tuesday.close_time"),
+ tuesday24: idx("forecourts.opening_times.usual_days.tuesday.is_24_hours"),
+ wednesdayOpen: idx("forecourts.opening_times.usual_days.wednesday.open_time"),
+ wednesdayClose: idx("forecourts.opening_times.usual_days.wednesday.close_time"),
+ wednesday24: idx("forecourts.opening_times.usual_days.wednesday.is_24_hours"),
+ thursdayOpen: idx("forecourts.opening_times.usual_days.thursday.open_time"),
+ thursdayClose: idx("forecourts.opening_times.usual_days.thursday.close_time"),
+ thursday24: idx("forecourts.opening_times.usual_days.thursday.is_24_hours"),
+ fridayOpen: idx("forecourts.opening_times.usual_days.friday.open_time"),
+ fridayClose: idx("forecourts.opening_times.usual_days.friday.close_time"),
+ friday24: idx("forecourts.opening_times.usual_days.friday.is_24_hours"),
+ saturdayOpen: idx("forecourts.opening_times.usual_days.saturday.open_time"),
+ saturdayClose: idx("forecourts.opening_times.usual_days.saturday.close_time"),
+ saturday24: idx("forecourts.opening_times.usual_days.saturday.is_24_hours"),
+ sundayOpen: idx("forecourts.opening_times.usual_days.sunday.open_time"),
+ sundayClose: idx("forecourts.opening_times.usual_days.sunday.close_time"),
+ sunday24: idx("forecourts.opening_times.usual_days.sunday.is_24_hours"),
+ adbluePumps: idx("forecourts.amenities.fuel_and_energy_services.adblue_pumps"),
+ adbluePackaged: idx("forecourts.amenities.fuel_and_energy_services.adblue_packaged"),
+ lpg: idx("forecourts.amenities.fuel_and_energy_services.lpg_pumps"),
+ carWash: idx("forecourts.amenities.vehicle_services.car_wash"),
+ water: idx("forecourts.amenities.water_filling"),
+ fuel24: idx("forecourts.amenities.twenty_four_hour_fuel"),
+ toilets: idx("forecourts.amenities.customer_toilets")
+ };
+
+ const dayFields = {
+ monday: [headerIndex.mondayOpen, headerIndex.mondayClose, headerIndex.monday24],
+ tuesday: [headerIndex.tuesdayOpen, headerIndex.tuesdayClose, headerIndex.tuesday24],
+ wednesday: [headerIndex.wednesdayOpen, headerIndex.wednesdayClose, headerIndex.wednesday24],
+ thursday: [headerIndex.thursdayOpen, headerIndex.thursdayClose, headerIndex.thursday24],
+ friday: [headerIndex.fridayOpen, headerIndex.fridayClose, headerIndex.friday24],
+ saturday: [headerIndex.saturdayOpen, headerIndex.saturdayClose, headerIndex.saturday24],
+ sunday: [headerIndex.sundayOpen, headerIndex.sundayClose, headerIndex.sunday24]
+ };
+
+ return lines.slice(1).map((line, index) => {
+ const cols = parseCsvLine(line);
+ const latitude = asNumber(cols[headerIndex.lat]);
+ const longitude = asNumber(cols[headerIndex.lng]);
  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
 
- const hydrated = {
- id: String(station.id || `station-${index + 1}`),
- brandRaw: station.brandRaw || station.brandDisplay || "",
- brandDisplay: station.brandDisplay || station.brandRaw || "Unknown",
- tradingName: station.tradingName || station.brandDisplay || station.brandRaw || "Fuel Station",
- postcode: (station.postcode || "").toUpperCase(),
- city: titleCase(station.city || ""),
- county: titleCase(station.county || ""),
- country: titleCase(station.country || ""),
- addressLine1: titleCase(station.addressLine1 || station.address || ""),
- addressLine2: titleCase(station.addressLine2 || ""),
+ const closed = toBool(cols[headerIndex.temporaryClosure]) || toBool(cols[headerIndex.permanentClosure]);
+ if (closed) return null;
+
+ const brandDisplay = formatBrandName(cols[headerIndex.brandName]);
+ const tradingName = titleCase(cols[headerIndex.tradingName] || "Fuel Station");
+ const city = titleCase(cols[headerIndex.city]);
+ const county = titleCase(cols[headerIndex.county]);
+ const country = titleCase(cols[headerIndex.country]);
+ const postcode = (cols[headerIndex.postcode] || "").toUpperCase();
+ const addressLine1 = titleCase(cols[headerIndex.line1]);
+ const addressLine2 = titleCase(cols[headerIndex.line2]);
+
+ const station = {
+ id: cols[headerIndex.nodeId] || `station-${index + 1}`,
+ brandRaw: cols[headerIndex.brandName] || "",
+ brandDisplay,
+ tradingName,
+ postcode,
+ city,
+ county,
+ country,
+ addressLine1,
+ addressLine2,
+ address: composeAddress([addressLine1, addressLine2, city, county, postcode]),
  latitude,
  longitude,
- phone: station.phone || station.publicPhoneNumber || "",
- isMotorway: Boolean(station.isMotorway),
- isSupermarket: Boolean(station.isSupermarket),
- forecourtUpdatedAt: safeDate(station.forecourtUpdatedAt),
- priceE5: asNumber(station.priceE5),
- priceE10: asNumber(station.priceE10),
- priceB7S: asNumber(station.priceB7S),
- priceB7P: asNumber(station.priceB7P),
- priceB10: asNumber(station.priceB10),
- priceHVO: asNumber(station.priceHVO),
- timestampE5: safeDate(station.timestampE5),
- timestampE10: safeDate(station.timestampE10),
- timestampB7S: safeDate(station.timestampB7S),
- timestampB7P: safeDate(station.timestampB7P),
- timestampB10: safeDate(station.timestampB10),
- timestampHVO: safeDate(station.timestampHVO),
- hasAdbluePumps: Array.isArray(station.amenities) && station.amenities.includes("adblue_pumps"),
- hasAdbluePackaged: Array.isArray(station.amenities) && station.amenities.includes("adblue_packaged"),
- hasLpg: Array.isArray(station.amenities) && station.amenities.includes("lpg_pumps"),
- hasCarWash: Array.isArray(station.amenities) && station.amenities.includes("car_wash"),
- hasWater: Array.isArray(station.amenities) && station.amenities.includes("water_filling"),
- is24HoursAmenity: Array.isArray(station.amenities) && station.amenities.includes("twenty_four_hour_fuel"),
- hasToilets: Array.isArray(station.amenities) && station.amenities.includes("customer_toilets"),
- openingTimes: normalizeOpeningTimes(station.openingHours || station.openingTimes || null)
+ phone: cols[headerIndex.phone] || "",
+ isMotorway: toBool(cols[headerIndex.isMotorway]),
+ isSupermarket: toBool(cols[headerIndex.isSupermarket]),
+ forecourtUpdatedAt: safeDate(cols[headerIndex.update]),
+ priceE5: asNumber(cols[headerIndex.priceE5]),
+ priceE10: asNumber(cols[headerIndex.priceE10]),
+ priceB7S: asNumber(cols[headerIndex.priceB7S]),
+ priceB7P: asNumber(cols[headerIndex.priceB7P]),
+ priceB10: asNumber(cols[headerIndex.priceB10]),
+ priceHVO: asNumber(cols[headerIndex.priceHVO]),
+ timestampE5: safeDate(cols[headerIndex.timestampE5]),
+ timestampE10: safeDate(cols[headerIndex.timestampE10]),
+ timestampB7S: safeDate(cols[headerIndex.timestampB7S]),
+ timestampB7P: safeDate(cols[headerIndex.timestampB7P]),
+ timestampB10: safeDate(cols[headerIndex.timestampB10]),
+ timestampHVO: safeDate(cols[headerIndex.timestampHVO]),
+ hasAdbluePumps: toBool(cols[headerIndex.adbluePumps]),
+ hasAdbluePackaged: toBool(cols[headerIndex.adbluePackaged]),
+ hasLpg: toBool(cols[headerIndex.lpg]),
+ hasCarWash: toBool(cols[headerIndex.carWash]),
+ hasWater: toBool(cols[headerIndex.water]),
+ is24HoursAmenity: toBool(cols[headerIndex.fuel24]),
+ hasToilets: toBool(cols[headerIndex.toilets]),
+ openingTimes: Object.fromEntries(Object.entries(dayFields).map(([day, fieldIndexes]) => {
+ const [openIdx, closeIdx, is24Idx] = fieldIndexes;
+ return [day, {
+ open: cols[openIdx] || "",
+ close: cols[closeIdx] || "",
+ is24Hours: toBool(cols[is24Idx])
+ }];
+ }))
  };
 
- hydrated.address = composeAddress([
- hydrated.addressLine1,
- hydrated.addressLine2,
- hydrated.city,
- hydrated.county,
- hydrated.postcode
- ]);
- hydrated.amenities = buildAmenities(hydrated);
- return hydrated;
+ station.amenities = buildAmenities(station);
+ return station;
+ }).filter(Boolean);
  }
 
- function normalizeOpeningTimes(openingData) {
- if (!openingData || typeof openingData !== "object") return {
- monday: { open: "", close: "", is24Hours: false },
- tuesday: { open: "", close: "", is24Hours: false },
- wednesday: { open: "", close: "", is24Hours: false },
- thursday: { open: "", close: "", is24Hours: false },
- friday: { open: "", close: "", is24Hours: false },
- saturday: { open: "", close: "", is24Hours: false },
- sunday: { open: "", close: "", is24Hours: false }
- };
+ 
+function normalizeApiAmenityLabel(code) {
+const map = {
+"adblue_packaged": "Packaged AdBlue",
+"adblue_pumps": "AdBlue pumps",
+"car_wash": "Car wash",
+"customer_toilets": "Customer toilets",
+"water_filling": "Water filling",
+"lpg_pumps": "LPG"
+};
+return map[String(code || "").toLowerCase()] || titleCase(String(code || "").replace(/_/g, " "));
+}
 
- const usualDays = openingData.usual_days || openingData.usualDays || {};
- const dayNames = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
- const out = {};
- for (const day of dayNames) {
- const d = usualDays[day] || {};
- out[day] = {
- open: d.open || d.open_time || "",
- close: d.close || d.close_time || "",
- is24Hours: Boolean(d.is_24_hours || d.is24Hours)
- };
- }
- return out;
- }
+function normalizeApiOpeningTimes(openingTimes) {
+const fallback = {
+monday: { open: "", close: "", is24Hours: false },
+tuesday: { open: "", close: "", is24Hours: false },
+wednesday: { open: "", close: "", is24Hours: false },
+thursday: { open: "", close: "", is24Hours: false },
+friday: { open: "", close: "", is24Hours: false },
+saturday: { open: "", close: "", is24Hours: false },
+sunday: { open: "", close: "", is24Hours: false }
+};
 
- async function loadCsvData() {
- const response = await fetch(API_URL, {
- headers: { Accept: "application/json" }
- });
- if (!response.ok) throw new Error(`Could not load ${API_URL}`);
- const payload = await response.json();
- if (!payload || !Array.isArray(payload.stations)) throw new Error("Fuel API returned invalid station data.");
- state.stations = payload.stations.map((station, index) => hydrateApiStation(station, index)).filter(Boolean);
- }
+if (!openingTimes || typeof openingTimes !== "object") return fallback;
+const usualDays = openingTimes.usual_days || {};
+for (const day of Object.keys(fallback)) {
+const source = usualDays[day] || {};
+fallback[day] = {
+open: source.open || "",
+close: source.close || "",
+is24Hours: Boolean(source.is_24_hours)
+};
+}
+return fallback;
+}
+
+function mapApiStation(station) {
+const amenities = Array.isArray(station.amenities) ? station.amenities : [];
+return {
+id: String(station.id || ""),
+brandRaw: station.brandRaw || station.brandDisplay || "Independent",
+brandDisplay: station.brandDisplay || station.brandRaw || "Independent",
+tradingName: station.tradingName || station.brandDisplay || station.brandRaw || "Fuel Station",
+address: station.address || "",
+city: station.city || "",
+county: station.county || "",
+postcode: station.postcode || "",
+phone: station.publicPhoneNumber || station.phone || "",
+latitude: asNumber(station.latitude),
+longitude: asNumber(station.longitude),
+priceE10: asNumber(station.priceE10),
+priceE5: asNumber(station.priceE5),
+priceB7S: asNumber(station.priceB7S),
+priceB7P: asNumber(station.priceB7P),
+timestampE10: safeDate(station.timestampE10),
+timestampE5: safeDate(station.timestampE5),
+timestampB7S: safeDate(station.timestampB7S),
+timestampB7P: safeDate(station.timestampB7P),
+isMotorway: Boolean(station.isMotorway),
+isSupermarket: Boolean(station.isSupermarket),
+hasCarWash: amenities.includes("car_wash"),
+hasToilets: amenities.includes("customer_toilets"),
+hasWater: amenities.includes("water_filling"),
+hasAdbluePumps: amenities.includes("adblue_pumps"),
+hasAdbluePackaged: amenities.includes("adblue_packaged"),
+hasLpg: amenities.includes("lpg_pumps"),
+is24HoursAmenity: false,
+amenities: amenities.map(normalizeApiAmenityLabel),
+openingTimes: normalizeApiOpeningTimes(station.openingHours)
+};
+}
+
+async function loadCsvData() {
+const response = await fetch(API_URL, { headers: { Accept: "application/json" } });
+if (!response.ok) throw new Error(`Could not load ${API_URL}`);
+const payload = await response.json();
+state.stations = (payload.stations || []).map(mapApiStation).filter(station =>
+station.id &&
+Number.isFinite(station.latitude) &&
+Number.isFinite(station.longitude)
+);
+}
+
 
  function calculateResults(center, fuelCode, sortBy) {
  const { tankLitres, fuelEconomyMpg } = getEstimatorSettings();
@@ -2858,7 +3000,7 @@ Locate me
  journeyFuelLitres: calculateJourneyFuelLitres(distanceMiles, fuelEconomyMpg)
  };
  })
- .filter(station => station.distanceMiles <= searchRadiusMiles);
+ .filter(station => Number.isFinite(station.price) && station.price > 0 && station.distanceMiles <= searchRadiusMiles);
 
  const priceRanks = new Map(
  [...filteredResults]
@@ -2924,9 +3066,7 @@ Locate me
  elements.resultsBadge.textContent = `${count} result${count === 1 ? "" : "s"}`;
 
  if (!state.searchCenter) {
- elements.statusBanner.textContent = "Ready when you are. Search by postcode, town or city or use the 
-Locate me
- button.";
+ elements.statusBanner.textContent = "Ready when you are. Search by postcode, town or city or use the Locate me button.";
  return;
  }
 
@@ -2958,37 +3098,14 @@ Locate me
  }
 
  function renderStations() {
- if (!state.results.length) {
- if (!state.searchCenter && state.stations.length) {
- state.results = state.stations.slice(0, 50).map((station, index) => ({
- ...station,
- price: getStationPrice(station, elements.fuelType.value),
- fuelCode: elements.fuelType.value,
- fuelLabel: FUEL_CONFIG[elements.fuelType.value].label,
- updatedAt: getStationTimestamp(station, elements.fuelType.value),
- updatedText: relativeUpdatedText(getStationTimestamp(station, elements.fuelType.value)),
- openingSummary: getOpeningSummary(station),
- openState: getStationOpenState(station),
- distanceMiles: 0,
- displayUnleaded: station.priceE10,
- displaySuperUnleaded: station.priceE5,
- displayDiesel: station.priceB7S,
- displayPremiumDiesel: station.priceB7P,
- fillCost: calculateFillCost(getStationPrice(station, elements.fuelType.value), getEstimatorSettings().tankLitres),
- journeyCost: 0,
- journeyFuelLitres: 0,
- rank: index + 1
- }));
- state.selectedId = state.results[0]?.id || null;
- } else {
+ if (!state.searchCenter) {
  elements.stations.innerHTML = `
  <div class="empty-state">
- <h3>No nearby stations found</h3>
- <p>Try a different fuel type, increase your search radius, search a nearby postcode, or use your current location to try another area.</p>
+ <h3>Start with a location</h3>
+ <p>Enter a postcode, town or city and youll see stations within your chosen radius, ranked by price, distance or how recently the price was updated.</p>
  </div>
  `;
  return;
- }
  }
 
  if (!state.results.length) {
@@ -3385,33 +3502,6 @@ Locate me
  async function init() {
  try {
  await loadCsvData();
- if (state.stations.length) {
- const first = state.stations[0];
- state.searchCenter = { lat: first.latitude, lng: first.longitude };
- state.searchLabel = "UK fuel stations";
- state.lastSearchMode = "initial load";
- state.results = state.stations.slice(0, 50).map((station, index) => ({
- ...station,
- price: getStationPrice(station, elements.fuelType.value),
- fuelCode: elements.fuelType.value,
- fuelLabel: FUEL_CONFIG[elements.fuelType.value].label,
- updatedAt: getStationTimestamp(station, elements.fuelType.value),
- updatedText: relativeUpdatedText(getStationTimestamp(station, elements.fuelType.value)),
- openingSummary: getOpeningSummary(station),
- openState: getStationOpenState(station),
- distanceMiles: 0,
- displayUnleaded: station.priceE10,
- displaySuperUnleaded: station.priceE5,
- displayDiesel: station.priceB7S,
- displayPremiumDiesel: station.priceB7P,
- fillCost: calculateFillCost(getStationPrice(station, elements.fuelType.value), getEstimatorSettings().tankLitres),
- journeyCost: 0,
- journeyFuelLitres: 0,
- rank: index + 1
- }));
- state.selectedId = state.results[0]?.id || null;
- setStatus("Loaded the latest UK fuel station data.", false);
- }
  renderAll();
  } catch (error) {
  console.error(error);
