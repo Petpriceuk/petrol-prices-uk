@@ -2214,8 +2214,7 @@
  ></script>
 
  <script>
- const STATIONS_API_URL = "/api/fuel-stations";
- const PRICES_API_URL = "/api/fuel-prices";
+ const FUEL_DATA_API_URL = "/api/fuel-data";
  const DEFAULT_SEARCH_RADIUS_MILES = 5;
  const DEFAULT_MAP_CENTER = [54.5, -3.2];
  const DEFAULT_MAP_ZOOM = 6;
@@ -2860,19 +2859,13 @@ function firstDefined(...values) {
  }
 
  async function loadApiData() {
- const [stationsPayload, pricesPayload] = await Promise.all([
- fetchJson(STATIONS_API_URL),
- fetchJson(PRICES_API_URL)
- ]);
-
- const stationRecords = getApiArray(stationsPayload);
- const priceRecords = getApiArray(pricesPayload);
- const priceMap = new Map(priceRecords.map((record, index) => [getNodeId(record, `price-${index + 1}`), record]));
-
+ const payload = await fetchJson(FUEL_DATA_API_URL);
+ const stationRecords = Array.isArray(payload) ? payload : getApiArray(payload);
  state.stations = stationRecords
- .map((record, index) => normalizeStationRecord(record, index, priceMap.get(getNodeId(record))))
+ .map((record, index) => normalizeStationRecord(record, index, record))
  .filter(Boolean);
  }
+
 
 
  function calculateResults(center, fuelCode, sortBy) {
