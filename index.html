@@ -2958,14 +2958,37 @@ Locate me
  }
 
  function renderStations() {
- if (!state.searchCenter) {
+ if (!state.results.length) {
+ if (!state.searchCenter && state.stations.length) {
+ state.results = state.stations.slice(0, 50).map((station, index) => ({
+ ...station,
+ price: getStationPrice(station, elements.fuelType.value),
+ fuelCode: elements.fuelType.value,
+ fuelLabel: FUEL_CONFIG[elements.fuelType.value].label,
+ updatedAt: getStationTimestamp(station, elements.fuelType.value),
+ updatedText: relativeUpdatedText(getStationTimestamp(station, elements.fuelType.value)),
+ openingSummary: getOpeningSummary(station),
+ openState: getStationOpenState(station),
+ distanceMiles: 0,
+ displayUnleaded: station.priceE10,
+ displaySuperUnleaded: station.priceE5,
+ displayDiesel: station.priceB7S,
+ displayPremiumDiesel: station.priceB7P,
+ fillCost: calculateFillCost(getStationPrice(station, elements.fuelType.value), getEstimatorSettings().tankLitres),
+ journeyCost: 0,
+ journeyFuelLitres: 0,
+ rank: index + 1
+ }));
+ state.selectedId = state.results[0]?.id || null;
+ } else {
  elements.stations.innerHTML = `
  <div class="empty-state">
- <h3>Start with a location</h3>
- <p>Enter a postcode, town or city and youll see stations within your chosen radius, ranked by price, distance or how recently the price was updated.</p>
+ <h3>No nearby stations found</h3>
+ <p>Try a different fuel type, increase your search radius, search a nearby postcode, or use your current location to try another area.</p>
  </div>
  `;
  return;
+ }
  }
 
  if (!state.results.length) {
@@ -3362,6 +3385,33 @@ Locate me
  async function init() {
  try {
  await loadCsvData();
+ if (state.stations.length) {
+ const first = state.stations[0];
+ state.searchCenter = { lat: first.latitude, lng: first.longitude };
+ state.searchLabel = "UK fuel stations";
+ state.lastSearchMode = "initial load";
+ state.results = state.stations.slice(0, 50).map((station, index) => ({
+ ...station,
+ price: getStationPrice(station, elements.fuelType.value),
+ fuelCode: elements.fuelType.value,
+ fuelLabel: FUEL_CONFIG[elements.fuelType.value].label,
+ updatedAt: getStationTimestamp(station, elements.fuelType.value),
+ updatedText: relativeUpdatedText(getStationTimestamp(station, elements.fuelType.value)),
+ openingSummary: getOpeningSummary(station),
+ openState: getStationOpenState(station),
+ distanceMiles: 0,
+ displayUnleaded: station.priceE10,
+ displaySuperUnleaded: station.priceE5,
+ displayDiesel: station.priceB7S,
+ displayPremiumDiesel: station.priceB7P,
+ fillCost: calculateFillCost(getStationPrice(station, elements.fuelType.value), getEstimatorSettings().tankLitres),
+ journeyCost: 0,
+ journeyFuelLitres: 0,
+ rank: index + 1
+ }));
+ state.selectedId = state.results[0]?.id || null;
+ setStatus("Loaded the latest UK fuel station data.", false);
+ }
  renderAll();
  } catch (error) {
  console.error(error);
