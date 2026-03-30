@@ -1,11 +1,7 @@
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).json({
-      ok: false,
-      step: "request",
-      error: "Method not allowed"
-    });
+    return res.status(405).json({ ok: false, error: "Method not allowed" });
   }
 
   try {
@@ -18,12 +14,10 @@ export default async function handler(req, res) {
     ];
 
     const missingEnv = requiredEnv.filter((key) => !process.env[key]);
-
     if (missingEnv.length > 0) {
       return res.status(500).json({
         ok: false,
-        step: "env",
-        error: "Missing required environment variables",
+        error: "Missing environment variables",
         missingEnv
       });
     }
@@ -32,14 +26,12 @@ export default async function handler(req, res) {
 
     const [pricesResponse, stationsResponse] = await Promise.all([
       fetch(process.env.FUEL_FINDER_PRICES_URL, {
-        method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: "application/json"
         }
       }),
       fetch(process.env.FUEL_FINDER_STATIONS_URL, {
-        method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           Accept: "application/json"
@@ -53,49 +45,25 @@ export default async function handler(req, res) {
     if (!pricesResponse.ok) {
       return res.status(pricesResponse.status).json({
         ok: false,
-        step: "prices-api",
-        error: "Fuel Finder prices request failed",
-        status: pricesResponse.status,
-        details: safeSnippet(pricesText)
+        error: "Prices request failed",
+        details: pricesText.slice(0, 800)
       });
     }
 
     if (!stationsResponse.ok) {
       return res.status(stationsResponse.status).json({
         ok: false,
-        step: "stations-api",
-        error: "Fuel Finder stations request failed",
-        status: stationsResponse.status,
-        details: safeSnippet(stationsText)
+        error: "Stations request failed",
+        details: stationsText.slice(0, 800)
       });
     }
 
-    let pricesJson;
-    let stationsJson;
-
-    try {
-      pricesJson = JSON.parse(pricesText);
-    } catch {
-      return res.status(500).json({
-        ok: false,
-        step: "prices-parse",
-        error: "Prices endpoint did not return valid JSON",
-        details: safeSnippet(pricesText)
-      });
-    }
-
-    try {
-      stationsJson = JSON.parse(stationsText);
-    } catch {
-      return res.status(500).json({
-        ok: false,
-        step: "stations-parse",
-        error: "Stations endpoint did not return valid JSON",
-        details: safeSnippet(stationsText)
-      });
-    }
+    const pricesJson = JSON.parse(pricesText);
+    const stationsJson = JSON.parse(stationsText);
 
     const stations = mergeFuelFinderData(stationsJson, pricesJson);
+
+    res.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=3600");
 
     return res.status(200).json({
       ok: true,
@@ -105,7 +73,6 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({
       ok: false,
-      step: "server",
       error: error?.message || "Unknown server error"
     });
   }
@@ -126,130 +93,152 @@ async function getAccessToken() {
   });
 
   const tokenText = await tokenResponse.text();
-
-  if (!tokenResponse.ok) {
-    throw new Error(
-      `Token request failed (${tokenResponse.status}): ${safeSnippet(tokenText)}`
-    );
-  }
-
-  let tokenJson;
-  try {
-    tokenJson = JSON.parse(tokenText);
-  } catch {
-    throw new Error(`Token endpoint did not return valid JSON: ${safeSnippet(tokenText)}`);
-  }
+  const tokenJson = JSON.parse(tokenText);
 
   const accessToken =
     tokenJson?.access_token ||
     tokenJson?.data?.access_token ||
+    tokenJson?.token?.access_token ||
     null;
 
   if (!accessToken) {
-    throw new Error(`No access_token in token response: ${safeSnippet(tokenText)}`);
+    throw new Error(`No access token returned: ${tokenText.slice(0, 500)}`);
   }
 
   return accessToken;
 }
 
 function mergeFuelFinderData(stationsRaw, pricesRaw) {
-  const stationsList = getArrayFromPayload(stationsRaw);
-  const pricesList = getArrayFromPayload(pricesRaw);
+  const stationItems = extractItems(stationsRaw);
+  const priceItems = extractItems(pricesRaw);
 
   const pricesById = new Map();
 
-  for (const item of pricesList) {
-    const siteId = String(
-      item.forecourtId ??
-      item.stationId ??
-      item.siteId ??
-      item.id ??
-      ""
-    ).trim();
+  for (const item of priceItems) {
+    const ids = getPossibleIds(item);
+    const priceEntries = extractPriceEntries(item);
 
-    if (!siteId) continue;
-
-    const prices = Array.isArray(item.prices) ? item.prices : [];
-    const existing = pricesById.get(siteId) || [];
-    pricesById.set(siteId, existing.concat(prices));
+    for (const id of ids) {
+      if (!pricesById.has(id)) pricesById.set(id, []);
+      pricesById.get(id).push(...priceEntries);
+    }
   }
 
-  return stationsList
+  const stations = stationItems
     .map((site, index) => {
-      const siteId = String(
-        site.forecourtId ??
-        site.stationId ??
-        site.siteId ??
-        site.id ??
-        `${index + 1}`
-      ).trim();
+      const ids = getPossibleIds(site);
+      const matchedPrices = firstMatchedPrices(ids, pricesById);
 
-      const prices = pricesById.get(siteId) || [];
+      const e10 = findFuelPrice(matchedPrices, ["E10", "Regular Unleaded", "Unleaded"]);
+      const e5 = findFuelPrice(matchedPrices, ["E5", "Super Unleaded", "Premium Unleaded"]);
+      const b7s = findFuelPrice(matchedPrices, ["B7", "Diesel", "Regular Diesel"]);
+      const b7p = findFuelPrice(matchedPrices, ["SDV", "B7P", "Premium Diesel"]);
 
-      const e10 = findFuelPrice(prices, ["E10", "Unleaded"]);
-      const e5 = findFuelPrice(prices, ["E5", "Super Unleaded", "Premium Unleaded"]);
-      const b7s = findFuelPrice(prices, ["B7", "B7S", "Diesel"]);
-      const b7p = findFuelPrice(prices, ["SDV", "B7P", "Premium Diesel"]);
+      const latitude = firstNumber([
+        site.latitude,
+        site.lat,
+        site.location?.latitude,
+        site.location?.lat,
+        site.coordinates?.latitude,
+        site.coordinates?.lat,
+        site.siteLocation?.latitude,
+        site.siteLocation?.lat,
+        site.geo?.latitude,
+        site.geo?.lat
+      ]);
 
-      const latitude = toNumber(
-        site.latitude ??
-        site.location?.latitude ??
-        site.coordinates?.latitude ??
-        site.lat
-      );
-
-      const longitude = toNumber(
-        site.longitude ??
-        site.location?.longitude ??
-        site.coordinates?.longitude ??
-        site.lng
-      );
+      const longitude = firstNumber([
+        site.longitude,
+        site.lng,
+        site.lon,
+        site.location?.longitude,
+        site.location?.lng,
+        site.location?.lon,
+        site.coordinates?.longitude,
+        site.coordinates?.lng,
+        site.coordinates?.lon,
+        site.siteLocation?.longitude,
+        site.siteLocation?.lng,
+        site.geo?.longitude,
+        site.geo?.lng,
+        site.geo?.lon
+      ]);
 
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
         return null;
       }
 
-      const brand = site.brand || site.operator || site.companyName || "Unknown";
-      const tradingName =
-        site.name || site.tradingName || site.siteName || brand || "Fuel Station";
+      const brand = firstString([
+        site.brand,
+        site.brandName,
+        site.operator,
+        site.operatorName,
+        site.companyName,
+        site.forecourtBrand
+      ]) || "Unknown";
 
-      const addressLine1 =
-        site.address?.line1 ||
-        site.addressLine1 ||
-        site.address1 ||
-        "";
-      const addressLine2 =
-        site.address?.line2 ||
-        site.addressLine2 ||
-        site.address2 ||
-        "";
-      const city =
-        site.address?.town ||
-        site.city ||
-        site.town ||
-        "";
-      const county =
-        site.address?.county ||
-        site.county ||
-        "";
-      const postcode =
-        site.address?.postcode ||
-        site.postcode ||
-        "";
+      const tradingName = firstString([
+        site.tradingName,
+        site.name,
+        site.siteName,
+        site.forecourtName,
+        site.displayName,
+        brand
+      ]) || "Fuel Station";
+
+      const address1 = firstString([
+        site.address?.line1,
+        site.addressLine1,
+        site.address1,
+        site.line1,
+        site.street,
+        site.address?.addressLine1
+      ]);
+
+      const address2 = firstString([
+        site.address?.line2,
+        site.addressLine2,
+        site.address2,
+        site.line2,
+        site.address?.addressLine2
+      ]);
+
+      const city = firstString([
+        site.address?.town,
+        site.address?.city,
+        site.city,
+        site.town,
+        site.locality
+      ]);
+
+      const county = firstString([
+        site.address?.county,
+        site.county,
+        site.region
+      ]);
+
+      const postcode = firstString([
+        site.address?.postcode,
+        site.postcode,
+        site.zip,
+        site.zipCode
+      ]);
+
+      const address = [address1, address2, city, county, postcode]
+        .filter(Boolean)
+        .join(", ");
 
       return {
-        id: siteId,
+        id: ids[0] || `station-${index + 1}`,
         latitude,
         longitude,
         brandRaw: brand,
         brandDisplay: brand,
         tradingName,
-        address: [addressLine1, addressLine2, city, county, postcode]
-          .filter(Boolean)
-          .join(", "),
-        city,
-        county,
-        postcode,
+        address,
+        city: city || "",
+        county: county || "",
+        postcode: postcode || "",
         priceE10: e10?.price ?? null,
         priceE5: e5?.price ?? null,
         priceB7S: b7s?.price ?? null,
@@ -258,67 +247,151 @@ function mergeFuelFinderData(stationsRaw, pricesRaw) {
         timestampE5: e5?.updatedAt ?? null,
         timestampB7S: b7s?.updatedAt ?? null,
         timestampB7P: b7p?.updatedAt ?? null,
-        forecourtUpdatedAt:
-          site.updatedAt ||
-          site.lastUpdated ||
-          site.forecourtUpdatedAt ||
-          null,
-        openingHours: site.openingHours || site.hours || null,
-        amenities: normalizeAmenities(site.amenities),
-        isMotorway: Boolean(site.isMotorway),
-        isSupermarket: Boolean(site.isSupermarket)
+        forecourtUpdatedAt: firstString([
+          site.updatedAt,
+          site.lastUpdated,
+          site.forecourtUpdatedAt,
+          site.updated_at,
+          site.last_updated
+        ]),
+        openingHours: site.openingHours || site.hours || site.opening_hours || null,
+        amenities: normalizeAmenities(site.amenities || site.facilities || site.services),
+        isMotorway: Boolean(site.isMotorway || site.motorway),
+        isSupermarket: Boolean(site.isSupermarket || site.supermarket)
       };
     })
     .filter(Boolean);
+
+  return stations;
 }
 
-function getArrayFromPayload(payload) {
+function extractItems(payload) {
   if (Array.isArray(payload)) return payload;
 
-  const possibleKeys = [
-    "forecourts",
-    "stations",
-    "items",
+  const directKeys = [
     "data",
-    "results"
+    "items",
+    "results",
+    "stations",
+    "forecourts",
+    "records"
   ];
 
-  for (const key of possibleKeys) {
-    if (Array.isArray(payload?.[key])) {
-      return payload[key];
+  for (const key of directKeys) {
+    if (Array.isArray(payload?.[key])) return payload[key];
+    if (Array.isArray(payload?.data?.[key])) return payload.data[key];
+  }
+
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.content)) return payload.data.content;
+
+  return [];
+}
+
+function getPossibleIds(obj) {
+  const ids = [
+    obj?.id,
+    obj?.siteId,
+    obj?.stationId,
+    obj?.forecourtId,
+    obj?.station_id,
+    obj?.site_id,
+    obj?.forecourt_id,
+    obj?.pfsId,
+    obj?.pfs_id,
+    obj?.locationId,
+    obj?.location_id
+  ]
+    .map((v) => String(v || "").trim())
+    .filter(Boolean);
+
+  return [...new Set(ids)];
+}
+
+function firstMatchedPrices(ids, pricesById) {
+  for (const id of ids) {
+    if (pricesById.has(id)) return pricesById.get(id);
+  }
+  return [];
+}
+
+function extractPriceEntries(item) {
+  const possibleArrays = [
+    item?.prices,
+    item?.fuelPrices,
+    item?.fuel_prices,
+    item?.products,
+    item?.grades,
+    item?.currentPrices,
+    item?.current_prices,
+    item?.retailPrices,
+    item?.retail_prices
+  ];
+
+  for (const arr of possibleArrays) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  return extractPricesFromObject(item);
+}
+
+function extractPricesFromObject(obj) {
+  const out = [];
+
+  for (const [key, value] of Object.entries(obj || {})) {
+    if (!value || typeof value !== "object") continue;
+
+    const keyNorm = normalizeFuelCode(key);
+
+    if (["e10", "e5", "b7", "b7s", "b7p", "sdv", "diesel", "unleaded", "premiumdiesel", "superunleaded"].includes(keyNorm)) {
+      out.push({
+        fuelCode: key,
+        ...value
+      });
     }
   }
 
-  return [];
+  return out;
 }
 
 function findFuelPrice(prices, acceptedNames) {
   const accepted = acceptedNames.map(normalizeFuelCode);
 
-  const entry = prices.find((item) => {
+  for (const item of prices || []) {
     const code = normalizeFuelCode(
       item.fuelType ||
       item.fuelCode ||
       item.product ||
       item.grade ||
-      item.name
+      item.name ||
+      item.code ||
+      item.productCode
     );
-    return accepted.includes(code);
-  });
 
-  if (!entry) return null;
+    if (accepted.includes(code)) {
+      return {
+        price: firstNumber([
+          item.price,
+          item.amount,
+          item.pencePerLitre,
+          item.pence_per_litre,
+          item.retailPrice,
+          item.retail_price,
+          item.currentPrice,
+          item.current_price
+        ]),
+        updatedAt: firstString([
+          item.updatedAt,
+          item.lastUpdated,
+          item.timestamp,
+          item.updated_at,
+          item.last_updated
+        ])
+      };
+    }
+  }
 
-  return {
-    price: toNumber(entry.price ?? entry.amount ?? entry.pencePerLitre),
-    updatedAt: entry.updatedAt || entry.lastUpdated || entry.timestamp || null
-  };
-}
-
-function normalizeFuelCode(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "");
+  return null;
 }
 
 function normalizeAmenities(input) {
@@ -326,17 +399,29 @@ function normalizeAmenities(input) {
   return input
     .map((item) => {
       if (typeof item === "string") return item;
-      return item?.name || item?.label || item?.type || "";
+      return item?.name || item?.label || item?.type || item?.code || "";
     })
     .filter(Boolean);
 }
 
-function toNumber(value) {
-  if (value === null || value === undefined || value === "") return null;
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
+function firstString(values) {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
 }
 
-function safeSnippet(value) {
-  return String(value || "").slice(0, 800);
+function firstNumber(values) {
+  for (const value of values) {
+    const num = Number(value);
+    if (Number.isFinite(num)) return num;
+  }
+  return null;
+}
+
+function normalizeFuelCode(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
 }
