@@ -1,13 +1,35 @@
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      ok: false,
+      step: "request",
+      error: "Method not allowed"
+    });
   }
 
   try {
+    const requiredEnv = [
+      "FUEL_FINDER_TOKEN_URL",
+      "FUEL_FINDER_CLIENT_ID",
+      "FUEL_FINDER_CLIENT_SECRET",
+      "FUEL_FINDER_API_URL"
+    ];
+
+    const missingEnv = requiredEnv.filter((key) => !process.env[key]);
+
+    if (missingEnv.length > 0) {
+      return res.status(500).json({
+        ok: false,
+        step: "env",
+        error: "Missing required environment variables",
+        missingEnv
+      });
+    }
+
     const accessToken = await getAccessToken();
 
-    const response = await fetch(process.env.FUEL_FINDER_API_URL, {
+    const apiResponse = await fetch(process.env.FUEL_FINDER_API_URL, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -15,30 +37,48 @@ export default async function handler(req, res) {
       }
     });
 
-    if (!response.ok) {
-      const details = await response.text();
-      return res.status(response.status).json({
+    const rawText = await apiResponse.text();
+
+    if (!apiResponse.ok) {
+      return res.status(apiResponse.status).json({
+        ok: false,
+        step: "fuel-api",
         error: "Fuel Finder API request failed",
-        details
+        status: apiResponse.status,
+        details: safeSnippet(rawText)
       });
     }
 
-    const raw = await response.json();
+    let raw;
+    try {
+      raw = JSON.parse(rawText);
+    } catch {
+      return res.status(500).json({
+        ok: false,
+        step: "fuel-api-parse",
+        error: "Fuel Finder API did not return valid JSON",
+        details: safeSnippet(rawText)
+      });
+    }
+
     const stations = normalizeFuelFinderResponse(raw);
 
-    res.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=3600");
-
-    return res.status(200).json({ stations });
+    return res.status(200).json({
+      ok: true,
+      count: stations.length,
+      stations
+    });
   } catch (error) {
-    console.error("Fuel API route error:", error);
     return res.status(500).json({
-      error: "Unable to load fuel data right now"
+      ok: false,
+      step: "server",
+      error: error?.message || "Unknown server error"
     });
   }
 }
 
 async function getAccessToken() {
-  const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
+  const tokenResponse = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -54,18 +94,26 @@ async function getAccessToken() {
     }).toString()
   });
 
-  if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`Token request failed: ${response.status} ${details}`);
+  const tokenText = await tokenResponse.text();
+
+  if (!tokenResponse.ok) {
+    throw new Error(
+      `Token request failed (${tokenResponse.status}): ${safeSnippet(tokenText)}`
+    );
   }
 
-  const json = await response.json();
-
-  if (!json.access_token) {
-    throw new Error("No access token returned");
+  let tokenJson;
+  try {
+    tokenJson = JSON.parse(tokenText);
+  } catch {
+    throw new Error(`Token endpoint did not return valid JSON: ${safeSnippet(tokenText)}`);
   }
 
-  return json.access_token;
+  if (!tokenJson.access_token) {
+    throw new Error(`No access_token in token response: ${safeSnippet(tokenText)}`);
+  }
+
+  return tokenJson.access_token;
 }
 
 function normalizeFuelFinderResponse(raw) {
@@ -74,7 +122,12 @@ function normalizeFuelFinderResponse(raw) {
     raw.stations ||
     raw.items ||
     raw.data ||
+    raw.results ||
     [];
+
+  if (!Array.isArray(items)) {
+    throw new Error("Fuel Finder payload did not contain a station array");
+  }
 
   return items
     .map((site, index) => {
@@ -87,16 +140,16 @@ function normalizeFuelFinderResponse(raw) {
 
       const latitude = toNumber(
         site.latitude ??
-        site.location?.latitude ??
-        site.coordinates?.latitude ??
-        site.lat
+          site.location?.latitude ??
+          site.coordinates?.latitude ??
+          site.lat
       );
 
       const longitude = toNumber(
         site.longitude ??
-        site.location?.longitude ??
-        site.coordinates?.longitude ??
-        site.lng
+          site.location?.longitude ??
+          site.coordinates?.longitude ??
+          site.lng
       );
 
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -131,33 +184,23 @@ function normalizeFuelFinderResponse(raw) {
         site.postcode ||
         "";
 
-      const address = [
-        addressLine1,
-        addressLine2,
-        city,
-        county,
-        postcode
-      ].filter(Boolean).join(", ");
-
       return {
         id: String(site.forecourtId || site.id || site.siteId || `${brand}-${index + 1}`),
         latitude,
         longitude,
-
         brandRaw: brand,
         brandDisplay: brand,
         tradingName,
-
-        address,
+        address: [addressLine1, addressLine2, city, county, postcode]
+          .filter(Boolean)
+          .join(", "),
         city,
         county,
         postcode,
-
         priceE10: e10?.price ?? null,
         priceE5: e5?.price ?? null,
         priceB7S: b7s?.price ?? null,
         priceB7P: b7p?.price ?? null,
-
         timestampE10: e10?.updatedAt ?? null,
         timestampE5: e5?.updatedAt ?? null,
         timestampB7S: b7s?.updatedAt ?? null,
@@ -167,10 +210,8 @@ function normalizeFuelFinderResponse(raw) {
           site.lastUpdated ||
           site.forecourtUpdatedAt ||
           null,
-
         openingHours: site.openingHours || site.hours || null,
         amenities: normalizeAmenities(site.amenities),
-
         isMotorway: Boolean(site.isMotorway),
         isSupermarket: Boolean(site.isSupermarket)
       };
@@ -184,10 +225,10 @@ function findFuelPrice(prices, acceptedNames) {
   const entry = prices.find((item) => {
     const code = normalizeFuelCode(
       item.fuelType ||
-      item.fuelCode ||
-      item.product ||
-      item.grade ||
-      item.name
+        item.fuelCode ||
+        item.product ||
+        item.grade ||
+        item.name
     );
     return accepted.includes(code);
   });
@@ -221,4 +262,8 @@ function toNumber(value) {
   if (value === null || value === undefined || value === "") return null;
   const num = Number(value);
   return Number.isFinite(num) ? num : null;
+}
+
+function safeSnippet(value) {
+  return String(value || "").slice(0, 800);
 }
