@@ -2858,7 +2858,7 @@ Locate me
  journeyFuelLitres: calculateJourneyFuelLitres(distanceMiles, fuelEconomyMpg)
  };
  })
- .filter(station => Number.isFinite(station.price) && station.price > 0 && station.distanceMiles <= searchRadiusMiles);
+ .filter(station => station.distanceMiles <= searchRadiusMiles);
 
  const priceRanks = new Map(
  [...filteredResults]
