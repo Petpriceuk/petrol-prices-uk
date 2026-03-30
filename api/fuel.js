@@ -140,11 +140,16 @@ async function getAccessToken() {
     throw new Error(`Token endpoint did not return valid JSON: ${safeSnippet(tokenText)}`);
   }
 
-  if (!tokenJson.access_token) {
+  const accessToken =
+    tokenJson?.access_token ||
+    tokenJson?.data?.access_token ||
+    null;
+
+  if (!accessToken) {
     throw new Error(`No access_token in token response: ${safeSnippet(tokenText)}`);
   }
 
-  return tokenJson.access_token;
+  return accessToken;
 }
 
 function mergeFuelFinderData(stationsRaw, pricesRaw) {
@@ -236,37 +241,30 @@ function mergeFuelFinderData(stationsRaw, pricesRaw) {
         id: siteId,
         latitude,
         longitude,
-
         brandRaw: brand,
         brandDisplay: brand,
         tradingName,
-
         address: [addressLine1, addressLine2, city, county, postcode]
           .filter(Boolean)
           .join(", "),
         city,
         county,
         postcode,
-
         priceE10: e10?.price ?? null,
         priceE5: e5?.price ?? null,
         priceB7S: b7s?.price ?? null,
         priceB7P: b7p?.price ?? null,
-
         timestampE10: e10?.updatedAt ?? null,
         timestampE5: e5?.updatedAt ?? null,
         timestampB7S: b7s?.updatedAt ?? null,
         timestampB7P: b7p?.updatedAt ?? null,
-
         forecourtUpdatedAt:
           site.updatedAt ||
           site.lastUpdated ||
           site.forecourtUpdatedAt ||
           null,
-
         openingHours: site.openingHours || site.hours || null,
         amenities: normalizeAmenities(site.amenities),
-
         isMotorway: Boolean(site.isMotorway),
         isSupermarket: Boolean(site.isSupermarket)
       };
@@ -311,13 +309,9 @@ function findFuelPrice(prices, acceptedNames) {
   if (!entry) return null;
 
   return {
-    price: toNumber(itemPrice(entry)),
+    price: toNumber(entry.price ?? entry.amount ?? entry.pencePerLitre),
     updatedAt: entry.updatedAt || entry.lastUpdated || entry.timestamp || null
   };
-}
-
-function itemPrice(entry) {
-  return entry.price ?? entry.amount ?? entry.pencePerLitre ?? null;
 }
 
 function normalizeFuelCode(value) {
