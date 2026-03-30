@@ -1,75 +1,3 @@
-let tokenCache = {
-  accessToken: null,
-  expiresAt: 0,
-};
-
-function cleanEnv(name) {
-  const value = process.env[name];
-  if (!value) return "";
-  return String(value).trim().replace(/^['"]|['"]$/g, "");
-}
-
-async function getAccessToken() {
-  const now = Date.now();
-
-  if (tokenCache.accessToken && now < tokenCache.expiresAt - 60_000) {
-    return tokenCache.accessToken;
-  }
-
-  const tokenUrl = cleanEnv("FUEL_FINDER_TOKEN_URL");
-  const clientId = cleanEnv("FUEL_FINDER_CLIENT_ID");
-  const clientSecret = cleanEnv("FUEL_FINDER_CLIENT_SECRET");
-
-  if (!tokenUrl || !clientId || !clientSecret) {
-    throw new Error(
-      "Missing environment variables: FUEL_FINDER_TOKEN_URL, FUEL_FINDER_CLIENT_ID, FUEL_FINDER_CLIENT_SECRET"
-    );
-  }
-
-  const body = new URLSearchParams({
-    grant_type: "client_credentials",
-    client_id: clientId,
-    client_secret: clientSecret,
-    scope: "fuelfinder.read",
-  });
-
-  const tokenResponse = await fetch(tokenUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Accept": "application/json",
-    },
-    body: body.toString(),
-    cache: "no-store",
-  });
-
-  const tokenText = await tokenResponse.text();
-
-  if (!tokenResponse.ok) {
-    throw new Error(
-      `Token request failed: ${tokenResponse.status} ${tokenText} | token host: ${new URL(tokenUrl).host}`
-    );
-  }
-
-  let tokenData;
-  try {
-    tokenData = JSON.parse(tokenText);
-  } catch {
-    throw new Error(`Token response was not valid JSON: ${tokenText}`);
-  }
-
-  if (!tokenData.access_token) {
-    throw new Error(`Token response missing access_token: ${tokenText}`);
-  }
-
-  tokenCache = {
-    accessToken: tokenData.access_token,
-    expiresAt: Date.now() + Number(tokenData.expires_in || 3600) * 1000,
-  };
-
-  return tokenCache.accessToken;
-}
-
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -77,62 +5,220 @@ export default async function handler(req, res) {
   }
 
   try {
-    const pricesUrl = cleanEnv("FUEL_FINDER_PRICES_URL");
+    const accessToken = await getAccessToken();
 
-    if (!pricesUrl) {
-      throw new Error("Missing environment variable: FUEL_FINDER_PRICES_URL");
-    }
-
-    const token = await getAccessToken();
-    const upstreamUrl = new URL(pricesUrl);
-
-    const query = req.query || {};
-    for (const [key, value] of Object.entries(query)) {
-      if (Array.isArray(value)) {
-        upstreamUrl.searchParams.delete(key);
-        value.forEach((v) => upstreamUrl.searchParams.append(key, v));
-      } else if (value !== undefined && value !== null && value !== "") {
-        upstreamUrl.searchParams.set(key, String(value));
-      }
-    }
-
-    if (!upstreamUrl.searchParams.has("fuel_type")) {
-      upstreamUrl.searchParams.set("fuel_type", "unleaded");
-    }
-
-    const apiResponse = await fetch(upstreamUrl.toString(), {
+    const response = await fetch(process.env.FUEL_FINDER_API_URL, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json"
+      }
     });
 
-    const apiText = await apiResponse.text();
-
-    if (!apiResponse.ok) {
-      return res.status(apiResponse.status).json({
-        error: `Fuel API request failed: ${apiResponse.status}`,
-        details: apiText,
+    if (!response.ok) {
+      const details = await response.text();
+      return res.status(response.status).json({
+        error: "Fuel Finder API request failed",
+        details
       });
     }
 
-    let data;
-    try {
-      data = JSON.parse(apiText);
-    } catch {
-      return res.status(502).json({
-        error: "Fuel API returned non-JSON data",
-        details: apiText,
-      });
-    }
+    const raw = await response.json();
+    const stations = normalizeFuelFinderResponse(raw);
 
-    res.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=60");
-    return res.status(200).json(data);
+    res.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=3600");
+
+    return res.status(200).json({ stations });
   } catch (error) {
+    console.error("Fuel API route error:", error);
     return res.status(500).json({
-      error: error.message || "Internal server error",
+      error: "Unable to load fuel data right now"
     });
   }
+}
+
+async function getAccessToken() {
+  const response = await fetch(process.env.FUEL_FINDER_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json"
+    },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: process.env.FUEL_FINDER_CLIENT_ID,
+      client_secret: process.env.FUEL_FINDER_CLIENT_SECRET,
+      ...(process.env.FUEL_FINDER_SCOPE
+        ? { scope: process.env.FUEL_FINDER_SCOPE }
+        : {})
+    }).toString()
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Token request failed: ${response.status} ${details}`);
+  }
+
+  const json = await response.json();
+
+  if (!json.access_token) {
+    throw new Error("No access token returned");
+  }
+
+  return json.access_token;
+}
+
+function normalizeFuelFinderResponse(raw) {
+  const items =
+    raw.forecourts ||
+    raw.stations ||
+    raw.items ||
+    raw.data ||
+    [];
+
+  return items
+    .map((site, index) => {
+      const prices = Array.isArray(site.prices) ? site.prices : [];
+
+      const e10 = findFuelPrice(prices, ["E10", "Unleaded"]);
+      const e5 = findFuelPrice(prices, ["E5", "Super Unleaded", "Premium Unleaded"]);
+      const b7s = findFuelPrice(prices, ["B7", "B7S", "Diesel"]);
+      const b7p = findFuelPrice(prices, ["SDV", "B7P", "Premium Diesel"]);
+
+      const latitude = toNumber(
+        site.latitude ??
+        site.location?.latitude ??
+        site.coordinates?.latitude ??
+        site.lat
+      );
+
+      const longitude = toNumber(
+        site.longitude ??
+        site.location?.longitude ??
+        site.coordinates?.longitude ??
+        site.lng
+      );
+
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        return null;
+      }
+
+      const brand = site.brand || site.operator || site.companyName || "Unknown";
+      const tradingName =
+        site.name || site.tradingName || site.siteName || brand || "Fuel Station";
+
+      const addressLine1 =
+        site.address?.line1 ||
+        site.addressLine1 ||
+        site.address1 ||
+        "";
+      const addressLine2 =
+        site.address?.line2 ||
+        site.addressLine2 ||
+        site.address2 ||
+        "";
+      const city =
+        site.address?.town ||
+        site.city ||
+        site.town ||
+        "";
+      const county =
+        site.address?.county ||
+        site.county ||
+        "";
+      const postcode =
+        site.address?.postcode ||
+        site.postcode ||
+        "";
+
+      const address = [
+        addressLine1,
+        addressLine2,
+        city,
+        county,
+        postcode
+      ].filter(Boolean).join(", ");
+
+      return {
+        id: String(site.forecourtId || site.id || site.siteId || `${brand}-${index + 1}`),
+        latitude,
+        longitude,
+
+        brandRaw: brand,
+        brandDisplay: brand,
+        tradingName,
+
+        address,
+        city,
+        county,
+        postcode,
+
+        priceE10: e10?.price ?? null,
+        priceE5: e5?.price ?? null,
+        priceB7S: b7s?.price ?? null,
+        priceB7P: b7p?.price ?? null,
+
+        timestampE10: e10?.updatedAt ?? null,
+        timestampE5: e5?.updatedAt ?? null,
+        timestampB7S: b7s?.updatedAt ?? null,
+        timestampB7P: b7p?.updatedAt ?? null,
+        forecourtUpdatedAt:
+          site.updatedAt ||
+          site.lastUpdated ||
+          site.forecourtUpdatedAt ||
+          null,
+
+        openingHours: site.openingHours || site.hours || null,
+        amenities: normalizeAmenities(site.amenities),
+
+        isMotorway: Boolean(site.isMotorway),
+        isSupermarket: Boolean(site.isSupermarket)
+      };
+    })
+    .filter(Boolean);
+}
+
+function findFuelPrice(prices, acceptedNames) {
+  const accepted = acceptedNames.map(normalizeFuelCode);
+
+  const entry = prices.find((item) => {
+    const code = normalizeFuelCode(
+      item.fuelType ||
+      item.fuelCode ||
+      item.product ||
+      item.grade ||
+      item.name
+    );
+    return accepted.includes(code);
+  });
+
+  if (!entry) return null;
+
+  return {
+    price: toNumber(entry.price ?? entry.amount ?? entry.pencePerLitre),
+    updatedAt: entry.updatedAt || entry.lastUpdated || entry.timestamp || null
+  };
+}
+
+function normalizeFuelCode(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "");
+}
+
+function normalizeAmenities(input) {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((item) => {
+      if (typeof item === "string") return item;
+      return item?.name || item?.label || item?.type || "";
+    })
+    .filter(Boolean);
+}
+
+function toNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
 }
