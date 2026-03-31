@@ -45,61 +45,44 @@ export default async function handler(req, res) {
       })
     ]);
 
-    const pricesText = await pricesResponse.text();
-    const stationsText = await stationsResponse.text();
-
     if (!pricesResponse.ok) {
+      const text = await safeReadText(pricesResponse);
       return res.status(pricesResponse.status).json({
         ok: false,
-        error: "Fuel Finder prices request failed",
-        details: pricesText.slice(0, 1000)
+        error: "Failed to fetch prices",
+        details: text
       });
     }
 
     if (!stationsResponse.ok) {
+      const text = await safeReadText(stationsResponse);
       return res.status(stationsResponse.status).json({
         ok: false,
-        error: "Fuel Finder stations request failed",
-        details: stationsText.slice(0, 1000)
+        error: "Failed to fetch stations",
+        details: text
       });
     }
 
-    let pricesJson;
-    let stationsJson;
+    const pricesJson = await pricesResponse.json();
+    const stationsJson = await stationsResponse.json();
 
-    try {
-      pricesJson = JSON.parse(pricesText);
-    } catch {
-      return res.status(500).json({
-        ok: false,
-        error: "Prices endpoint did not return valid JSON",
-        details: pricesText.slice(0, 1000)
-      });
-    }
+    const prices = extractArray(pricesJson);
+    const stations = extractArray(stationsJson);
 
-    try {
-      stationsJson = JSON.parse(stationsText);
-    } catch {
-      return res.status(500).json({
-        ok: false,
-        error: "Stations endpoint did not return valid JSON",
-        details: stationsText.slice(0, 1000)
-      });
-    }
-
-    const stations = mergeFuelFinderData(stationsJson, pricesJson);
-
-    res.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=3600");
+    const mergedStations = mergeStationsAndPrices(stations, prices)
+      .map(normalizeStation)
+      .filter(Boolean);
 
     return res.status(200).json({
       ok: true,
-      count: stations.length,
-      stations
+      count: mergedStations.length,
+      stations: mergedStations
     });
   } catch (error) {
     return res.status(500).json({
       ok: false,
-      error: error?.message || "Unknown server error"
+      error: "Unexpected server error",
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 }
@@ -118,209 +101,221 @@ async function getAccessToken() {
     }).toString()
   });
 
-  const tokenText = await tokenResponse.text();
-
   if (!tokenResponse.ok) {
-    throw new Error(`Token request failed: ${tokenResponse.status} ${tokenText.slice(0, 500)}`);
+    const text = await safeReadText(tokenResponse);
+    throw new Error(`Failed to get access token: ${tokenResponse.status} ${text}`);
   }
 
-  let tokenJson;
-  try {
-    tokenJson = JSON.parse(tokenText);
-  } catch {
-    throw new Error(`Token endpoint did not return valid JSON: ${tokenText.slice(0, 500)}`);
-  }
-
+  const tokenJson = await tokenResponse.json();
   const accessToken =
-    tokenJson?.access_token ||
-    tokenJson?.data?.access_token ||
-    null;
+    tokenJson.access_token ||
+    tokenJson.accessToken ||
+    tokenJson.token;
 
   if (!accessToken) {
-    throw new Error(`No access token returned: ${tokenText.slice(0, 500)}`);
+    throw new Error("Token response did not contain an access token");
   }
 
   return accessToken;
 }
 
-function mergeFuelFinderData(stationsRaw, pricesRaw) {
-  const stationItems = extractItems(stationsRaw);
-  const priceItems = extractItems(pricesRaw);
-
-  const pricesByNodeId = new Map();
-
-  for (const item of priceItems) {
-    const nodeId = String(item?.node_id || "").trim();
-    if (!nodeId) continue;
-
-    const fuelPrices =
-      Array.isArray(item?.fuel_prices) ? item.fuel_prices :
-      Array.isArray(item?.prices) ? item.prices :
-      [];
-
-    pricesByNodeId.set(nodeId, fuelPrices);
-  }
-
-  return stationItems
-    .map((site, index) => {
-      const nodeId = String(site?.node_id || `station-${index + 1}`);
-
-      const fuelPrices = pricesByNodeId.get(nodeId) || [];
-      const location = site?.location || {};
-      const amenities = site?.amenities || {};
-      const usualDays = site?.opening_times?.usual_days || {};
-
-      const e10 = findFuelPrice(fuelPrices, ["E10"]);
-      const e5 = findFuelPrice(fuelPrices, ["E5"]);
-      const b7s = findFuelPrice(fuelPrices, ["B7_STANDARD", "B7", "B7S"]);
-      const b7p = findFuelPrice(fuelPrices, ["B7_SUPER", "B7_PREMIUM", "PREMIUM_DIESEL", "B7P"]);
-      const b10 = findFuelPrice(fuelPrices, ["B10"]);
-      const hvo = findFuelPrice(fuelPrices, ["HVO"]);
-
-      const brandRaw = site?.brand_name || "Unknown";
-      const tradingName = site?.trading_name || brandRaw || "Fuel Station";
-
-      const addressLine1 = location?.address_line_1 || "";
-      const addressLine2 = location?.address_line_2 || "";
-      const city = location?.city || "";
-      const county = location?.county || "";
-      const country = location?.country || "";
-      const postcode = location?.postcode || "";
-
-      const address = [
-        addressLine1,
-        addressLine2,
-        city,
-        county,
-        postcode
-      ].filter(Boolean).join(", ");
-
-      return {
-        id: nodeId,
-        latitude: toNumber(location?.latitude),
-        longitude: toNumber(location?.longitude),
-
-        brandRaw,
-        brandDisplay: brandRaw,
-        tradingName,
-
-        addressLine1,
-        addressLine2,
-        address,
-        city,
-        county,
-        country,
-        postcode,
-
-        phone: site?.public_phone_number || "",
-
-        priceE10: e10?.price ?? null,
-        priceE5: e5?.price ?? null,
-        priceB7S: b7s?.price ?? null,
-        priceB7P: b7p?.price ?? null,
-        priceB10: b10?.price ?? null,
-        priceHVO: hvo?.price ?? null,
-
-        timestampE10: e10?.updatedAt ?? null,
-        timestampE5: e5?.updatedAt ?? null,
-        timestampB7S: b7s?.updatedAt ?? null,
-        timestampB7P: b7p?.updatedAt ?? null,
-        timestampB10: b10?.updatedAt ?? null,
-        timestampHVO: hvo?.updatedAt ?? null,
-
-        forecourtUpdatedAt:
-          site?.forecourt_update_timestamp ||
-          site?.update_timestamp ||
-          e10?.updatedAt ||
-          e5?.updatedAt ||
-          b7s?.updatedAt ||
-          b7p?.updatedAt ||
-          b10?.updatedAt ||
-          hvo?.updatedAt ||
-          null,
-
-        openingTimes: {
-          monday: mapUsualDay(usualDays?.monday),
-          tuesday: mapUsualDay(usualDays?.tuesday),
-          wednesday: mapUsualDay(usualDays?.wednesday),
-          thursday: mapUsualDay(usualDays?.thursday),
-          friday: mapUsualDay(usualDays?.friday),
-          saturday: mapUsualDay(usualDays?.saturday),
-          sunday: mapUsualDay(usualDays?.sunday)
-        },
-
-        hasAdbluePumps: Boolean(amenities?.fuel_and_energy_services?.adblue_pumps),
-        hasAdbluePackaged: Boolean(amenities?.fuel_and_energy_services?.adblue_packaged),
-        hasLpg: Boolean(amenities?.fuel_and_energy_services?.lpg_pumps),
-        hasCarWash: Boolean(amenities?.vehicle_services?.car_wash),
-        hasWater: Boolean(amenities?.water_filling),
-        is24HoursAmenity: Boolean(amenities?.twenty_four_hour_fuel),
-        hasToilets: Boolean(amenities?.customer_toilets),
-
-        isMotorway: Boolean(site?.is_motorway_service_station),
-        isSupermarket: Boolean(site?.is_supermarket_service_station),
-
-        temporaryClosure: Boolean(site?.temporary_closure),
-        permanentClosure: Boolean(site?.permanent_closure)
-      };
-    })
-    .filter((station) =>
-      Number.isFinite(station.latitude) &&
-      Number.isFinite(station.longitude) &&
-      !station.temporaryClosure &&
-      !station.permanentClosure
-    );
-}
-
-function mapUsualDay(day) {
-  return {
-    open: day?.open_time || "",
-    close: day?.close_time || "",
-    is24Hours: Boolean(day?.is_24_hours)
-  };
-}
-
-function extractItems(payload) {
+function extractArray(payload) {
   if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.items)) return payload.items;
-  if (Array.isArray(payload?.results)) return payload.results;
   if (Array.isArray(payload?.stations)) return payload.stations;
-  if (Array.isArray(payload?.forecourts)) return payload.forecourts;
-  if (Array.isArray(payload?.records)) return payload.records;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.results)) return payload.results;
+  if (Array.isArray(payload?.items)) return payload.items;
   return [];
 }
 
-function findFuelPrice(fuelPrices, acceptedTypes) {
-  const accepted = acceptedTypes.map(normalizeFuelType);
+function mergeStationsAndPrices(stations, prices) {
+  if (!stations.length && !prices.length) return [];
 
-  const entry = (fuelPrices || []).find((item) => {
-    const type =
-      item?.fuel_type ||
-      item?.fuelType ||
-      item?.product_code ||
-      item?.productCode;
+  const stationMap = new Map();
 
-    return accepted.includes(normalizeFuelType(type));
-  });
+  for (const station of stations) {
+    const key = getMergeKey(station);
+    const base = { ...station };
+    if (key) {
+      stationMap.set(key, base);
+    } else {
+      stationMap.set(`station-${stationMap.size + 1}`, base);
+    }
+  }
 
-  if (!entry) return null;
+  for (const price of prices) {
+    const key = getMergeKey(price);
+
+    if (key && stationMap.has(key)) {
+      const existing = stationMap.get(key);
+      stationMap.set(key, { ...existing, ...price });
+      continue;
+    }
+
+    stationMap.set(key || `price-${stationMap.size + 1}`, { ...price });
+  }
+
+  return Array.from(stationMap.values());
+}
+
+function getMergeKey(item) {
+  return (
+    item?.id ||
+    item?.stationId ||
+    item?.station_id ||
+    item?.forecourtId ||
+    item?.forecourt_id ||
+    item?.siteId ||
+    item?.site_id ||
+    item?.locationId ||
+    item?.location_id ||
+    null
+  );
+}
+
+function normalizeStation(raw) {
+  const latitude = toNumber(raw.latitude ?? raw.lat);
+  const longitude = toNumber(raw.longitude ?? raw.lng ?? raw.lon);
+
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  if (raw.temporaryClosure === true || raw.permanentClosure === true) {
+    return null;
+  }
+
+  const addressLine1 = stringOrEmpty(raw.addressLine1 || raw.address1);
+  const addressLine2 = stringOrEmpty(raw.addressLine2 || raw.address2);
+  const city = stringOrEmpty(raw.city || raw.town);
+  const county = stringOrEmpty(raw.county || raw.region);
+  const country = stringOrEmpty(raw.country);
+  const postcode = stringOrEmpty(raw.postcode || raw.postCode);
+
+  const address =
+    stringOrEmpty(raw.address) ||
+    [addressLine1, addressLine2, city, county, postcode].filter(Boolean).join(", ");
 
   return {
-    price: toNumber(entry?.price),
-    updatedAt:
-      entry?.price_last_updated ||
-      entry?.price_change_effective_timestamp ||
-      entry?.updated_at ||
-      null
+    id:
+      raw.id ||
+      raw.stationId ||
+      raw.station_id ||
+      raw.forecourtId ||
+      raw.forecourt_id ||
+      createFallbackId(raw, latitude, longitude),
+
+    latitude,
+    longitude,
+
+    brandRaw: stringOrEmpty(raw.brandRaw || raw.brand || raw.brandName),
+    brandDisplay: stringOrEmpty(raw.brandDisplay || raw.brandRaw || raw.brand || raw.brandName),
+    tradingName: stringOrEmpty(raw.tradingName || raw.name || raw.siteName),
+
+    addressLine1,
+    addressLine2,
+    address,
+    city,
+    county,
+    country,
+    postcode,
+
+    phone: stringOrEmpty(raw.phone || raw.telephone),
+
+    priceE10: toNullableNumber(raw.priceE10 ?? raw.e10),
+    priceE5: toNullableNumber(raw.priceE5 ?? raw.e5),
+    priceB7S: toNullableNumber(raw.priceB7S ?? raw.b7s ?? raw.priceDiesel ?? raw.diesel),
+    priceB7P: toNullableNumber(raw.priceB7P ?? raw.b7p ?? raw.premiumDiesel),
+    priceB10: toNullableNumber(raw.priceB10 ?? raw.b10),
+    priceHVO: toNullableNumber(raw.priceHVO ?? raw.hvo),
+
+    timestampE10: toNullableDate(raw.timestampE10),
+    timestampE5: toNullableDate(raw.timestampE5),
+    timestampB7S: toNullableDate(raw.timestampB7S),
+    timestampB7P: toNullableDate(raw.timestampB7P),
+    timestampB10: toNullableDate(raw.timestampB10),
+    timestampHVO: toNullableDate(raw.timestampHVO),
+    forecourtUpdatedAt: toNullableDate(
+      raw.forecourtUpdatedAt || raw.updatedAt || raw.lastUpdated || raw.modifiedAt
+    ),
+
+    openingTimes: normalizeOpeningTimes(raw.openingTimes),
+
+    hasAdbluePumps: Boolean(raw.hasAdbluePumps),
+    hasAdbluePackaged: Boolean(raw.hasAdbluePackaged),
+    hasLpg: Boolean(raw.hasLpg),
+    hasCarWash: Boolean(raw.hasCarWash),
+    hasWater: Boolean(raw.hasWater),
+    is24HoursAmenity: Boolean(raw.is24HoursAmenity),
+    hasToilets: Boolean(raw.hasToilets),
+
+    isMotorway: Boolean(raw.isMotorway),
+    isSupermarket: Boolean(raw.isSupermarket),
+    temporaryClosure: Boolean(raw.temporaryClosure),
+    permanentClosure: Boolean(raw.permanentClosure)
   };
 }
 
-function normalizeFuelType(value) {
-  return String(value || "").trim().toUpperCase();
+function normalizeOpeningTimes(openingTimes) {
+  const emptyDay = { open: "", close: "", is24Hours: false };
+
+  return {
+    monday: normalizeDay(openingTimes?.monday, emptyDay),
+    tuesday: normalizeDay(openingTimes?.tuesday, emptyDay),
+    wednesday: normalizeDay(openingTimes?.wednesday, emptyDay),
+    thursday: normalizeDay(openingTimes?.thursday, emptyDay),
+    friday: normalizeDay(openingTimes?.friday, emptyDay),
+    saturday: normalizeDay(openingTimes?.saturday, emptyDay),
+    sunday: normalizeDay(openingTimes?.sunday, emptyDay)
+  };
+}
+
+function normalizeDay(day, fallback) {
+  if (!day || typeof day !== "object") return { ...fallback };
+
+  return {
+    open: stringOrEmpty(day.open),
+    close: stringOrEmpty(day.close),
+    is24Hours: Boolean(day.is24Hours)
+  };
 }
 
 function toNumber(value) {
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
+  if (value === null || value === undefined || value === "") return NaN;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function toNullableNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function toNullableDate(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function stringOrEmpty(value) {
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+}
+
+function createFallbackId(raw, latitude, longitude) {
+  return [
+    raw.brandDisplay || raw.brandRaw || raw.brand || "station",
+    raw.postcode || raw.postCode || "no-postcode",
+    latitude,
+    longitude
+  ].join("-");
+}
+
+async function safeReadText(response) {
+  try {
+    return await response.text();
+  } catch {
+    return "";
+  }
 }
