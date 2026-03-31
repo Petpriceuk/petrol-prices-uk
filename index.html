@@ -2214,7 +2214,27 @@
  ></script>
 
  <script>
- const API_URL = "https://YOUR_FUEL_FINDER_API_URL_HERE"; // Replace with your real Fuel Finder endpoint
+ const API_URL_STORAGE_KEY = "fuelFetchApiUrl";
+ const DEFAULT_API_URL = "/api/fuel";
+
+ function getConfiguredApiUrl() {
+ const fromQuery = new URLSearchParams(window.location.search).get("api");
+ if (fromQuery) {
+ localStorage.setItem(API_URL_STORAGE_KEY, fromQuery);
+ return fromQuery;
+ }
+ return localStorage.getItem(API_URL_STORAGE_KEY) || DEFAULT_API_URL;
+ }
+
+ function setConfiguredApiUrl(url) {
+ const clean = String(url || "").trim();
+ if (clean) {
+ localStorage.setItem(API_URL_STORAGE_KEY, clean);
+ } else {
+ localStorage.removeItem(API_URL_STORAGE_KEY);
+ }
+ }
+
  const DEFAULT_SEARCH_RADIUS_MILES = 5;
  const DEFAULT_MAP_CENTER = [54.5, -3.2];
  const DEFAULT_MAP_ZOOM = 6;
@@ -2885,17 +2905,36 @@
  }
 
  async function loadApiData() {
- const response = await fetch(API_URL, {
+      if (window.location.protocol === "file:") {
+        throw new Error("This page is being opened as a local file. Your API route only works when the page is served from your app, for example on localhost or Vercel. Move this HTML into your app or deploy it, then call /api/fuel.");
+      }
+ const apiUrl = getConfiguredApiUrl();
+ if (!apiUrl) {
+ throw new Error("No API URL is configured. Open the file with ?api=https://your-endpoint or set the URL in the prompt shown on load.");
+ }
+
+ let response;
+ try {
+ response = await fetch(apiUrl, {
  headers: {
  "Accept": "application/json"
  }
  });
-
- if (!response.ok) {
- throw new Error(`Could not load API data: ${response.status}`);
+ } catch (error) {
+ throw new Error(`Could not reach the API URL (${apiUrl}). This is usually a bad URL, a CORS block, or the API is offline.`);
  }
 
- const payload = await response.json();
+ if (!response.ok) {
+ throw new Error(`Could not load API data: ${response.status} ${response.statusText}`);
+ }
+
+ let payload;
+ try {
+ payload = await response.json();
+ } catch (error) {
+ throw new Error("The API responded, but it was not valid JSON.");
+ }
+
  if (!payload || !Array.isArray(payload.stations)) {
  throw new Error("API response is missing a stations array.");
  }
@@ -3512,18 +3551,29 @@
 
  async function init() {
  try {
+ let apiUrl = getConfiguredApiUrl();
+ if (!apiUrl) {
+ apiUrl = window.prompt("Paste your Fuel Finder API URL", "");
+ if (apiUrl) {
+ setConfiguredApiUrl(apiUrl);
+ }
+ }
  await loadApiData();
  renderAll();
  } catch (error) {
  console.error(error);
- elements.statusBanner.textContent = "Fuel price data is unavailable right now. Please try again in a moment.";
+ const apiUrl = getConfiguredApiUrl();
+ elements.statusBanner.textContent = `Fuel price data could not be loaded. ${error.message}`;
  elements.stations.innerHTML = `
  <div class="empty-state">
  <h3>Fuel data is unavailable</h3>
- <p>We could not load the latest station information just now. Please try again shortly.</p>
+ <p><strong>Reason:</strong> ${escapeHtml(error.message)}</p>
+ <p>Current API URL: ${escapeHtml(apiUrl || "Not set")}</p>
+ <p>Fix it by reopening this page with <code>?api=https://your-endpoint</code>, or clear local storage and reload to re-enter the URL.</p>
  </div>
  `;
- setStatus("Fuel price data could not be loaded.", true);
+ setStatus(`Fuel price data could not be loaded. ${error.message}`, true);
+ renderAll();
  registerRevealItems();
  }
  }
